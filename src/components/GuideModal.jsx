@@ -1,355 +1,243 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import './GuideModal.css';
 
-const steps = [
+const STEPS_DATA = [
   {
+    step: 1,
     title: 'Pilih Preferensi Pelaporan',
-    description:
-      'Tentukan apakah laporan ingin dikirim secara anonim dengan mengaktifkan atau menonaktifkan pilihan anonim.'
+    description: 'Tentukan apakah laporan ingin dikirim secara anonim dengan mengaktifkan atau menonaktifkan pilihan anonim.'
   },
   {
+    step: 2,
     title: 'Pilih Jenis Lokasi',
-    description:
-      'Tentukan apakah masalah fasilitas berada di dalam gedung atau di area luar gedung.'
+    description: 'Tentukan apakah masalah fasilitas berada di dalam gedung atau di area luar gedung.'
   },
   {
+    step: 3,
     title: 'Tentukan Lokasi Masalah',
-    description:
-      'Jika memilih gedung, pilih nama gedung dan ruangan. Jika memilih area luar, pilih area dan lokasi masalah.'
+    description: 'Jika memilih gedung, pilih nama gedung dan ruangan. Jika memilih area luar, pilih area dan lokasi masalah.'
   },
   {
+    step: 4,
     title: 'Jelaskan Masalah',
-    description:
-      'Jelaskan masalah fasilitas secara singkat dan jelas agar dapat membantu proses pemeriksaan dan penanganan laporan.'
+    description: 'Jelaskan masalah fasilitas secara singkat dan jelas agar dapat membantu proses pemeriksaan dan penanganan laporan.'
   },
   {
+    step: 5,
     title: 'Tambahkan Bukti Foto',
-    description:
-      'Tambahkan foto kondisi fasilitas sebagai bukti untuk membantu petugas memahami masalah yang dilaporkan.'
+    description: 'Tambahkan foto kondisi fasilitas sebagai bukti untuk membantu petugas memahami masalah yang dilaporkan.'
   },
   {
+    step: 6,
     title: 'Kirim Laporan',
-    description:
-      'Periksa kembali informasi yang telah dimasukkan, lalu tekan Kirim Laporan. Setelah terkirim, tunggu laporan diverifikasi dan diproses.'
+    description: 'Periksa kembali informasi yang telah dimasukkan, lalu tekan Kirim Laporan. Setelah terkirim, tunggu laporan diverifikasi dan diproses.'
   }
 ];
 
-const IdentityCard = () => (
-  <section className="guide-form-card">
-    <h3>Identitas Pelapor</h3>
-
-    <div className="guide-identity-row">
-      <span>Nama Pelapor</span>
-      <strong>Amba Ngawi</strong>
-    </div>
-
-    <div className="guide-identity-row">
-      <span>Email Pelapor</span>
-      <strong>amba@gmail.com</strong>
-    </div>
-
-    <label className="guide-checkbox">
-      <input type="checkbox" defaultChecked readOnly />
-      <span>Sembunyikan identitas pelapor</span>
-    </label>
-  </section>
-);
-
-const SelectPreview = ({ label, value, placeholder, helper }) => (
-  <label className="guide-field">
-    <span>{label}</span>
-
-    <div
-      className={
-        value
-          ? 'guide-select-preview'
-          : 'guide-select-preview is-empty'
-      }
-    >
-      {value || placeholder}
-      <b>⌄</b>
-    </div>
-
-    <small>{helper}</small>
-  </label>
-);
-
-const ReportCard = ({ activeStep }) => {
-  const showLocationType = activeStep >= 1;
-  const showLocation = activeStep >= 2;
-  const showDescription = activeStep >= 3;
-  const showPhoto = activeStep >= 4;
-  const showSubmit = activeStep >= 5;
-
-  return (
-    <section className="guide-form-card guide-report-card">
-      <h3>Form Laporan</h3>
-
-      <div className="guide-form-body">
-        {showLocationType && (
-          <div className="guide-field">
-            <span>Jenis Lokasi</span>
-
-            <div className="guide-radios">
-              <label>
-                <input
-                  type="radio"
-                  name="location"
-                  defaultChecked
-                  readOnly
-                />
-                Dalam Gedung
-              </label>
-
-              <label>
-                <input
-                  type="radio"
-                  name="location"
-                  readOnly
-                />
-                Area Luar
-              </label>
-            </div>
-          </div>
-        )}
-
-        {showLocation && (
-          <div className="guide-field-grid">
-            <SelectPreview
-              label="Nama Gedung"
-              value="Gedung GKU"
-              placeholder="Masukkan nama gedung"
-              helper="Pilih gedung"
-            />
-
-            <SelectPreview
-              label="Nama Ruangan"
-              value="KU3.03.12"
-              placeholder="Masukkan nama ruangan"
-              helper="Pilih ruangan"
-            />
-          </div>
-        )}
-
-        {showDescription && (
-          <label className="guide-field">
-            <span>Deskripsi</span>
-
-            <div className="guide-text-preview is-filled">
-              AC dikelas KU3.03.12 tidak dingin dan yang satunya lagi tidak
-              bisa nyala
-            </div>
-
-            <small>
-              Tuliskan deskripsi masalah dengan detail
-            </small>
-          </label>
-        )}
-
-        {showPhoto && (
-          <div className="guide-field">
-            <span>Foto</span>
-
-            <div className="guide-upload-preview">
-              <div className="guide-upload-icon">↥</div>
-
-              <b>Seret ke sini atau klik untuk dipilih</b>
-
-              <small>
-                Format JPG, PNG · Maks. 5 MB per foto
-              </small>
-
-              <button type="button">
-                Pilih dari perangkat
-              </button>
-            </div>
-
-            <div
-              className="guide-photo-row"
-              aria-label="Tiga foto bukti"
-            >
-              <i />
-              <i />
-              <i />
-            </div>
-          </div>
-        )}
-
-        {showSubmit && (
-          <div className="guide-submit-row">
-            <button type="button">
-              Laporkan
-            </button>
-          </div>
-        )}
-      </div>
-    </section>
-  );
-};
-
-const FormPreview = ({ activeStep }) => {
-  if (activeStep === 0) {
-    return (
-      <div className="guide-preview-scroll">
-        <div className="guide-preview-inner">
-          <IdentityCard />
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="guide-preview-scroll">
-      <div className="guide-preview-inner">
-        <IdentityCard />
-        <ReportCard activeStep={activeStep} />
-      </div>
-    </div>
-  );
-};
+// Gambar contoh thumbnail sesuai mockup
+const SAMPLE_THUMBNAILS = [
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
+  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'
+];
 
 const GuideModal = ({ isOpen, onClose }) => {
-  const [activeStep, setActiveStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(1);
+  const stepsListRef = useRef(null);
 
-  useEffect(() => {
-    if (!isOpen) {
-      return undefined;
-    }
-
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen, onClose]);
-
+  // Reset step ke 1 setiap kali modal dibuka
   useEffect(() => {
     if (isOpen) {
-      setActiveStep(0);
+      setCurrentStep(1);
     }
   }, [isOpen]);
 
-  if (!isOpen) {
-    return null;
-  }
-
-  const handlePrevious = () => {
-    if (activeStep > 0) {
-      setActiveStep((step) => step - 1);
+  // Auto scroll list langkah di panel kanan ke paling bawah
+  useEffect(() => {
+    if (stepsListRef.current) {
+      stepsListRef.current.scrollTop = stepsListRef.current.scrollHeight;
     }
-  };
+  }, [currentStep]);
+
+  if (!isOpen) return null;
 
   const handleNext = () => {
-    if (activeStep < steps.length - 1) {
-      setActiveStep((step) => step + 1);
-      return;
+    if (currentStep < STEPS_DATA.length) {
+      setCurrentStep((prev) => prev + 1);
+    } else {
+      onClose();
     }
-
-    onClose();
   };
 
-  const currentStep = steps[activeStep];
+  const handlePrev = () => {
+    if (currentStep > 1) {
+      setCurrentStep((prev) => prev - 1);
+    }
+  };
 
   return (
-    <div
-      className="guide-backdrop"
-      role="presentation"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) {
-          onClose();
-        }
-      }}
-    >
-      <section
-        className="guide-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="guide-title"
-      >
-        <button
-          className="guide-close"
-          type="button"
-          onClick={onClose}
-          aria-label="Tutup panduan"
-        >
-          ×
+    <div className="guide-backdrop" onClick={onClose}>
+      <div className="guide-modal-card" onClick={(e) => e.stopPropagation()}>
+        {/* Tombol Close */}
+        <button className="guide-close-btn" onClick={onClose} aria-label="Tutup">
+          &times;
         </button>
 
-        <div className="guide-layout">
-          <section
-            className="guide-preview-panel"
-            aria-label="Preview form laporan"
-          >
-            <header className="guide-preview-header">
-              <h2 id="guide-title">
-                Panduan Melapor
-              </h2>
-
-              <span className="guide-badge">
-                {activeStep + 1} dari {steps.length} langkah
-              </span>
-            </header>
-
-            <FormPreview activeStep={activeStep} />
-          </section>
-
-          <section
-            className="guide-steps-panel"
-            aria-label="Langkah panduan"
-          >
-            <header className="guide-steps-header">
-              <h3>Cara membuat laporan</h3>
-
-              <p>
-                Ikuti langkah berikut untuk melaporkan masalah fasilitas
-                kampus secara cepat dan akurat.
-              </p>
-            </header>
-
-            <div className="guide-step-list">
-              <div className="guide-step-card is-active">
-                <span>
-                  Langkah {activeStep + 1}
-                </span>
-
-                <b>
-                  {currentStep.title}
-                </b>
-
-                <p>
-                  {currentStep.description}
-                </p>
-              </div>
+        <div className="guide-content-grid">
+          {/* Panel Kiri: Preview Form */}
+          <div className="guide-left-panel">
+            <div className="guide-header-row">
+              <h2 className="guide-title">Panduan Melapor</h2>
+              <span className="guide-step-badge">{currentStep} dari 6 langkah</span>
             </div>
 
-            <footer className="guide-footer">
-              <button
-                className="guide-secondary"
-                type="button"
-                onClick={handlePrevious}
-                disabled={activeStep === 0}
-              >
-                Sebelumnya
-              </button>
+            <div className="guide-preview-container">
+              {/* LANGKAH 1 */}
+              {currentStep === 1 && (
+                <div className="guide-card">
+                  <h3 className="guide-card-title">Identitas Pelapor</h3>
+                  <div className="guide-info-row">
+                    <span className="guide-label">Nama Pelapor</span>
+                    <span className="guide-value">Amba Ngawi</span>
+                  </div>
+                  <div className="guide-info-row">
+                    <span className="guide-label">Email Pelapor</span>
+                    <span className="guide-value">amba@gmail.com</span>
+                  </div>
+                  <label className="guide-checkbox-label">
+                    <input type="checkbox" defaultChecked readOnly />
+                    <span>Sembunyikan identitas pelapor</span>
+                  </label>
+                </div>
+              )}
 
-              <button
-                className="guide-primary"
-                type="button"
-                onClick={handleNext}
-              >
-                {activeStep === steps.length - 1
-                  ? 'Selesai'
-                  : 'Selanjutnya'}
+              {/* LANGKAH 2 DSK */}
+              {currentStep >= 2 && (
+                <div className="guide-card">
+                  <h3 className="guide-card-title">Form Laporan</h3>
+                  
+                  {/* Jenis Lokasi */}
+                  <div className="guide-form-group">
+                    <label className="guide-field-label">Jenis Lokasi</label>
+                    <div className="guide-radio-group">
+                      <label className="guide-radio-label">
+                        <input type="radio" name="locationType" defaultChecked readOnly />
+                        <span>Dalam Gedung</span>
+                      </label>
+                      <label className="guide-radio-label">
+                        <input type="radio" name="locationType" readOnly />
+                        <span>Area Luar</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Gedung & Ruangan (Langkah 3+) */}
+                  {currentStep >= 3 && (
+                    <div className="guide-grid-2col">
+                      <div className="guide-form-group">
+                        <label className="guide-field-label">Nama Gedung</label>
+                        <select className="guide-input-select" value="Gedung GKU" disabled>
+                          <option value="Gedung GKU">Gedung GKU</option>
+                        </select>
+                        <span className="guide-helper-text">Pilih gedung</span>
+                      </div>
+                      <div className="guide-form-group">
+                        <label className="guide-field-label">Nama Ruangan</label>
+                        <select className="guide-input-select" value="KU3.03.12" disabled>
+                          <option value="KU3.03.12">KU3.03.12</option>
+                        </select>
+                        <span className="guide-helper-text">Pilih ruangan</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Deskripsi (Langkah 4+) */}
+                  {currentStep >= 4 && (
+                    <div className="guide-form-group">
+                      <label className="guide-field-label">Deskripsi</label>
+                      <textarea 
+                        className="guide-textarea" 
+                        value="AC dikelas KU3.03.12 tidak dingin dan yang satunya lagi tidak bisa nyala" 
+                        readOnly 
+                      />
+                      <span className="guide-helper-text">Tuliskan deskripsi masalah dengan detail</span>
+                    </div>
+                  )}
+
+                  {/* Upload Foto & Thumbnail (Langkah 5 & 6) */}
+                  {currentStep >= 5 && (
+                    <div className="guide-form-group">
+                      <label className="guide-field-label">Foto</label>
+                      <div className="guide-upload-box">
+                        <div className="guide-upload-icon">↑</div>
+                        <p className="guide-upload-text">
+                          <strong>Seret ke sini</strong> atau klik untuk dipilih
+                        </p>
+                        <span className="guide-upload-sub">Format JPG, PNG · Maks. 5 MB per foto</span>
+                        <button type="button" className="guide-upload-btn">Pilih dari perangkat</button>
+                      </div>
+
+                      {/* Thumbnail Foto */}
+                      <div className="guide-thumbnails-wrapper">
+                        {SAMPLE_THUMBNAILS.map((imgSrc, idx) => (
+                          <div key={idx} className="guide-thumbnail-item">
+                            <img src={imgSrc} alt={`Bukti foto ${idx + 1}`} />
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Tombol Laporkan dalam Form Preview */}
+                      <div className="guide-submit-row">
+                        <button 
+                          type="button" 
+                          className={`guide-btn-submit ${currentStep === 6 ? 'active' : 'disabled'}`}
+                          disabled={currentStep === 5}
+                        >
+                          Laporkan
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Panel Kanan */}
+          <div className="guide-right-panel">
+            <div className="guide-right-header">
+              <h3>Cara membuat laporan</h3>
+              <p>Ikuti langkah berikut untuk melaporkan masalah fasilitas kampus secara cepat dan akurat</p>
+            </div>
+
+            {/* List Langkah */}
+            <div className="guide-steps-list" ref={stepsListRef}>
+              {STEPS_DATA.slice(0, currentStep).map((item) => (
+                <div 
+                  key={item.step} 
+                  className={`guide-step-card ${item.step === currentStep ? 'active' : 'completed'}`}
+                >
+                  <span className="guide-step-tag">Langkah {item.step}</span>
+                  <h4 className="guide-step-heading">{item.title}</h4>
+                  <p className="guide-step-desc">{item.description}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Footer Navigasi */}
+            <div className="guide-actions-footer">
+              {currentStep > 1 && (
+                <button type="button" className="guide-btn-prev" onClick={handlePrev}>
+                  Sebelumnya
+                </button>
+              )}
+              <button type="button" className="guide-btn-next" onClick={handleNext}>
+                {currentStep === STEPS_DATA.length ? 'Selesai' : 'Selanjutnya'}
               </button>
-            </footer>
-          </section>
+            </div>
+          </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 };

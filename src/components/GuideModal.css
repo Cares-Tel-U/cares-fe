@@ -1,0 +1,764 @@
+.guide-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+}
+
+.guide-modal-card {
+  background-color: #f8fafc;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.guide-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  background: #cbd5e1;
+  color: #ffffff;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.guide-content-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  min-height: 520px;
+}
+
+/* Panel Kiri */
+.guide-left-panel {
+  padding: 32px;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+}
+
+.guide-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.guide-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.guide-step-badge {
+  background-color: #fecdd3;
+  color: #e11d48;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.guide-preview-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.guide-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+}
+
+.guide-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.guide-info-row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.guide-label {
+  color: #64748b;
+}
+
+.guide-value {
+  color: #334155;
+  font-weight: 500;
+}
+
+.guide-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #334155;
+  margin-top: 16px;
+  cursor: pointer;
+}
+
+.guide-checkbox-label input {
+  accent-color: #dc2626;
+}
+
+/* Form Inputs */
+.guide-form-group {
+  margin-bottom: 16px;
+}
+
+.guide-field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 8px;
+}
+
+.guide-radio-group {
+  display: flex;
+  gap: 16px;
+}
+
+.guide-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.guide-radio-label input {
+  accent-color: #dc2626;
+}
+
+.guide-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.guide-input-select, .guide-textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background-color: #f8fafc;
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+.guide-textarea {
+  height: 80px;
+  resize: none;
+}
+
+.guide-helper-text {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 4px;
+  display: block;
+}
+
+.guide-upload-box {
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  background-color: #f8fafc;
+}
+
+.guide-upload-icon {
+  background: #cbd5e1;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 8px auto;
+  color: #fff;
+}
+
+.guide-upload-text {
+  font-size: 12px;
+  font-weight: 600;
+  margin: 0;
+  color: #334155;
+}
+
+.guide-upload-sub {
+  font-size: 10px;
+  color: #94a3b8;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.guide-upload-btn {
+  background: #ffffff;
+  border: 1px solid #dc2626;
+  color: #dc2626;
+  font-size: 11px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Panel Kanan */
+.guide-right-panel {
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: #ffffff;
+}
+
+.guide-right-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 6px 0;
+}
+
+.guide-right-header p {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0 0 20px 0;
+  line-height: 1.4;
+}
+
+.guide-steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  max-height: 320px;
+}
+
+.guide-step-card {
+  border-radius: 10px;
+  padding: 12px 14px;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+}
+
+.guide-step-card.active {
+  border-color: #ef4444;
+  background-color: #fff5f5;
+}
+
+.guide-step-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.guide-step-card.active .guide-step-tag {
+  color: #dc2626;
+}
+
+.guide-step-heading {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 4px 0;
+}
+
+.guide-step-desc {
+  font-size: 11px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* Footer Navigasi */
+.guide-actions-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.guide-btn-prev {
+  background-color: #cbd5e1;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.guide-btn-next {
+  background-color: #dc2626;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Layout Thumbnail Gambar pada Langkah 5 & 6 */
+.guide-thumbnails-wrapper {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.guide-thumbnail-item {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.guide-thumbnail-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Container Tombol Laporkan di Form Langkah 6 */
+.guide-submit-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.guide-btn-submit {
+  background-color: #e53e3e;
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Navigasi Footer Tetap Terlihat di Bawah */
+.guide-right-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.guide-steps-list {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 4px;
+  margin-bottom: 16px;
+}
+
+.guide-actions-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+.guide-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+}
+
+.guide-modal-card {
+  background-color: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 920px;
+  max-height: 90vh;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.guide-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  background: #cbd5e1;
+  color: #ffffff;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.guide-content-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  min-height: 520px;
+}
+
+/* Panel Kiri */
+.guide-left-panel {
+  padding: 28px;
+  background-color: #f8fafc;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+}
+
+.guide-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.guide-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.guide-step-badge {
+  background-color: #fecdd3;
+  color: #e11d48;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.guide-preview-container {
+  overflow-y: auto;
+  max-height: 440px;
+}
+
+.guide-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+}
+
+.guide-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.guide-info-row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.guide-label {
+  color: #64748b;
+}
+
+.guide-value {
+  color: #334155;
+  font-weight: 500;
+}
+
+.guide-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #334155;
+  margin-top: 16px;
+  cursor: pointer;
+}
+
+.guide-checkbox-label input {
+  accent-color: #dc2626;
+}
+
+/* Form Styling */
+.guide-form-group {
+  margin-bottom: 14px;
+}
+
+.guide-field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 6px;
+}
+
+.guide-radio-group {
+  display: flex;
+  gap: 16px;
+}
+
+.guide-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.guide-radio-label input {
+  accent-color: #dc2626;
+}
+
+.guide-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.guide-input-select, .guide-textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background-color: #f8fafc;
+  font-size: 13px;
+  color: #334155;
+}
+
+.guide-textarea {
+  height: 65px;
+  resize: none;
+}
+
+.guide-helper-text {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 4px;
+  display: block;
+}
+
+.guide-upload-box {
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  background-color: #f8fafc;
+}
+
+.guide-upload-icon {
+  background: #cbd5e1;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 6px auto;
+  color: #fff;
+  font-size: 12px;
+}
+
+.guide-upload-text {
+  font-size: 12px;
+  margin: 0;
+  color: #334155;
+}
+
+.guide-upload-sub {
+  font-size: 10px;
+  color: #94a3b8;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.guide-upload-btn {
+  background: #ffffff;
+  border: 1px solid #ef4444;
+  color: #ef4444;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.guide-thumbnails-wrapper {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.guide-thumbnail-item {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.guide-thumbnail-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.guide-submit-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+/* Tombol Laporkan Merah Pudar (Langkah 5) */
+.guide-btn-submit.disabled {
+  background-color: #f8a5a5;
+  color: #ffffff;
+  border: none;
+  padding: 8px 22px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: not-allowed;
+}
+
+/* Tombol Laporkan Merah Terang (Langkah 6) */
+.guide-btn-submit.active {
+  background-color: #dc2626;
+  color: #ffffff;
+  border: none;
+  padding: 8px 22px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Panel Kanan */
+.guide-right-panel {
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+}
+
+.guide-right-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 4px 0;
+}
+
+.guide-right-header p {
+  font-size: 12px;
+  color: #64748b;
+  margin: 0 0 16px 0;
+  line-height: 1.4;
+}
+
+.guide-steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  max-height: 330px;
+  padding-right: 4px;
+}
+
+.guide-step-card {
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+}
+
+.guide-step-card.active {
+  border-color: #ef4444;
+  background-color: #fff5f5;
+}
+
+.guide-step-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.guide-step-card.active .guide-step-tag {
+  color: #dc2626;
+}
+
+.guide-step-heading {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 2px 0;
+}
+
+.guide-step-desc {
+  font-size: 11px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* Navigasi Kanan Bawah */
+.guide-actions-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+.guide-btn-prev {
+  background-color: #cbd5e1;
+  color: #ffffff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.guide-btn-next {
+  background-color: #dc2626;
+  color: #ffffff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
