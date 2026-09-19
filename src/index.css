@@ -70,6 +70,15 @@ button, a, input, select, textarea {
   transition: all 0.15s ease-in-out;
 }
 
+@media (max-width: 960px) {
+  .admin-metric-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  .admin-dashboard-grid { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 680px) {
+  .admin-metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+
 .faq-page { display: grid; grid-template-columns: minmax(250px, .72fr) minmax(0, 1.28fr); gap: 28px; width: min(1200px, 100%); margin: 0 auto; align-items: start; }
 .faq-info-card { position: sticky; top: 24px; background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; overflow: hidden; box-shadow: 0 6px 18px rgba(17, 24, 39, .04); }
 .faq-info-card h2 { padding: 18px 20px; border-bottom: 1px solid #e5e7eb; color: #d90429; font-size: 18px; font-weight: 700; }

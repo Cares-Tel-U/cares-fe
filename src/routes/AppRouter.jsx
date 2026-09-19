@@ -7,14 +7,25 @@ import CreateReportPage from '../pages/pelapor/CreateReportPage';
 import ReportHistoryPage from '../pages/pelapor/ReportHistoryPage';
 import FAQ from '../pages/FAQ';
 
+// Import Halaman Admin
+import AdminDashboardPage from '../pages/admin/AdminDashboardPage';
+import AdminReportListPage from '../pages/admin/AdminReportListPage';
+import AdminReportResponsePage from '../pages/admin/AdminReportResponsePage';
+import AdminAnalyticsPage from '../pages/admin/AdminAnalyticsPage';
+
 const AppRouter = ({
   user,
+  adminUser,
   onLoginSuccess,
   onRegisterSuccess,
   onLogout,
   reports,
   onAddReport,
-  notifications
+  onVerifyReport,
+  onRejectReport,
+  onCompleteReport,
+  notifications,
+  onMarkAllNotificationsAsRead
 }) => {
   return (
     <Routes>
@@ -28,7 +39,7 @@ const AppRouter = ({
         element={<RegisterPage onRegisterSuccess={onRegisterSuccess} />}
       />
 
-      {/* Pelapor Protected / Main Routes */}
+      {/* Pelapor Routes */}
       <Route
         path="/dashboard"
         element={
@@ -75,9 +86,82 @@ const AppRouter = ({
         }
       />
 
+      {/* Admin Redirect Shortcut */}
+      <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+
+      {/* Admin Routes - Menggunakan adminUser */}
+      <Route
+        path="/admin/dashboard"
+        element={
+          adminUser ? (
+            <AdminDashboardPage
+              user={adminUser}
+              reports={reports}
+              notifications={notifications}
+              onMarkAllNotificationsAsRead={onMarkAllNotificationsAsRead}
+              onVerifyReport={onVerifyReport}
+              onRejectReport={onRejectReport}
+              onLogout={onLogout}
+            />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+      <Route
+        path="/admin/daftar-laporan"
+        element={
+          adminUser ? (
+            <AdminReportListPage
+              user={adminUser}
+              reports={reports}
+              notifications={notifications}
+              onMarkAllNotificationsAsRead={onMarkAllNotificationsAsRead}
+              onVerifyReport={onVerifyReport}
+              onRejectReport={onRejectReport}
+              onLogout={onLogout}
+            />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+      <Route
+        path="/admin/respons-laporan/:id"
+        element={
+          adminUser ? (
+            <AdminReportResponsePage
+              user={adminUser}
+              reports={reports}
+              notifications={notifications}
+              onMarkAllNotificationsAsRead={onMarkAllNotificationsAsRead}
+              onCompleteReport={onCompleteReport}
+              onLogout={onLogout}
+            />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+      <Route
+        path="/admin/data-statistik"
+        element={
+          adminUser ? (
+            <AdminAnalyticsPage
+              user={adminUser}
+              reports={reports}
+              notifications={notifications}
+              onMarkAllNotificationsAsRead={onMarkAllNotificationsAsRead}
+              onLogout={onLogout}
+            />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+
       {/* Fallback routes */}
       <Route path="/" element={<Navigate to={user ? "/dashboard" : "/login"} replace />} />
-      <Route path="/panduan" element={<Navigate to="/dashboard" replace />} />
       <Route path="/faq" element={user ? <FAQ user={user} notifications={notifications} onLogout={onLogout} /> : <Navigate to="/login" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
