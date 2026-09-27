@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Sidebar from '../components/layout/Sidebar';
 import Header from '../components/layout/Header';
-import NotificationCenter from '../components/layout/NotificationCenter';
 import GuideModal from '../components/GuideModal';
 
 const MainLayout = ({
@@ -10,13 +9,26 @@ const MainLayout = ({
   subtitle,
   user,
   notifications = [],
+  onMarkAllNotificationsAsRead,
   onLogout
 }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [notifList, setNotifList] = useState(notifications);
 
-  const unreadCount = notifications.filter((n) => n.isUnread).length;
+  // Sync when parent updates notifications
+  React.useEffect(() => {
+    setNotifList(notifications);
+  }, [notifications]);
+
+  const unreadCount = notifList.filter((n) => n.isUnread).length;
+
+  const handleMarkAllAsRead = () => {
+    setNotifList((prev) => prev.map((n) => ({ ...n, isUnread: false })));
+    if (onMarkAllNotificationsAsRead) {
+      onMarkAllNotificationsAsRead();
+    }
+  };
 
   return (
     <div
@@ -55,7 +67,8 @@ const MainLayout = ({
           subtitle={subtitle}
           user={user}
           unreadCount={unreadCount}
-          onOpenNotification={() => setIsNotificationOpen(true)}
+          notifications={notifList}
+          onMarkAllAsRead={handleMarkAllAsRead}
           onLogout={onLogout}
         />
 
@@ -64,12 +77,6 @@ const MainLayout = ({
         </div>
       </main>
 
-      {/* Notification Center Modal */}
-      <NotificationCenter
-        isOpen={isNotificationOpen}
-        onClose={() => setIsNotificationOpen(false)}
-        notifications={notifications}
-      />
       <GuideModal isOpen={isGuideOpen} onClose={() => setIsGuideOpen(false)} />
     </div>
   );

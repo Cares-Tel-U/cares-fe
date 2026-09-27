@@ -21,6 +21,7 @@ const AdminDashboardPage = ({
 }) => {
   const navigate = useNavigate();
   const [selectedReport, setSelectedReport] = useState(null);
+  const [reportToReject, setReportToReject] = useState(null);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
@@ -33,9 +34,11 @@ const AdminDashboardPage = ({
   };
 
   const handleRejectSubmit = (reason) => {
-    if (selectedReport) {
-      onRejectReport(selectedReport.id, reason);
+    const target = reportToReject || selectedReport;
+    if (target) {
+      onRejectReport(target.id, reason);
       setShowRejectModal(false);
+      setReportToReject(null);
       setSelectedReport(null);
     }
   };
@@ -85,7 +88,11 @@ const AdminDashboardPage = ({
           report={selectedReport}
           onClose={() => setSelectedReport(null)}
           onVerify={handleVerify}
-          onOpenReject={() => setShowRejectModal(true)}
+          onOpenReject={() => {
+            setReportToReject(selectedReport);
+            setSelectedReport(null);
+            setShowRejectModal(true);
+          }}
           onNavigateToResponse={(rep) => {
             setSelectedReport(null);
             navigate(`/admin/respons-laporan/${rep.id}`);

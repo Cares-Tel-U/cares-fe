@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import AdminLayout from '../../layouts/AdminLayout';
 import BadgeStatus from '../../components/common/BadgeStatus';
@@ -16,6 +16,7 @@ const AdminReportResponsePage = ({
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const fileInputRef = useRef(null);
 
   // Initial reports from location state (batch mode) or from param id
   const initialReports = useMemo(() => {
@@ -54,9 +55,38 @@ const AdminReportResponsePage = ({
   const [activeReports, setActiveReports] = useState(initialReports);
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('Laporan berhasil diverifikasi');
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const primaryReport = activeReports[0] || initialReports[0] || {};
   const isProcessMode = primaryReport.status === 'Diproses';
+
+  // Handle file selection from input or drop
+  const handleFilesSelected = useCallback((files) => {
+    const fileArray = Array.from(files);
+    const imageFiles = fileArray.filter((f) => f.type.startsWith('image/'));
+    const newEntries = imageFiles.map((f) => ({
+      url: URL.createObjectURL(f),
+      name: f.name
+    }));
+    setUploadedFiles((prev) => [...prev, ...newEntries]);
+  }, []);
+
+  const handleFileInputChange = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      handleFilesSelected(e.target.files);
+      e.target.value = '';
+    }
+  };
+
+  const handleRemoveUploadedFile = (index) => {
+    setUploadedFiles((prev) => {
+      const copy = [...prev];
+      URL.revokeObjectURL(copy[index].url);
+      copy.splice(index, 1);
+      return copy;
+    });
+  };
 
   // Remove a report from preview list
   const handleRemoveReport = (reportId) => {
@@ -79,10 +109,11 @@ const AdminReportResponsePage = ({
     setShowSuccess(true);
   };
 
-  // Handle Complete single report
+  // Handle Complete single report - pass uploaded proof image URLs
   const handleCompleteSingle = () => {
     if (onCompleteReport && primaryReport.id) {
-      onCompleteReport(primaryReport.id, []);
+      const proofUrls = uploadedFiles.map((f) => f.url);
+      onCompleteReport(primaryReport.id, proofUrls);
     }
     setSuccessMessage('Laporan selesai ditangani');
     setShowSuccess(true);
@@ -209,30 +240,49 @@ const AdminReportResponsePage = ({
               <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#111827', marginBottom: '10px' }}>
                 Bukti Perbaikan Fasilitas
               </label>
+
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                style={{ display: 'none' }}
+                onChange={handleFileInputChange}
+              />
+
+              {/* Drop Zone */}
               <div
+                onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                onDragLeave={() => setIsDragOver(false)}
+                onDrop={(e) => { e.preventDefault(); setIsDragOver(false); if (e.dataTransfer.files?.length) handleFilesSelected(e.dataTransfer.files); }}
                 style={{
-                  border: '2px dashed #e5e7eb',
+                  border: `2px dashed ${isDragOver ? '#dc2626' : '#d1d5db'}`,
                   borderRadius: '16px',
                   padding: '28px 16px',
                   textAlign: 'center',
-                  backgroundColor: '#f9fafb',
+                  backgroundColor: isDragOver ? '#fff5f5' : '#f9fafb',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
                 }}
               >
                 <div
                   style={{
                     width: '42px',
                     height: '42px',
-                    backgroundColor: '#e5e7eb',
+                    backgroundColor: isDragOver ? '#fee2e2' : '#e5e7eb',
                     borderRadius: '50%',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: '#6b7280',
-                    marginBottom: '10px'
+                    color: isDragOver ? '#dc2626' : '#6b7280',
+                    marginBottom: '10px',
+                    transition: 'all 0.2s ease'
                   }}
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -249,6 +299,7 @@ const AdminReportResponsePage = ({
                 </div>
                 <button
                   type="button"
+                  onClick={(e) => { e.stopPropagation(); fileInputRef.current && fileInputRef.current.click(); }}
                   style={{
                     backgroundColor: '#ffffff',
                     border: '1px solid #f87171',
@@ -263,6 +314,36 @@ const AdminReportResponsePage = ({
                   Pilih dari perangkat
                 </button>
               </div>
+
+              {/* Uploaded file thumbnails */}
+              {uploadedFiles.length > 0 && (
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
+                  {uploadedFiles.map((file, idx) => (
+                    <div key={idx} style={{ position: 'relative', display: 'inline-block' }}>
+                      <img
+                        src={file.url}
+                        alt={file.name}
+                        style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e5e7eb' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveUploadedFile(idx)}
+                        title="Hapus foto"
+                        style={{
+                          position: 'absolute', top: '-6px', right: '-6px',
+                          width: '18px', height: '18px',
+                          backgroundColor: '#dc2626', color: '#ffffff',
+                          border: 'none', borderRadius: '50%',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          cursor: 'pointer', fontSize: '9px', lineHeight: 1, padding: 0
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

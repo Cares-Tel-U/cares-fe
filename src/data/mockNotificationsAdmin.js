@@ -19,9 +19,9 @@ export const mockNotificationsAdmin = [
   },
   {
     id: "NOTIF-ADM-003",
-    category: "Hari ini",
+    category: "Sebelumnya",
     title: "Laporan Selesai",
-    time: "18:45 WIB",
+    time: "5/9/2026",
     location: "KU03.03.12",
     statusText: "Selesai",
     desc: "Laporan masalah di KU03.03.12 telah selesai ditangani dan status telah berubah menjadi Selesai",
@@ -39,6 +39,16 @@ export const mockNotificationsAdmin = [
   },
   {
     id: "NOTIF-ADM-005",
+    category: "Sebelumnya",
+    title: "Laporan Selesai",
+    time: "5/9/2026",
+    location: "KU03.03.12",
+    statusText: "Selesai",
+    desc: "Laporan masalah di KU03.03.12 telah selesai ditangani dan status telah berubah menjadi Selesai",
+    isUnread: false
+  },
+  {
+    id: "NOTIF-ADM-006",
     category: "Sebelumnya",
     title: "Laporan Selesai",
     time: "5/9/2026",

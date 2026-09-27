@@ -30,6 +30,7 @@ const AdminReportListPage = ({
 
   // Modals state
   const [selectedReport, setSelectedReport] = useState(null);
+  const [reportToReject, setReportToReject] = useState(null);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -105,11 +106,13 @@ const AdminReportListPage = ({
 
   // Handle single reject
   const handleRejectSubmit = (reason) => {
-    if (selectedReport) {
+    const target = reportToReject || selectedReport;
+    if (target) {
       if (onRejectReport) {
-        onRejectReport(selectedReport.id, reason);
+        onRejectReport(target.id, reason);
       }
       setShowRejectModal(false);
+      setReportToReject(null);
       setSelectedReport(null);
     }
   };
@@ -737,7 +740,11 @@ const AdminReportListPage = ({
           isOpen={!!selectedReport}
           onClose={() => setSelectedReport(null)}
           onVerify={handleVerifySingle}
-          onOpenReject={() => setShowRejectModal(true)}
+          onOpenReject={() => {
+            setReportToReject(selectedReport);
+            setSelectedReport(null);
+            setShowRejectModal(true);
+          }}
           onNavigateToResponse={(rep) => {
             setSelectedReport(null);
             navigate(`/admin/respons-laporan/${rep.id}`);
