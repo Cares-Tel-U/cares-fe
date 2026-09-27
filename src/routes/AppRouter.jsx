@@ -22,11 +22,18 @@ const AppRouter = ({
   reports,
   onAddReport,
   onVerifyReport,
+  onVerifyReports,
   onRejectReport,
   onCompleteReport,
   notifications,
-  onMarkAllNotificationsAsRead
+  onMarkAllNotificationsAsRead,
+  adminNotifications,
+  onMarkAllAdminNotificationsAsRead
 }) => {
+  const currentAdminNotifs = adminNotifications || notifications;
+  const currentAdminMarkRead = onMarkAllAdminNotificationsAsRead || onMarkAllNotificationsAsRead;
+  const currentVerifyReports = onVerifyReports || onVerifyReport;
+
   return (
     <Routes>
       {/* Auth Routes */}
@@ -97,8 +104,8 @@ const AppRouter = ({
             <AdminDashboardPage
               user={adminUser}
               reports={reports}
-              notifications={notifications}
-              onMarkAllNotificationsAsRead={onMarkAllNotificationsAsRead}
+              notifications={currentAdminNotifs}
+              onMarkAllNotificationsAsRead={currentAdminMarkRead}
               onVerifyReport={onVerifyReport}
               onRejectReport={onRejectReport}
               onLogout={onLogout}
@@ -115,10 +122,29 @@ const AppRouter = ({
             <AdminReportListPage
               user={adminUser}
               reports={reports}
-              notifications={notifications}
-              onMarkAllNotificationsAsRead={onMarkAllNotificationsAsRead}
+              notifications={currentAdminNotifs}
+              onMarkAllNotificationsAsRead={currentAdminMarkRead}
               onVerifyReport={onVerifyReport}
+              onVerifyReports={currentVerifyReports}
               onRejectReport={onRejectReport}
+              onLogout={onLogout}
+            />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+      <Route
+        path="/admin/respons-laporan"
+        element={
+          adminUser ? (
+            <AdminReportResponsePage
+              user={adminUser}
+              reports={reports}
+              notifications={currentAdminNotifs}
+              onMarkAllNotificationsAsRead={currentAdminMarkRead}
+              onVerifyReports={currentVerifyReports}
+              onCompleteReport={onCompleteReport}
               onLogout={onLogout}
             />
           ) : (
@@ -133,8 +159,9 @@ const AppRouter = ({
             <AdminReportResponsePage
               user={adminUser}
               reports={reports}
-              notifications={notifications}
-              onMarkAllNotificationsAsRead={onMarkAllNotificationsAsRead}
+              notifications={currentAdminNotifs}
+              onMarkAllNotificationsAsRead={currentAdminMarkRead}
+              onVerifyReports={currentVerifyReports}
               onCompleteReport={onCompleteReport}
               onLogout={onLogout}
             />
@@ -150,8 +177,8 @@ const AppRouter = ({
             <AdminAnalyticsPage
               user={adminUser}
               reports={reports}
-              notifications={notifications}
-              onMarkAllNotificationsAsRead={onMarkAllNotificationsAsRead}
+              notifications={currentAdminNotifs}
+              onMarkAllNotificationsAsRead={currentAdminMarkRead}
               onLogout={onLogout}
             />
           ) : (

@@ -4,12 +4,14 @@ import AppRouter from './routes/AppRouter';
 import { mockUser, mockAdminUser } from './data/mockUser';
 import { mockReports } from './data/mockReports';
 import { mockNotifications } from './data/mockNotifications';
+import { mockNotificationsAdmin } from './data/mockNotificationsAdmin';
 
 function App() {
   const [user, setUser] = useState(mockUser);
   const [adminUser, setAdminUser] = useState(mockAdminUser);
   const [reports, setReports] = useState(mockReports);
   const [notifications, setNotifications] = useState(mockNotifications);
+  const [adminNotifications, setAdminNotifications] = useState(mockNotificationsAdmin);
 
   const handleLoginSuccess = (userData) => {
     if (userData?.role === 'Admin' || userData?.role === 'admin') {
@@ -40,18 +42,36 @@ function App() {
       isUnread: true
     };
     setNotifications((prev) => [newNotif, ...prev]);
+
+    const newAdminNotif = {
+      id: `NOTIF-ADM-${Date.now()}`,
+      category: 'Hari ini',
+      title: 'Laporan Baru',
+      time: 'Baru saja',
+      location: newReport.namaRuangan || newReport.lokasi,
+      desc: `Laporan masalah di ${newReport.lokasi} telah masuk dan menunggu verifikasi`,
+      isUnread: true
+    };
+    setAdminNotifications((prev) => [newAdminNotif, ...prev]);
   };
 
   const handleVerifyReport = (reportId) => {
     setReports((prev) =>
-      prev.map((r) => (r.id === reportId ? { ...r, status: 'Diproses' } : r))
+      prev.map((r) => (String(r.id) === String(reportId) ? { ...r, status: 'Diproses' } : r))
+    );
+  };
+
+  const handleVerifyReports = (reportIds) => {
+    const idSet = new Set((Array.isArray(reportIds) ? reportIds : [reportIds]).map(String));
+    setReports((prev) =>
+      prev.map((r) => (idSet.has(String(r.id)) ? { ...r, status: 'Diproses' } : r))
     );
   };
 
   const handleRejectReport = (reportId, reason) => {
     setReports((prev) =>
       prev.map((r) =>
-        r.id === reportId ? { ...r, status: 'Ditolak', rejectReason: reason } : r
+        String(r.id) === String(reportId) ? { ...r, status: 'Ditolak', rejectReason: reason } : r
       )
     );
   };
@@ -59,13 +79,17 @@ function App() {
   const handleCompleteReport = (reportId, proofImages) => {
     setReports((prev) =>
       prev.map((r) =>
-        r.id === reportId ? { ...r, status: 'Selesai', completionProofs: proofImages } : r
+        String(r.id) === String(reportId) ? { ...r, status: 'Selesai', completionProofs: proofImages } : r
       )
     );
   };
 
   const handleMarkAllNotificationsAsRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, isUnread: false })));
+  };
+
+  const handleMarkAllAdminNotificationsAsRead = () => {
+    setAdminNotifications((prev) => prev.map((n) => ({ ...n, isUnread: false })));
   };
 
   return (
@@ -79,10 +103,13 @@ function App() {
         reports={reports}
         onAddReport={handleAddReport}
         onVerifyReport={handleVerifyReport}
+        onVerifyReports={handleVerifyReports}
         onRejectReport={handleRejectReport}
         onCompleteReport={handleCompleteReport}
         notifications={notifications}
         onMarkAllNotificationsAsRead={handleMarkAllNotificationsAsRead}
+        adminNotifications={adminNotifications}
+        onMarkAllAdminNotificationsAsRead={handleMarkAllAdminNotificationsAsRead}
       />
     </BrowserRouter>
   );

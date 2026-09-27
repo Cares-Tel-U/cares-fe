@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AdminLayout from '../../layouts/AdminLayout';
 import MetricCards from '../../components/admin/MetricCards';
 import ReportChart from '../../components/admin/ReportChart';
@@ -8,16 +8,18 @@ import ReportTable from '../../components/admin/ReportTable';
 import DetailReportModal from '../../components/modals/DetailReportModal';
 import RejectReportModal from '../../components/modals/RejectReportModal';
 import SuccessModal from '../../components/modals/SuccessModal';
+import { mockNotificationsAdmin } from '../../data/mockNotificationsAdmin';
 
 const AdminDashboardPage = ({
   user,
   reports = [],
-  notifications = [],
+  notifications = mockNotificationsAdmin,
   onMarkAllNotificationsAsRead,
   onVerifyReport,
   onRejectReport,
   onLogout
 }) => {
+  const navigate = useNavigate();
   const [selectedReport, setSelectedReport] = useState(null);
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -48,10 +50,8 @@ const AdminDashboardPage = ({
       onLogout={onLogout}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        {/* Metric Cards (5 Cards) */}
         <MetricCards reports={reports} />
 
-        {/* Section Chart & Location Stats (Grid 2 Kolom) */}
         <div className="admin-dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '2.12fr 1fr', gap: '12px', alignItems: 'stretch' }}>
           <div style={{ minWidth: 0 }}>
             <ReportChart />
@@ -61,7 +61,6 @@ const AdminDashboardPage = ({
           </div>
         </div>
 
-        {/* Section Laporan Terbaru */}
         <div style={{ backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #d7d7d7', overflow: 'hidden' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 16px', borderBottom: '1px solid #d7d7d7' }}>
             <h2 style={{ fontSize: '14px', fontWeight: '700', color: '#303038', margin: 0 }}>Laporan Terbaru</h2>
@@ -81,13 +80,16 @@ const AdminDashboardPage = ({
         </div>
       </div>
 
-      {/* Modals */}
       {selectedReport && (
         <DetailReportModal
           report={selectedReport}
           onClose={() => setSelectedReport(null)}
           onVerify={handleVerify}
           onOpenReject={() => setShowRejectModal(true)}
+          onNavigateToResponse={(rep) => {
+            setSelectedReport(null);
+            navigate(`/admin/respons-laporan/${rep.id}`);
+          }}
         />
       )}
 
