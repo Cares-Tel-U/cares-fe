@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminSidebar from '../components/admin/AdminSidebar';
 import Header from '../components/layout/Header';
+import AdminGuideModal from '../components/AdminGuideModal';
 
 const AdminLayout = ({
   title,
@@ -12,6 +13,7 @@ const AdminLayout = ({
   children
 }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [notifList, setNotifList] = useState(notifications);
 
   useEffect(() => {
@@ -27,7 +29,12 @@ const AdminLayout = ({
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', width: '100vw', background: '#f8fafc', fontFamily: "'Plus Jakarta Sans', Inter, sans-serif" }}>
-      <AdminSidebar isCollapsed={isSidebarCollapsed} onToggleCollapse={() => setIsSidebarCollapsed((c) => !c)} />
+      <AdminSidebar 
+        isCollapsed={isSidebarCollapsed} 
+        onToggleCollapse={() => setIsSidebarCollapsed((c) => !c)} 
+        onOpenGuide={() => setIsGuideOpen(true)}
+        isGuideOpen={isGuideOpen}
+      />
       <main style={{ flex: 1, minWidth: 0, padding: '28px 36px', overflowY: 'auto', boxSizing: 'border-box' }}>
         <Header
           title={title}
@@ -40,6 +47,11 @@ const AdminLayout = ({
         />
         {children}
       </main>
+
+      <AdminGuideModal 
+        isOpen={isGuideOpen} 
+        onClose={() => setIsGuideOpen(false)} 
+      />
     </div>
   );
 };

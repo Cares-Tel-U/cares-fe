@@ -6,6 +6,7 @@ import DashboardPage from '../pages/pelapor/DashboardPage';
 import CreateReportPage from '../pages/pelapor/CreateReportPage';
 import ReportHistoryPage from '../pages/pelapor/ReportHistoryPage';
 import FAQ from '../pages/FAQ';
+import AdminFAQ from '../pages/AdminFAQ';
 
 // Import Halaman Admin
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage';
@@ -179,6 +180,21 @@ const AppRouter = ({
               reports={reports}
               notifications={currentAdminNotifs}
               onMarkAllNotificationsAsRead={currentAdminMarkRead}
+              onLogout={onLogout}
+            />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+      {/* Route Baru untuk Admin FAQ */}
+      <Route
+        path="/admin/faq"
+        element={
+          adminUser ? (
+            <AdminFAQ
+              user={adminUser}
+              notifications={currentAdminNotifs}
               onLogout={onLogout}
             />
           ) : (
