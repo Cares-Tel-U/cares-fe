@@ -142,6 +142,11 @@ export const mockReports = [
     foto: [
       "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=300&q=80"
     ],
+    completionProofs: [
+      "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=600&q=80"
+    ],
+    keteranganBukti: "Pengerjaan perbaikan AC di Gedung A ruang KU3.02.12 telah selesai dilakukan",
+    tanggalSelesai: "12 Februari 2026, 15:00 WIB",
     timeline: [
       { step: "Laporan terkirim", date: "09 Februari 2026, 11:00 WIB", completed: true, current: false },
       { step: "Laporan berhasil diverifikasi", date: "09 Februari 2026, 13:00 WIB", completed: true, current: false },
@@ -163,6 +168,11 @@ export const mockReports = [
     foto: [
       "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=300&q=80"
     ],
+    completionProofs: [
+      "https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=600&q=80"
+    ],
+    keteranganBukti: "Perbaikan fasilitas di Gedung A ruang KU3.02.12 sudah selesai dikerjakan oleh tim teknisi",
+    tanggalSelesai: "11 Februari 2026, 14:00 WIB",
     timeline: [
       { step: "Laporan terkirim", date: "08 Februari 2026, 10:00 WIB", completed: true, current: false },
       { step: "Laporan berhasil diverifikasi", date: "08 Februari 2026, 11:00 WIB", completed: true, current: false },
@@ -205,6 +215,11 @@ export const mockReports = [
     foto: [
       "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=300&q=80"
     ],
+    completionProofs: [
+      "https://images.unsplash.com/photo-1581092162384-8987c1d64718?auto=format&fit=crop&w=600&q=80"
+    ],
+    keteranganBukti: "Perbaikan AC di Gedung A ruang KU3.02.12 telah selesai dilakukan oleh tim teknisi kampus",
+    tanggalSelesai: "10 Februari 2026, 16:00 WIB",
     timeline: [
       { step: "Laporan terkirim", date: "06 Februari 2026, 08:30 WIB", completed: true, current: false },
       { step: "Laporan berhasil diverifikasi", date: "06 Februari 2026, 10:00 WIB", completed: true, current: false },
@@ -262,6 +277,11 @@ export const mockReports = [
     status: "Selesai",
     isAnonim: false,
     foto: ["https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=300&q=80"],
+    completionProofs: [
+      "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=600&q=80"
+    ],
+    keteranganBukti: "Pembersihan dan perbaikan wastafel di Kantin Blok C telah diselesaikan",
+    tanggalSelesai: "10 Februari 2026, 11:00 WIB",
     timeline: [
       { step: "Laporan terkirim", date: "09 Februari 2026, 12:00 WIB", completed: true, current: false },
       { step: "Laporan berhasil diverifikasi", date: "09 Februari 2026, 13:00 WIB", completed: true, current: false },

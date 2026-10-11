@@ -3,10 +3,16 @@ import React, { useState } from 'react';
 const Login = ({ onSwitchToSignUp, onLoginSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (password.length < 8 || password === 'salah') {
+      setLoginError(true);
+      return;
+    }
     if (email && password) {
+      setLoginError(false);
       onLoginSuccess({ name: 'Amba Ngawi', email: email });
     }
   };
@@ -23,6 +29,21 @@ const Login = ({ onSwitchToSignUp, onLoginSuccess }) => {
       <div className="auth-form-container">
         <div className="auth-form-title">Login</div>
         <div className="auth-form-subtitle">Masuk ke akun CARES untuk membuat laporan dan melihat riwayat laporan fasilitas kampus Anda.</div>
+        {loginError && (
+          <div
+            style={{
+              backgroundColor: '#f2989b',
+              color: '#b91c1c',
+              padding: '12px 16px',
+              borderRadius: '8px',
+              fontSize: '12.5px',
+              fontWeight: '500',
+              marginBottom: '16px'
+            }}
+          >
+            Kata sandi yang Anda masukkan tidak valid atau salah. Silakan coba kembali
+          </div>
+        )}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Alamat Email</label>

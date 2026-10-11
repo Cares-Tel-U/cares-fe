@@ -18,15 +18,15 @@ const IdentitySection = ({ user, isAnonim, onToggleAnonim }) => {
 
       <div style={{ display: 'grid', gap: '10px', padding: '16px 20px 18px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '132px minmax(0, 1fr)', alignItems: 'center', gap: '12px' }}>
-          <div style={{ fontSize: '13px', color: '#4b5563', fontWeight: '500' }}>Nama Pelapor</div>
-          <div style={{ fontSize: '13px', color: '#9ca3af', fontWeight: '500', overflowWrap: 'anywhere' }}>
+          <div style={{ fontSize: '13px', color: '#1f2937', fontWeight: '500' }}>Nama Pelapor</div>
+          <div style={{ fontSize: '13px', color: '#6b7280', fontWeight: '400', overflowWrap: 'anywhere' }}>
             {user?.name || 'Amba Ngawi'}
           </div>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '132px minmax(0, 1fr)', alignItems: 'center', gap: '12px' }}>
-          <div style={{ fontSize: '13px', color: '#4b5563', fontWeight: '500' }}>Email Pelapor</div>
-          <div style={{ fontSize: '13px', color: '#9ca3af', fontWeight: '500', overflowWrap: 'anywhere' }}>
-            {user?.email || 'ambangawi@telkomuniversity.ac.id'}
+          <div style={{ fontSize: '13px', color: '#1f2937', fontWeight: '500' }}>Email Pelapor</div>
+          <div style={{ fontSize: '13px', color: '#6b7280', fontWeight: '400', overflowWrap: 'anywhere' }}>
+            {user?.email || 'amba@gmail.com'}
           </div>
         </div>
 

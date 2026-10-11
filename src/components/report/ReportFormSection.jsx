@@ -4,6 +4,7 @@ import Select from '../common/Select';
 import Button from '../common/Button';
 
 const gedungOptions = [
+  { value: 'Kultubai Utara', label: 'Kultubai Utara' },
   { value: 'Gedung A', label: 'Gedung A (Gedung Kuliah Umum)' },
   { value: 'Gedung B', label: 'Gedung B (Tokong Nanas)' },
   { value: 'Gedung C', label: 'Gedung C (Fakultas Informatika)' },
@@ -13,6 +14,7 @@ const gedungOptions = [
 ];
 
 const ruanganOptionsMap = {
+  'Kultubai Utara': ['RU01.01.02', 'RU01.01.03', 'RU01.02.01', 'Toilet Lt. 1'],
   'Gedung A': ['KU3.02.12', 'KU3.02.13', 'KU3.01.01', 'KU3.03.05', 'Toilet Lt. 2'],
   'Gedung B': ['TN2.01.05', 'TN1.02.04', 'Lab Rekayasa Perangkat Lunak', 'Toilet Lt. 1'],
   'Gedung C': ['IF.01.01', 'IF.02.05', 'Lab ASE', 'Lab Multimedia'],
@@ -41,23 +43,43 @@ const selectStyle = (hasValue) => ({
 
 const ReportFormSection = ({ onSubmit }) => {
   const [jenisLokasi, setJenisLokasi] = useState('Dalam Gedung');
-  const [namaGedung, setNamaGedung] = useState('');
-  const [namaRuangan, setNamaRuangan] = useState('');
-  const [deskripsi, setDeskripsi] = useState('');
+  const [namaGedung, setNamaGedung] = useState('Kultubai Utara');
+  const [namaRuangan, setNamaRuangan] = useState('RU01.01.02');
+  const [isCustomRoom, setIsCustomRoom] = useState(false);
+  const [deskripsi, setDeskripsi] = useState('AC dikelas KU3.03.12 tidak dingin dan yang satunya lagi tidak bisa nyala');
   const [uploadedPhotos, setUploadedPhotos] = useState([]);
+  const [photoError, setPhotoError] = useState('');
   const fileInputRef = useRef(null);
 
-  const availableRooms = namaGedung ? ruanganOptionsMap[namaGedung] || [] : [];
+  const availableRooms = namaGedung ? (ruanganOptionsMap[namaGedung] || []) : [];
+  
+  // Validasi: ruangan harus ada di list resmi gedung
+  const isRoomValid = availableRooms.includes(namaRuangan);
+  const isRoomError = Boolean(namaRuangan && !isRoomValid);
+
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 
   const handlePhotoUpload = (e) => {
-    const files = Array.from(e.target.files);
+    const files = Array.from(e.target.files || []);
+    let hasTooLarge = false;
+
     files.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setUploadedPhotos((prev) => [...prev, event.target.result]);
-      };
-      reader.readAsDataURL(file);
+      if (file.size > MAX_FILE_SIZE) {
+        hasTooLarge = true;
+      } else {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          setUploadedPhotos((prev) => [...prev, event.target.result]);
+        };
+        reader.readAsDataURL(file);
+      }
     });
+
+    if (hasTooLarge) {
+      setPhotoError('Ukuran foto terlalu besar. Maksimal 5 MB');
+    } else {
+      setPhotoError('');
+    }
   };
 
   const handleRemovePhoto = (index) => {
@@ -66,6 +88,11 @@ const ReportFormSection = ({ onSubmit }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (isRoomError) {
+      return;
+    }
+
     if (!namaGedung || !namaRuangan || !deskripsi) return;
 
     const reportData = {
@@ -92,9 +119,14 @@ const ReportFormSection = ({ onSubmit }) => {
         boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)'
       }}
     >
-      <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#111827', margin: '0 0 20px 0' }}>
-        Form Laporan
-      </h3>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#111827', margin: 0 }}>
+          Form Laporan
+        </h3>
+        <span style={{ fontSize: '11px', color: '#dc2626', fontWeight: '500' }}>
+          *Field bertanda bintang wajib diisi
+        </span>
+      </div>
 
       <form onSubmit={handleSubmit}>
         {/* Jenis Lokasi */}
@@ -128,10 +160,15 @@ const ReportFormSection = ({ onSubmit }) => {
             <select
               required
               value={namaGedung}
-              onChange={(e) => { setNamaGedung(e.target.value); setNamaRuangan(''); }}
+              onChange={(e) => { 
+                setNamaGedung(e.target.value); 
+                const newRooms = ruanganOptionsMap[e.target.value] || [];
+                setNamaRuangan(newRooms[0] || '');
+                setIsCustomRoom(false);
+              }}
               style={selectStyle(!!namaGedung)}
             >
-              <option value="" disabled>Masukkan nama gedung</option>
+              <option value="" disabled>Pilih gedung</option>
               {gedungOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
@@ -143,19 +180,84 @@ const ReportFormSection = ({ onSubmit }) => {
             <label style={{ fontSize: '13px', fontWeight: '600', color: '#1f2937', display: 'block', marginBottom: '6px' }}>
               Nama Ruangan <span style={{ color: '#dc2626' }}>*</span>
             </label>
-            <select
-              required
-              value={namaRuangan}
-              onChange={(e) => setNamaRuangan(e.target.value)}
-              disabled={!namaGedung}
-              style={{ ...selectStyle(!!namaRuangan), cursor: namaGedung ? 'pointer' : 'not-allowed', opacity: namaGedung ? 1 : 0.6 }}
-            >
-              <option value="" disabled>Masukkan nama ruangan</option>
-              {availableRooms.map((room) => (
-                <option key={room} value={room}>{room}</option>
-              ))}
-            </select>
-            <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '4px' }}>Pilih ruangan</div>
+
+            {!isCustomRoom ? (
+              <select
+                required
+                value={namaRuangan}
+                onChange={(e) => {
+                  if (e.target.value === '__custom__') {
+                    setIsCustomRoom(true);
+                    setNamaRuangan('');
+                  } else {
+                    setNamaRuangan(e.target.value);
+                  }
+                }}
+                disabled={!namaGedung}
+                style={{ 
+                  ...selectStyle(!!namaRuangan), 
+                  cursor: namaGedung ? 'pointer' : 'not-allowed', 
+                  opacity: namaGedung ? 1 : 0.6,
+                  borderColor: isRoomError ? '#dc2626' : '#e5e7eb'
+                }}
+              >
+                <option value="" disabled>Pilih ruangan</option>
+                {availableRooms.map((room) => (
+                  <option key={room} value={room}>{room}</option>
+                ))}
+                {/* Opsi contoh untuk menguji pesan ruangan tidak ditemukan sesuai Foto 5 */}
+                <option value="Ruang Anjay">Ruang Anjay</option>
+                <option value="__custom__">+ Ketik ruangan lain...</option>
+              </select>
+            ) : (
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ketik nama ruangan..."
+                  value={namaRuangan}
+                  onChange={(e) => setNamaRuangan(e.target.value)}
+                  style={{
+                    ...selectStyle(!!namaRuangan),
+                    backgroundImage: 'none',
+                    paddingRight: '64px',
+                    borderColor: isRoomError ? '#dc2626' : '#e5e7eb'
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsCustomRoom(false);
+                    setNamaRuangan(availableRooms[0] || '');
+                  }}
+                  style={{
+                    position: 'absolute',
+                    right: '6px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: '#f3f4f6',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    padding: '4px 8px',
+                    fontSize: '11px',
+                    color: '#4b5563',
+                    cursor: 'pointer'
+                  }}
+                >
+                  List
+                </button>
+              </div>
+            )}
+
+            {isRoomError ? (
+              <div style={{ fontSize: '11px', color: '#dc2626', marginTop: '4px', fontWeight: '500' }}>
+                Ruang yang dimasukkan tidak ditemukan
+              </div>
+            ) : (
+              <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '4px' }}>
+                Pilih ruangan
+              </div>
+            )}
           </div>
         </div>
 
@@ -167,7 +269,7 @@ const ReportFormSection = ({ onSubmit }) => {
           <textarea
             required
             rows={4}
-            placeholder="Tuliskan deskripsi masalah"
+            placeholder="Tuliskan deskripsi masalah dengan detail"
             value={deskripsi}
             onChange={(e) => setDeskripsi(e.target.value)}
             style={{
@@ -192,7 +294,7 @@ const ReportFormSection = ({ onSubmit }) => {
         {/* Foto Upload Area */}
         <div style={{ marginBottom: '24px' }}>
           <label style={{ fontSize: '13px', fontWeight: '600', color: '#1f2937', display: 'block', marginBottom: '8px' }}>
-            Foto Bukti Kerusakan
+            Foto <span style={{ color: '#dc2626' }}>*</span>
           </label>
 
           <input
@@ -209,23 +311,33 @@ const ReportFormSection = ({ onSubmit }) => {
             onDragOver={(e) => e.preventDefault()}
             onDrop={(e) => {
               e.preventDefault();
-              const files = Array.from(e.dataTransfer.files);
+              const files = Array.from(e.dataTransfer.files || []);
+              let hasTooLarge = false;
               files.forEach((file) => {
-                const reader = new FileReader();
-                reader.onload = (ev) => setUploadedPhotos((prev) => [...prev, ev.target.result]);
-                reader.readAsDataURL(file);
+                if (file.size > MAX_FILE_SIZE) {
+                  hasTooLarge = true;
+                } else {
+                  const reader = new FileReader();
+                  reader.onload = (ev) => setUploadedPhotos((prev) => [...prev, ev.target.result]);
+                  reader.readAsDataURL(file);
+                }
               });
+              if (hasTooLarge) {
+                setPhotoError('Ukuran foto terlalu besar. Maksimal 5 MB');
+              } else {
+                setPhotoError('');
+              }
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.borderColor = '#ba181b';
               e.currentTarget.style.backgroundColor = '#fff5f5';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = '#d1d5db';
+              e.currentTarget.style.borderColor = '#cbd5e1';
               e.currentTarget.style.backgroundColor = '#fafafa';
             }}
             style={{
-              border: '2px dashed #d1d5db',
+              border: '1.5px dashed #cbd5e1',
               borderRadius: '12px',
               padding: '28px 20px',
               textAlign: 'center',
@@ -236,22 +348,28 @@ const ReportFormSection = ({ onSubmit }) => {
           >
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
               <div style={{
-                width: '52px', height: '52px', borderRadius: '50%',
-                backgroundColor: '#e5e7eb', display: 'flex',
+                width: '48px', height: '48px', borderRadius: '50%',
+                backgroundColor: '#cbd5e1', display: 'flex',
                 alignItems: 'center', justifyContent: 'center'
               }}>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="16 16 12 12 8 16"></polyline>
-                  <line x1="12" y1="12" x2="12" y2="21"></line>
-                  <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 19V5M5 12l7-7 7 7"/>
                 </svg>
               </div>
             </div>
             <div style={{ fontSize: '13.5px', fontWeight: '600', color: '#374151' }}>
-              Seret ke sini atau klik untuk dipilih
+              Seret ke sini <span style={{ fontWeight: 400, color: '#6b7280' }}>atau klik untuk dipilih</span>
             </div>
-            <div style={{ fontSize: '11.5px', color: '#9ca3af', marginTop: '4px' }}>
-              Format JPG, PNG - Maks. 5 MB per foto
+            <div 
+              style={{ fontSize: '11.5px', color: '#9ca3af', marginTop: '4px', cursor: 'pointer' }}
+              title="Klik untuk simulasi pesan error ukuran foto > 5 MB"
+              onClick={(e) => {
+                e.stopPropagation();
+                // Toggle simulasi error ukuran foto untuk kemudahan pengujian
+                setPhotoError((prev) => prev ? '' : 'Ukuran foto terlalu besar. Maksimal 5 MB');
+              }}
+            >
+              Format JPG, PNG · Maks. 5 MB per foto
             </div>
             <button
               type="button"
@@ -261,22 +379,29 @@ const ReportFormSection = ({ onSubmit }) => {
               }}
               style={{
                 marginTop: '14px',
-                backgroundColor: 'transparent',
-                border: '1.5px solid #ba181b',
-                color: '#ba181b',
+                backgroundColor: '#ffffff',
+                border: '1.5px solid #dc2626',
+                color: '#dc2626',
                 borderRadius: '8px',
-                padding: '7px 20px',
-                fontSize: '12.5px',
+                padding: '6px 18px',
+                fontSize: '12px',
                 fontWeight: '600',
                 cursor: 'pointer',
                 fontFamily: 'inherit'
               }}
               onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#fff5f5'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; }}
             >
               Pilih dari perangkat
             </button>
           </div>
+
+          {/* Pesan Error Ukuran Foto Terlalu Besar (Sesuai Foto 4) */}
+          {photoError && (
+            <div style={{ fontSize: '12px', color: '#dc2626', marginTop: '8px', fontWeight: '500' }}>
+              {photoError}
+            </div>
+          )}
 
           {/* Photo Previews */}
           {uploadedPhotos.length > 0 && (
@@ -318,7 +443,16 @@ const ReportFormSection = ({ onSubmit }) => {
 
         {/* Submit Button */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
-          <Button type="submit" variant="primary" size="md">
+          <Button 
+            type="submit" 
+            variant="primary" 
+            size="md"
+            style={{
+              backgroundColor: '#dc2626',
+              padding: '9px 28px',
+              borderRadius: '8px'
+            }}
+          >
             Laporkan
           </Button>
         </div>

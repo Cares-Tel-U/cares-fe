@@ -10,6 +10,7 @@ const Input = ({
   onChange,
   required = false,
   error = '',
+  helperText = '',
   disabled = false,
   rows = 4,
   className = '',
@@ -130,11 +131,15 @@ const Input = ({
         </div>
       )}
 
-      {error && (
-        <span style={{ fontSize: '12px', color: '#dc2626', marginTop: '2px' }}>
+      {error ? (
+        <span style={{ fontSize: '12px', color: '#dc2626', marginTop: '2px', fontWeight: '500' }}>
           {error}
         </span>
-      )}
+      ) : helperText ? (
+        <span style={{ fontSize: '12px', color: '#6b7280', marginTop: '2px' }}>
+          {helperText}
+        </span>
+      ) : null}
     </div>
   );
 };

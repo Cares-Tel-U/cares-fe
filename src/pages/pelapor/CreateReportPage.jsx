@@ -7,7 +7,7 @@ import ImportantInfoCard from '../../components/report/ImportantInfoCard';
 
 const CreateReportPage = ({ user, onAddReport, notifications = [], onLogout }) => {
   const navigate = useNavigate();
-  const [isAnonim, setIsAnonim] = useState(false);
+  const [isAnonim, setIsAnonim] = useState(true);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   useEffect(() => {
