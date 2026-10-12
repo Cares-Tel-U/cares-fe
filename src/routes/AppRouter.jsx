@@ -69,6 +69,7 @@ const AppRouter = ({
           user ? (
             <CreateReportPage
               user={user}
+              reports={reports}
               onAddReport={onAddReport}
               notifications={notifications}
               onLogout={onLogout}

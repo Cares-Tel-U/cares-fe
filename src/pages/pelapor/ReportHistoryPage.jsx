@@ -37,19 +37,20 @@ const ReportHistoryPage = ({ user, reports = [], notifications = [], onLogout })
       <div
         style={{
           backgroundColor: '#ffffff',
-          borderRadius: '16px',
-          border: '1px solid #e5e7eb',
-          padding: '24px',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)'
+          borderRadius: '9px',
+          border: '1px solid #d9d9d9',
+          overflow: 'hidden'
         }}
       >
         {/* Filters */}
-        <HistoryFilter
-          sortBy={sortBy}
-          onSortChange={setSortBy}
-          statusFilter={statusFilter}
-          onStatusChange={setStatusFilter}
-        />
+        <div style={{ padding: '10px 16px', borderBottom: '1px solid #d9d9d9' }}>
+          <HistoryFilter
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
+          />
+        </div>
 
         {/* Table with Pagination */}
         <HistoryTable

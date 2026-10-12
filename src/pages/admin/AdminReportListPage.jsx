@@ -356,18 +356,19 @@ const AdminReportListPage = ({
         </div>
 
         {/* Data Table */}
-        <div style={{ overflowX: 'auto' }}>
+        <div style={{ width: '100%', overflow: 'hidden' }}>
           <table
             style={{
               width: '100%',
+              tableLayout: 'fixed',
               borderCollapse: 'collapse',
               textAlign: 'left'
             }}
           >
             <thead>
-              <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
+              <tr style={{ borderBottom: '1px solid #d9d9d9', background: '#f3f3f3' }}>
                 {isSelectionMode && (
-                  <th style={{ padding: '12px 14px', width: '38px', textAlign: 'center' }}>
+                  <th style={{ padding: '9px 8px', width: '4%', textAlign: 'center' }}>
                     <div
                       onClick={handleSelectAllVisible}
                       style={{
@@ -391,22 +392,22 @@ const AdminReportListPage = ({
                     </div>
                   </th>
                 )}
-                <th style={{ padding: '12px 14px', fontSize: '13px', fontWeight: '600', color: '#4b5563', width: '50px' }}>
+                <th style={{ padding: '9px 8px', fontSize: '10px', fontWeight: '500', color: '#7b7c82', width: isSelectionMode ? '5%' : '5%', textAlign: 'center' }}>
                   No
                 </th>
-                <th style={{ padding: '12px 14px', fontSize: '13px', fontWeight: '600', color: '#4b5563', minWidth: '170px' }}>
+                <th style={{ padding: '9px 8px', fontSize: '10px', fontWeight: '500', color: '#7b7c82', width: isSelectionMode ? '19%' : '20%' }}>
                   Lokasi
                 </th>
-                <th style={{ padding: '12px 14px', fontSize: '13px', fontWeight: '600', color: '#4b5563' }}>
+                <th style={{ padding: '9px 8px', fontSize: '10px', fontWeight: '500', color: '#7b7c82', width: isSelectionMode ? '29%' : '31%' }}>
                   Deskripsi
                 </th>
-                <th style={{ padding: '12px 14px', fontSize: '13px', fontWeight: '600', color: '#4b5563', minWidth: '110px' }}>
+                <th style={{ padding: '9px 8px', fontSize: '10px', fontWeight: '500', color: '#7b7c82', width: '13%' }}>
                   Tanggal
                 </th>
-                <th style={{ padding: '12px 14px', fontSize: '13px', fontWeight: '600', color: '#4b5563', minWidth: '140px' }}>
+                <th style={{ padding: '9px 8px', fontSize: '10px', fontWeight: '500', color: '#7b7c82', width: '18%', textAlign: 'center' }}>
                   Status
                 </th>
-                <th style={{ padding: '12px 14px', fontSize: '13px', fontWeight: '600', color: '#4b5563', textAlign: 'center', width: '100px' }}>
+                <th style={{ padding: '9px 8px', fontSize: '10px', fontWeight: '500', color: '#7b7c82', textAlign: 'center', width: '13%' }}>
                   Aksi
                 </th>
               </tr>
@@ -431,7 +432,7 @@ const AdminReportListPage = ({
                       }}
                       style={{
                         backgroundColor: rowBg,
-                        borderBottom: '1px solid #f3f4f6',
+                        borderBottom: '1px solid #ededed',
                         transition: 'background-color 0.1s ease',
                         cursor: isSelectionMode ? 'pointer' : 'default'
                       }}
@@ -443,7 +444,7 @@ const AdminReportListPage = ({
                       }}
                     >
                       {isSelectionMode && (
-                        <td style={{ padding: '14px', textAlign: 'center' }}>
+                        <td style={{ padding: '11px 8px', textAlign: 'center', verticalAlign: 'middle' }}>
                           <div
                             onClick={(e) => {
                               e.stopPropagation();
@@ -470,33 +471,33 @@ const AdminReportListPage = ({
                           </div>
                         </td>
                       )}
-                      <td style={{ padding: '14px', fontSize: '13px', color: '#374151' }}>
+                      <td style={{ padding: '11px 8px', fontSize: '9px', color: '#63636a', textAlign: 'center', verticalAlign: 'middle' }}>
                         {startIndex + index + 1}
                       </td>
-                      <td style={{ padding: '14px', fontSize: '13px', color: '#111827', fontWeight: '500' }}>
+                      <td style={{ padding: '11px 8px', fontSize: '9px', color: '#63636a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', verticalAlign: 'middle' }} title={item.lokasi}>
                         {item.lokasi}
                       </td>
                       <td
                         style={{
-                          padding: '14px',
-                          fontSize: '13px',
+                          padding: '11px 8px',
+                          fontSize: '9px',
                           color: '#4b5563',
-                          maxWidth: '320px',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap'
+                          whiteSpace: 'nowrap',
+                          verticalAlign: 'middle'
                         }}
                         title={item.deskripsi}
                       >
                         {item.deskripsi}
                       </td>
-                      <td style={{ padding: '14px', fontSize: '13px', color: '#4b5563' }}>
+                      <td style={{ padding: '11px 8px', fontSize: '9px', color: '#63636a', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
                         {item.tanggal}
                       </td>
-                      <td style={{ padding: '14px' }}>
+                      <td style={{ padding: '11px 8px', textAlign: 'center', verticalAlign: 'middle' }}>
                         <BadgeStatus status={item.status} />
                       </td>
-                      <td style={{ padding: '14px', textAlign: 'center' }}>
+                      <td style={{ padding: '11px 8px', textAlign: 'center', verticalAlign: 'middle' }}>
                         <button
                           type="button"
                           onClick={(e) => {
@@ -508,8 +509,8 @@ const AdminReportListPage = ({
                             color: '#df1e2d',
                             backgroundColor: '#ffffff',
                             borderRadius: '4px',
-                            padding: '4px 10px',
-                            fontSize: '11px',
+                            padding: '4px 8px',
+                            fontSize: '9px',
                             fontWeight: '500',
                             cursor: 'pointer',
                             whiteSpace: 'nowrap',

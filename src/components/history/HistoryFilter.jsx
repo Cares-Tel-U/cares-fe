@@ -21,13 +21,13 @@ const HistoryFilter = ({ sortBy, onSortChange, statusFilter, onStatusChange }) =
         display: 'flex',
         alignItems: 'center',
         gap: '12px',
-        marginBottom: '20px',
+        marginBottom: '0',
         flexWrap: 'wrap'
       }}
     >
       {/* Sort By Dropdown */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <span style={{ fontSize: '13px', color: '#4b5563', fontWeight: '500' }}>
+        <span style={{ fontSize: '10px', color: '#4b5563', fontWeight: '500' }}>
           Sort by:
         </span>
         <Select

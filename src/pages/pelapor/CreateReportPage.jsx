@@ -5,10 +5,11 @@ import IdentitySection from '../../components/report/IdentitySection';
 import ReportFormSection from '../../components/report/ReportFormSection';
 import ImportantInfoCard from '../../components/report/ImportantInfoCard';
 
-const CreateReportPage = ({ user, onAddReport, notifications = [], onLogout }) => {
+const CreateReportPage = ({ user, reports = [], onAddReport, notifications = [], onLogout }) => {
   const navigate = useNavigate();
   const [isAnonim, setIsAnonim] = useState(true);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showDailyLimitModal, setShowDailyLimitModal] = useState(false);
 
   useEffect(() => {
     if (!showSuccessModal) return undefined;
@@ -16,9 +17,25 @@ const CreateReportPage = ({ user, onAddReport, notifications = [], onLogout }) =
     return () => window.clearTimeout(redirectTimer);
   }, [navigate, showSuccessModal]);
 
+  useEffect(() => {
+    if (!showDailyLimitModal) return undefined;
+    const closeTimer = window.setTimeout(() => setShowDailyLimitModal(false), 2400);
+    return () => window.clearTimeout(closeTimer);
+  }, [showDailyLimitModal]);
+
   const handleSubmit = (formData) => {
     const today = new Date();
     const formattedDate = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
+    const reporterId = user?.email || user?.id || 'pelapor';
+    const reportsToday = reports.filter((report) => {
+      const sameReporter = report.reporterId ? report.reporterId === reporterId : true;
+      return sameReporter && report.tanggal === formattedDate;
+    });
+
+    if (reportsToday.length >= 3) {
+      setShowDailyLimitModal(true);
+      return;
+    }
 
     const newReport = {
       id: `LAP-${Date.now().toString().slice(-4)}`,
@@ -30,6 +47,7 @@ const CreateReportPage = ({ user, onAddReport, notifications = [], onLogout }) =
       deskripsi: formData.deskripsi,
       tanggal: formattedDate,
       status: 'Menunggu Verifikasi',
+      reporterId,
       isAnonim: isAnonim,
       foto: formData.foto,
       timeline: [
@@ -93,6 +111,46 @@ const CreateReportPage = ({ user, onAddReport, notifications = [], onLogout }) =
               </svg>
             </div>
             <p>Laporan berhasil dibuat</p>
+          </section>
+        </div>
+      )}
+
+      {showDailyLimitModal && (
+        <div
+          role="presentation"
+          onClick={() => setShowDailyLimitModal(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 10000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+            background: 'rgba(0, 0, 0, 0.32)',
+            backdropFilter: 'blur(1px)'
+          }}
+        >
+          <section
+            role="alert"
+            aria-live="assertive"
+            onClick={(event) => event.stopPropagation()}
+            style={{
+              width: '182px',
+              padding: '22px 18px 18px',
+              borderRadius: '9px',
+              background: '#ffffff',
+              textAlign: 'center',
+              boxShadow: '0 16px 36px rgba(0, 0, 0, .18)',
+              animation: 'modalFadeIn .2s ease-out'
+            }}
+          >
+            <div style={{ display: 'grid', placeItems: 'center', width: '36px', height: '36px', margin: '0 auto 16px', borderRadius: '50%', background: '#ff654f', color: '#ffffff' }}>
+              <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="m7 7 10 10M17 7 7 17" /></svg>
+            </div>
+            <p style={{ margin: 0, color: '#171717', fontSize: '10px', fontWeight: 600, lineHeight: 1.38 }}>
+              Laporan gagal dibuat karena melebihi batas laporan harian
+            </p>
           </section>
         </div>
       )}

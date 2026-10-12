@@ -6,16 +6,16 @@ const ReportTable = ({ reports = [], onSelectReport, showPagination = true, limi
 
   return (
     <div style={{ background: '#fff', overflow: 'hidden' }}>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+      <div style={{ width: '100%', overflow: 'hidden' }}>
+        <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
-            <tr style={{ borderBottom: '1px solid #e0e0e0', background: '#f4f4f4', color: '#85858c', fontSize: '10px', fontWeight: 500 }}>
-              <th style={{ padding: '9px 12px', width: '40px', textAlign: 'center' }}>No</th>
-              <th style={{ padding: '9px 12px' }}>Lokasi</th>
-              <th style={{ padding: '9px 12px' }}>Deskripsi</th>
-              <th style={{ padding: '9px 12px' }}>Tanggal</th>
-              <th style={{ padding: '9px 12px' }}>Status</th>
-              <th style={{ padding: '9px 12px', textAlign: 'center' }}>Aksi</th>
+            <tr style={{ borderBottom: '1px solid #d9d9d9', background: '#f3f3f3', color: '#7b7c82', fontSize: '10px', fontWeight: 500 }}>
+              <th style={{ width: '5%', padding: '9px 8px', textAlign: 'center' }}>No</th>
+              <th style={{ width: '20%', padding: '9px 8px' }}>Lokasi</th>
+              <th style={{ width: '31%', padding: '9px 8px' }}>Deskripsi</th>
+              <th style={{ width: '13%', padding: '9px 8px' }}>Tanggal</th>
+              <th style={{ width: '18%', padding: '9px 8px', textAlign: 'center' }}>Status</th>
+              <th style={{ width: '13%', padding: '9px 8px', textAlign: 'center' }}>Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 text-xs text-gray-700">
@@ -25,18 +25,18 @@ const ReportTable = ({ reports = [], onSelectReport, showPagination = true, limi
               </tr>
             ) : (
               displayReports.map((report, index) => (
-                <tr key={report.id || index} style={{ color: '#63636a', fontSize: '9px' }}>
-                  <td style={{ padding: '11px 12px', textAlign: 'center' }}>{index + 1}</td>
-                  <td style={{ padding: '11px 12px', whiteSpace: 'nowrap' }}>{report.lokasi || 'Gedung A - KU3.02.12'}</td>
-                  <td style={{ padding: '11px 12px', maxWidth: '230px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{report.deskripsi || 'AC dikelas KU3.03.12 tidak dingin...'}</td>
-                  <td style={{ padding: '11px 12px', whiteSpace: 'nowrap' }}>{report.tanggal || '12/02/2026'}</td>
-                  <td style={{ padding: '11px 12px' }}>
+                <tr key={report.id || index} style={{ borderBottom: '1px solid #ededed', color: '#63636a', fontSize: '9px' }}>
+                  <td style={{ padding: '11px 8px', textAlign: 'center', verticalAlign: 'middle' }}>{index + 1}</td>
+                  <td style={{ padding: '11px 8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>{report.lokasi || 'Gedung A - KU3.02.12'}</td>
+                  <td style={{ padding: '11px 8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>{report.deskripsi || 'AC dikelas KU3.03.12 tidak dingin...'}</td>
+                  <td style={{ padding: '11px 8px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>{report.tanggal || '12/02/2026'}</td>
+                  <td style={{ padding: '11px 8px', textAlign: 'center', verticalAlign: 'middle' }}>
                     <StatusBadge status={report.status} />
                   </td>
-                  <td style={{ padding: '11px 12px', textAlign: 'center' }}>
+                  <td style={{ padding: '11px 8px', textAlign: 'center', verticalAlign: 'middle' }}>
                     <button
                       onClick={() => onSelectReport(report)}
-                      style={{ border: '1px solid #ff5964', color: '#df1e2d', background: '#fff', fontSize: '9px', padding: '4px 9px', borderRadius: '3px', cursor: 'pointer' }}
+                      style={{ border: '1px solid #ff5964', color: '#df1e2d', background: '#fff', fontSize: '9px', lineHeight: 1.2, padding: '4px 8px', borderRadius: '3px', cursor: 'pointer', whiteSpace: 'nowrap' }}
                     >
                       Lihat detail
                     </button>
