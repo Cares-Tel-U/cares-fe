@@ -4,7 +4,7 @@ import HistoryFilter from '../../components/history/HistoryFilter';
 import HistoryTable from '../../components/history/HistoryTable';
 import ReportDetailModal from '../../components/report/ReportDetailModal';
 
-const ReportHistoryPage = ({ user, reports = [], notifications = [], onLogout }) => {
+const ReportHistoryPage = ({ user, reports = [], notifications = [], onLogout, onUpdateAvatar }) => {
   const [sortBy, setSortBy] = useState('Terbaru');
   const [statusFilter, setStatusFilter] = useState('Semua Status');
   const [selectedReport, setSelectedReport] = useState(null);
@@ -33,6 +33,7 @@ const ReportHistoryPage = ({ user, reports = [], notifications = [], onLogout })
       user={user}
       notifications={notifications}
       onLogout={onLogout}
+      onUpdateAvatar={onUpdateAvatar}
     >
       <div
         style={{

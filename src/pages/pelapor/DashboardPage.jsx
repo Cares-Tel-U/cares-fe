@@ -7,7 +7,7 @@ import RecentReportTable from '../../components/dashboard/RecentReportTable';
 import ReportDetailModal from '../../components/report/ReportDetailModal';
 
 
-const DashboardPage = ({ user, reports = [], notifications = [], onLogout }) => {
+const DashboardPage = ({ user, reports = [], notifications = [], onLogout, onUpdateAvatar }) => {
   const navigate = useNavigate();
   const [selectedReport, setSelectedReport] = useState(null);
 
@@ -24,6 +24,7 @@ const DashboardPage = ({ user, reports = [], notifications = [], onLogout }) => 
       user={user}
       notifications={notifications}
       onLogout={onLogout}
+      onUpdateAvatar={onUpdateAvatar}
     >
       {/* Action Button: + Buat Laporan */}
       <div style={{ marginBottom: '22px' }}>

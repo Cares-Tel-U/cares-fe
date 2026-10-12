@@ -10,6 +10,7 @@ const AdminLayout = ({
   notifications = [],
   onMarkAllNotificationsAsRead,
   onLogout,
+  onUpdateAvatar,
   children
 }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -44,6 +45,7 @@ const AdminLayout = ({
           notifications={notifList}
           onMarkAllAsRead={handleMarkAllAsRead}
           onLogout={onLogout}
+          onUpdateAvatar={onUpdateAvatar}
         />
         {children}
       </main>

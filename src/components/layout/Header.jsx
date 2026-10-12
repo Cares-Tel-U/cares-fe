@@ -9,14 +9,38 @@ const Header = ({
   unreadCount = 0,
   notifications = [],
   onMarkAllAsRead,
-  onLogout
+  onLogout,
+  onUpdateAvatar
 }) => {
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [avatarSuccessMsg, setAvatarSuccessMsg] = useState('');
   const profileRef = useRef(null);
   const notifRef = useRef(null);
+  const avatarInputRef = useRef(null);
+
+  const handleAvatarUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Harap pilih file gambar (JPG, PNG, dll).');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const newAvatarUrl = event.target?.result;
+      if (newAvatarUrl && onUpdateAvatar) {
+        onUpdateAvatar(newAvatarUrl);
+      }
+      setAvatarSuccessMsg('Foto profil berhasil diperbarui.');
+      setTimeout(() => setAvatarSuccessMsg(''), 3500);
+    };
+    reader.readAsDataURL(file);
+  };
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -365,27 +389,71 @@ const Header = ({
                 animation: 'modalFadeIn 0.15s ease-out'
               }}
             >
+              {/* Hidden Avatar File Input */}
+              <input
+                type="file"
+                ref={avatarInputRef}
+                accept="image/*"
+                onChange={handleAvatarUpload}
+                style={{ display: 'none' }}
+              />
+
               {/* User Info Header */}
               <div
                 style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '12px',
-                  padding: '16px 18px'
+                  padding: '16px 18px',
+                  borderBottom: '1px solid #f3f4f6'
                 }}
               >
-                <img
-                  src={user?.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80"}
-                  alt={user?.name || "User"}
+                <div
+                  onClick={() => avatarInputRef.current && avatarInputRef.current.click()}
+                  title="Klik untuk mengganti foto profil"
                   style={{
-                    width: '46px',
-                    height: '46px',
+                    position: 'relative',
+                    cursor: 'pointer',
                     borderRadius: '50%',
-                    objectFit: 'cover',
-                    flexShrink: 0
+                    overflow: 'hidden',
+                    flexShrink: 0,
+                    width: '46px',
+                    height: '46px'
                   }}
-                />
-                <div style={{ overflow: 'hidden' }}>
+                >
+                  <img
+                    src={user?.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80"}
+                    alt={user?.name || "User"}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      borderRadius: '50%',
+                      objectFit: 'cover'
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      opacity: 0,
+                      transition: 'opacity 0.2s ease',
+                      borderRadius: '50%'
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
+                    onMouseLeave={(e) => (e.currentTarget.style.opacity = '0')}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                      <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                  </div>
+                </div>
+
+                <div style={{ overflow: 'hidden', flex: 1 }}>
                   <div
                     style={{
                       fontSize: '14.5px',
@@ -410,8 +478,41 @@ const Header = ({
                   >
                     {user?.email || 'amba@gmail.com'}
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => avatarInputRef.current && avatarInputRef.current.click()}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
+                      margin: '4px 0 0 0',
+                      color: '#ba181b',
+                      fontSize: '11px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      textAlign: 'left'
+                    }}
+                  >
+                    Ubah Foto Profil
+                  </button>
                 </div>
               </div>
+
+              {/* Notifikasi Sukses Update Avatar */}
+              {avatarSuccessMsg && (
+                <div
+                  style={{
+                    backgroundColor: '#ecfdf5',
+                    color: '#065f46',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    padding: '8px 16px',
+                    borderBottom: '1px solid #a7f3d0'
+                  }}
+                >
+                  {avatarSuccessMsg}
+                </div>
+              )}
 
               {/* Logout Button Section */}
               <div

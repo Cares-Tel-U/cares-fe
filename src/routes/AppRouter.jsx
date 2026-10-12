@@ -29,7 +29,8 @@ const AppRouter = ({
   notifications,
   onMarkAllNotificationsAsRead,
   adminNotifications,
-  onMarkAllAdminNotificationsAsRead
+  onMarkAllAdminNotificationsAsRead,
+  onUpdateAvatar
 }) => {
   const currentAdminNotifs = adminNotifications || notifications;
   const currentAdminMarkRead = onMarkAllAdminNotificationsAsRead || onMarkAllNotificationsAsRead;
@@ -57,6 +58,7 @@ const AppRouter = ({
               reports={reports}
               notifications={notifications}
               onLogout={onLogout}
+              onUpdateAvatar={onUpdateAvatar}
             />
           ) : (
             <Navigate to="/login" replace />
@@ -73,6 +75,7 @@ const AppRouter = ({
               onAddReport={onAddReport}
               notifications={notifications}
               onLogout={onLogout}
+              onUpdateAvatar={onUpdateAvatar}
             />
           ) : (
             <Navigate to="/login" replace />
@@ -88,6 +91,7 @@ const AppRouter = ({
               reports={reports}
               notifications={notifications}
               onLogout={onLogout}
+              onUpdateAvatar={onUpdateAvatar}
             />
           ) : (
             <Navigate to="/login" replace />

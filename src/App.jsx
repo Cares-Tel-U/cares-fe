@@ -92,6 +92,21 @@ function App() {
     setAdminNotifications((prev) => prev.map((n) => ({ ...n, isUnread: false })));
   };
 
+  const handleUpdateAvatar = (newAvatarUrl) => {
+    setUser((prev) => (prev ? { ...prev, avatar: newAvatarUrl } : prev));
+    setAdminUser((prev) => (prev ? { ...prev, avatar: newAvatarUrl } : prev));
+
+    const newNotif = {
+      id: `NOTIF-AVATAR-${Date.now()}`,
+      category: 'Hari ini',
+      title: 'Foto Profil Diperbarui',
+      time: 'Baru saja',
+      desc: 'Foto profil akun Anda telah berhasil diperbarui dengan gambar baru.',
+      isUnread: true
+    };
+    setNotifications((prev) => [newNotif, ...prev]);
+  };
+
   return (
     <BrowserRouter>
       <AppRouter
@@ -110,6 +125,7 @@ function App() {
         onMarkAllNotificationsAsRead={handleMarkAllNotificationsAsRead}
         adminNotifications={adminNotifications}
         onMarkAllAdminNotificationsAsRead={handleMarkAllAdminNotificationsAsRead}
+        onUpdateAvatar={handleUpdateAvatar}
       />
     </BrowserRouter>
   );

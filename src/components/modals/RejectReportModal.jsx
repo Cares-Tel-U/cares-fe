@@ -104,21 +104,31 @@ const RejectReportModal = ({ onClose, onSubmit }) => {
         {/* Submit Button */}
         <button
           type="button"
-          onClick={() => onSubmit(reason)}
+          disabled={!reason.trim()}
+          onClick={() => {
+            if (reason.trim()) {
+              onSubmit(reason.trim());
+            }
+          }}
           style={{
             width: '100%',
-            backgroundColor: '#dc2626',
+            backgroundColor: !reason.trim() ? '#fca5a5' : '#dc2626',
             color: '#ffffff',
             border: 'none',
             borderRadius: '10px',
             padding: '13px 0',
             fontSize: '14px',
             fontWeight: '700',
-            cursor: 'pointer',
-            transition: 'background-color 0.15s ease'
+            cursor: !reason.trim() ? 'not-allowed' : 'pointer',
+            opacity: !reason.trim() ? 0.7 : 1,
+            transition: 'all 0.15s ease'
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#b91c1c')}
-          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#dc2626')}
+          onMouseEnter={(e) => {
+            if (reason.trim()) e.currentTarget.style.backgroundColor = '#b91c1c';
+          }}
+          onMouseLeave={(e) => {
+            if (reason.trim()) e.currentTarget.style.backgroundColor = '#dc2626';
+          }}
         >
           Tolak Laporan
         </button>

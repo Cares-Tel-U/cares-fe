@@ -10,7 +10,8 @@ const MainLayout = ({
   user,
   notifications = [],
   onMarkAllNotificationsAsRead,
-  onLogout
+  onLogout,
+  onUpdateAvatar
 }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
@@ -70,6 +71,7 @@ const MainLayout = ({
           notifications={notifList}
           onMarkAllAsRead={handleMarkAllAsRead}
           onLogout={onLogout}
+          onUpdateAvatar={onUpdateAvatar}
         />
 
         <div style={{ flex: 1 }}>

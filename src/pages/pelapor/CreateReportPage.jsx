@@ -5,7 +5,7 @@ import IdentitySection from '../../components/report/IdentitySection';
 import ReportFormSection from '../../components/report/ReportFormSection';
 import ImportantInfoCard from '../../components/report/ImportantInfoCard';
 
-const CreateReportPage = ({ user, reports = [], onAddReport, notifications = [], onLogout }) => {
+const CreateReportPage = ({ user, reports = [], onAddReport, notifications = [], onLogout, onUpdateAvatar }) => {
   const navigate = useNavigate();
   const [isAnonim, setIsAnonim] = useState(true);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -76,6 +76,7 @@ const CreateReportPage = ({ user, reports = [], onAddReport, notifications = [],
       user={user}
       notifications={notifications}
       onLogout={onLogout}
+      onUpdateAvatar={onUpdateAvatar}
     >
       <div
         style={{
