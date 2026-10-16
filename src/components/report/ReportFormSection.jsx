@@ -1,68 +1,204 @@
-import React, { useState, useRef } from 'react';
-import Input from '../common/Input';
-import Select from '../common/Select';
+import React, { useState, useRef, useEffect } from 'react';
 import Button from '../common/Button';
 
-const gedungOptions = [
+// All available buildings with their display labels
+const gedungList = [
   { value: 'Kultubai Utara', label: 'Kultubai Utara' },
   { value: 'Gedung A', label: 'Gedung A (Gedung Kuliah Umum)' },
   { value: 'Gedung B', label: 'Gedung B (Tokong Nanas)' },
   { value: 'Gedung C', label: 'Gedung C (Fakultas Informatika)' },
   { value: 'TULT', label: 'TULT (Telkom University Landmark Tower)' },
   { value: 'GKB', label: 'GKB (Gedung Kuliah Bersama)' },
-  { value: 'Kantin Telkom', label: 'Area Kantin' }
+  { value: 'Kantin Telkom', label: 'Area Kantin' },
 ];
 
 const ruanganOptionsMap = {
-  'Kultubai Utara': ['RU01.01.02', 'RU01.01.03', 'RU01.02.01', 'Toilet Lt. 1'],
+  'Kultubai Utara': ['RU01.01.02', 'RU01.01.03', 'RU01.02.01', 'Toilet Lt. 1', 'KU3.03.12'],
   'Gedung A': ['KU3.02.12', 'KU3.02.13', 'KU3.01.01', 'KU3.03.05', 'Toilet Lt. 2'],
   'Gedung B': ['TN2.01.05', 'TN1.02.04', 'Lab Rekayasa Perangkat Lunak', 'Toilet Lt. 1'],
   'Gedung C': ['IF.01.01', 'IF.02.05', 'Lab ASE', 'Lab Multimedia'],
   'TULT': ['Area Parkir Motor', 'Area Parkir Mobil', 'Lobi Utama', 'Lt. 5 Kelas 501'],
   'GKB': ['GKB.401', 'GKB.302', 'Toilet Pria Lt. 3'],
-  'Kantin Telkom': ['Area Wastafel Blok C', 'Area Makan Blok A']
+  'Kantin Telkom': ['Area Wastafel Blok C', 'Area Makan Blok A'],
 };
 
-const selectStyle = (hasValue) => ({
+const inputStyle = (hasError) => ({
   width: '100%',
-  padding: '10px 36px 10px 12px',
+  padding: '10px 12px',
   fontSize: '13.5px',
-  color: hasValue ? '#1f2937' : '#9ca3af',
+  color: '#1f2937',
   backgroundColor: '#f9fafb',
-  border: '1.5px solid #e5e7eb',
+  border: `1.5px solid ${hasError ? '#dc2626' : '#e5e7eb'}`,
   borderRadius: '10px',
   outline: 'none',
-  appearance: 'none',
-  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'right 12px center',
-  cursor: 'pointer',
   boxSizing: 'border-box',
-  fontFamily: 'inherit'
+  fontFamily: 'inherit',
+  transition: 'border-color 0.15s ease',
 });
+
+// Reusable autocomplete field
+const AutocompleteField = ({ label, required, placeholder, value, onChange, suggestions, onSelect, error, helperText, disabled }) => {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const filtered = suggestions.filter((s) =>
+    s.toLowerCase().includes(value.toLowerCase())
+  );
+
+  const showDropdown = open && value.length > 0;
+  const showError = value.length > 0 && !suggestions.some(
+    (s) => s.toLowerCase() === value.toLowerCase()
+  ) && filtered.length === 0;
+
+  return (
+    <div ref={wrapRef} style={{ position: 'relative' }}>
+      <label style={{ fontSize: '13px', fontWeight: '600', color: '#1f2937', display: 'block', marginBottom: '6px' }}>
+        {label} {required && <span style={{ color: '#dc2626' }}>*</span>}
+      </label>
+      <input
+        type="text"
+        placeholder={placeholder}
+        value={value}
+        disabled={disabled}
+        onChange={(e) => {
+          onChange(e.target.value);
+          setOpen(true);
+        }}
+        onFocus={() => setOpen(true)}
+        style={{
+          ...inputStyle(showError || error),
+          opacity: disabled ? 0.6 : 1,
+          cursor: disabled ? 'not-allowed' : 'text',
+        }}
+        autoComplete="off"
+      />
+
+      {/* Dropdown suggestions */}
+      {showDropdown && filtered.length > 0 && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(100% + 4px)',
+            left: 0,
+            right: 0,
+            backgroundColor: '#ffffff',
+            border: '1px solid #e5e7eb',
+            borderRadius: '10px',
+            boxShadow: '0 6px 16px rgba(0,0,0,0.08)',
+            zIndex: 100,
+            maxHeight: '200px',
+            overflowY: 'auto',
+          }}
+        >
+          {filtered.map((item) => (
+            <div
+              key={item}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                onSelect(item);
+                setOpen(false);
+              }}
+              style={{
+                padding: '10px 14px',
+                fontSize: '13px',
+                color: '#374151',
+                cursor: 'pointer',
+                borderBottom: '1px solid #f3f4f6',
+                transition: 'background-color 0.1s ease',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f9fafb')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+            >
+              {item}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Error or helper text */}
+      {(showError || error) ? (
+        <div style={{ fontSize: '11px', color: '#dc2626', marginTop: '4px', fontWeight: '500' }}>
+          {error || 'Ruang yang dimasukkan tidak ditemukan'}
+        </div>
+      ) : (
+        <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '4px' }}>
+          {helperText || placeholder}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const ReportFormSection = ({ onSubmit }) => {
   const [jenisLokasi, setJenisLokasi] = useState('Dalam Gedung');
-  const [namaGedung, setNamaGedung] = useState('Kultubai Utara');
-  const [namaRuangan, setNamaRuangan] = useState('RU01.01.02');
-  const [isCustomRoom, setIsCustomRoom] = useState(false);
+
+  // Gedung autocomplete state
+  const [gedungQuery, setGedungQuery] = useState('');
+  const [selectedGedung, setSelectedGedung] = useState('');
+
+  // Ruangan autocomplete state
+  const [ruanganQuery, setRuanganQuery] = useState('');
+  const [selectedRuangan, setSelectedRuangan] = useState('');
+
   const [deskripsi, setDeskripsi] = useState('AC dikelas KU3.03.12 tidak dingin dan yang satunya lagi tidak bisa nyala');
   const [uploadedPhotos, setUploadedPhotos] = useState([]);
   const [photoError, setPhotoError] = useState('');
   const fileInputRef = useRef(null);
 
-  const availableRooms = namaGedung ? (ruanganOptionsMap[namaGedung] || []) : [];
-  
-  // Validasi: ruangan harus ada di list resmi gedung
-  const isRoomValid = availableRooms.includes(namaRuangan);
-  const isRoomError = Boolean(namaRuangan && !isRoomValid);
+  const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
-  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+  // All gedung names for suggestion
+  const allGedungNames = gedungList.map((g) => g.label);
+
+  // Available rooms based on selected building
+  const availableRooms = selectedGedung ? (ruanganOptionsMap[selectedGedung] || []) : [];
+
+  // Validation for gedung
+  const gedungValid = gedungList.some(
+    (g) => g.label.toLowerCase() === gedungQuery.toLowerCase() || g.value.toLowerCase() === gedungQuery.toLowerCase()
+  );
+  const gedungError = gedungQuery.length > 0 && !gedungValid && !allGedungNames.some(
+    (n) => n.toLowerCase().includes(gedungQuery.toLowerCase())
+  );
+
+  // Validation for ruangan
+  const ruanganValid = availableRooms.some(
+    (r) => r.toLowerCase() === ruanganQuery.toLowerCase()
+  );
+  const ruanganHasInput = ruanganQuery.length > 0;
+  const ruanganFiltered = availableRooms.filter((r) =>
+    r.toLowerCase().includes(ruanganQuery.toLowerCase())
+  );
+  const ruanganError = ruanganHasInput && !ruanganValid && ruanganFiltered.length === 0;
+
+  const handleSelectGedung = (label) => {
+    setGedungQuery(label);
+    // Find actual value key
+    const found = gedungList.find((g) => g.label === label);
+    const key = found ? found.value : label;
+    setSelectedGedung(key);
+    setRuanganQuery('');
+    setSelectedRuangan('');
+  };
+
+  const handleSelectRuangan = (room) => {
+    setRuanganQuery(room);
+    setSelectedRuangan(room);
+  };
 
   const handlePhotoUpload = (e) => {
     const files = Array.from(e.target.files || []);
     let hasTooLarge = false;
-
     files.forEach((file) => {
       if (file.size > MAX_FILE_SIZE) {
         hasTooLarge = true;
@@ -74,7 +210,6 @@ const ReportFormSection = ({ onSubmit }) => {
         reader.readAsDataURL(file);
       }
     });
-
     if (hasTooLarge) {
       setPhotoError('Ukuran foto terlalu besar. Maksimal 5 MB');
     } else {
@@ -89,17 +224,14 @@ const ReportFormSection = ({ onSubmit }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (isRoomError) {
-      return;
-    }
-
-    if (!namaGedung || !namaRuangan || !deskripsi) return;
+    if (ruanganError || gedungError) return;
+    if (!selectedGedung || !selectedRuangan || !deskripsi) return;
 
     const reportData = {
       jenisLokasi,
-      namaGedung,
-      namaRuangan,
-      lokasi: `${namaGedung} - ${namaRuangan}`,
+      namaGedung: selectedGedung,
+      namaRuangan: selectedRuangan,
+      lokasi: `${selectedGedung} - ${selectedRuangan}`,
       deskripsi,
       foto: uploadedPhotos.length > 0 ? uploadedPhotos : [
         'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=300&q=80'
@@ -151,114 +283,52 @@ const ReportFormSection = ({ onSubmit }) => {
           </div>
         </div>
 
-        {/* Nama Gedung & Nama Ruangan */}
+        {/* Nama Gedung & Nama Ruangan — Searchable Autocomplete */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '20px' }}>
-          <div>
-            <label style={{ fontSize: '13px', fontWeight: '600', color: '#1f2937', display: 'block', marginBottom: '6px' }}>
-              Nama Gedung <span style={{ color: '#dc2626' }}>*</span>
-            </label>
-            <select
-              required
-              value={namaGedung}
-              onChange={(e) => { 
-                setNamaGedung(e.target.value); 
-                const newRooms = ruanganOptionsMap[e.target.value] || [];
-                setNamaRuangan(newRooms[0] || '');
-                setIsCustomRoom(false);
-              }}
-              style={selectStyle(!!namaGedung)}
-            >
-              <option value="" disabled>Pilih gedung</option>
-              {gedungOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-            <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '4px' }}>Pilih gedung</div>
-          </div>
+          {/* Gedung Autocomplete */}
+          <AutocompleteField
+            label="Nama Gedung"
+            required
+            placeholder="Ketik nama gedung..."
+            value={gedungQuery}
+            onChange={(val) => {
+              setGedungQuery(val);
+              // Reset gedung selection if user clears or changes
+              const exact = gedungList.find(
+                (g) => g.label.toLowerCase() === val.toLowerCase() || g.value.toLowerCase() === val.toLowerCase()
+              );
+              if (exact) {
+                setSelectedGedung(exact.value);
+              } else {
+                setSelectedGedung('');
+                setRuanganQuery('');
+                setSelectedRuangan('');
+              }
+            }}
+            suggestions={allGedungNames}
+            onSelect={handleSelectGedung}
+            helperText="Ketik untuk mencari gedung"
+          />
 
-          <div>
-            <label style={{ fontSize: '13px', fontWeight: '600', color: '#1f2937', display: 'block', marginBottom: '6px' }}>
-              Nama Ruangan <span style={{ color: '#dc2626' }}>*</span>
-            </label>
-
-            {!isCustomRoom ? (
-              <select
-                required
-                value={namaRuangan}
-                onChange={(e) => {
-                  if (e.target.value === '__custom__') {
-                    setIsCustomRoom(true);
-                    setNamaRuangan('');
-                  } else {
-                    setNamaRuangan(e.target.value);
-                  }
-                }}
-                disabled={!namaGedung}
-                style={{ 
-                  ...selectStyle(!!namaRuangan), 
-                  cursor: namaGedung ? 'pointer' : 'not-allowed', 
-                  opacity: namaGedung ? 1 : 0.6,
-                  borderColor: isRoomError ? '#dc2626' : '#e5e7eb'
-                }}
-              >
-                <option value="" disabled>Pilih ruangan</option>
-                {availableRooms.map((room) => (
-                  <option key={room} value={room}>{room}</option>
-                ))}
-                {/* Opsi contoh untuk menguji pesan ruangan tidak ditemukan sesuai Foto 5 */}
-                <option value="Ruang Anjay">Ruang Anjay</option>
-                <option value="__custom__">+ Ketik ruangan lain...</option>
-              </select>
-            ) : (
-              <div style={{ position: 'relative' }}>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ketik nama ruangan..."
-                  value={namaRuangan}
-                  onChange={(e) => setNamaRuangan(e.target.value)}
-                  style={{
-                    ...selectStyle(!!namaRuangan),
-                    backgroundImage: 'none',
-                    paddingRight: '64px',
-                    borderColor: isRoomError ? '#dc2626' : '#e5e7eb'
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsCustomRoom(false);
-                    setNamaRuangan(availableRooms[0] || '');
-                  }}
-                  style={{
-                    position: 'absolute',
-                    right: '6px',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: '#f3f4f6',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '6px',
-                    padding: '4px 8px',
-                    fontSize: '11px',
-                    color: '#4b5563',
-                    cursor: 'pointer'
-                  }}
-                >
-                  List
-                </button>
-              </div>
-            )}
-
-            {isRoomError ? (
-              <div style={{ fontSize: '11px', color: '#dc2626', marginTop: '4px', fontWeight: '500' }}>
-                Ruang yang dimasukkan tidak ditemukan
-              </div>
-            ) : (
-              <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '4px' }}>
-                Pilih ruangan
-              </div>
-            )}
-          </div>
+          {/* Ruangan Autocomplete */}
+          <AutocompleteField
+            label="Nama Ruangan"
+            required
+            placeholder={selectedGedung ? 'Ketik nama ruangan...' : 'Pilih gedung terlebih dahulu'}
+            value={ruanganQuery}
+            onChange={(val) => {
+              setRuanganQuery(val);
+              const exact = availableRooms.find(
+                (r) => r.toLowerCase() === val.toLowerCase()
+              );
+              setSelectedRuangan(exact || '');
+            }}
+            suggestions={availableRooms}
+            onSelect={handleSelectRuangan}
+            error={ruanganError ? 'Ruang yang dimasukkan tidak ditemukan' : ''}
+            helperText="Ketik untuk mencari ruangan"
+            disabled={!selectedGedung}
+          />
         </div>
 
         {/* Deskripsi */}
@@ -360,15 +430,7 @@ const ReportFormSection = ({ onSubmit }) => {
             <div style={{ fontSize: '13.5px', fontWeight: '600', color: '#374151' }}>
               Seret ke sini <span style={{ fontWeight: 400, color: '#6b7280' }}>atau klik untuk dipilih</span>
             </div>
-            <div 
-              style={{ fontSize: '11.5px', color: '#9ca3af', marginTop: '4px', cursor: 'pointer' }}
-              title="Klik untuk simulasi pesan error ukuran foto > 5 MB"
-              onClick={(e) => {
-                e.stopPropagation();
-                // Toggle simulasi error ukuran foto untuk kemudahan pengujian
-                setPhotoError((prev) => prev ? '' : 'Ukuran foto terlalu besar. Maksimal 5 MB');
-              }}
-            >
+            <div style={{ fontSize: '11.5px', color: '#9ca3af', marginTop: '4px' }}>
               Format JPG, PNG · Maks. 5 MB per foto
             </div>
             <button
@@ -396,7 +458,7 @@ const ReportFormSection = ({ onSubmit }) => {
             </button>
           </div>
 
-          {/* Pesan Error Ukuran Foto Terlalu Besar (Sesuai Foto 4) */}
+          {/* Pesan Error Ukuran Foto Terlalu Besar */}
           {photoError && (
             <div style={{ fontSize: '12px', color: '#dc2626', marginTop: '8px', fontWeight: '500' }}>
               {photoError}
@@ -443,9 +505,9 @@ const ReportFormSection = ({ onSubmit }) => {
 
         {/* Submit Button */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
-          <Button 
-            type="submit" 
-            variant="primary" 
+          <Button
+            type="submit"
+            variant="primary"
             size="md"
             style={{
               backgroundColor: '#dc2626',

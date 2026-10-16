@@ -16,7 +16,6 @@ const Header = ({
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [avatarSuccessMsg, setAvatarSuccessMsg] = useState('');
   const profileRef = useRef(null);
   const notifRef = useRef(null);
   const avatarInputRef = useRef(null);
@@ -497,22 +496,6 @@ const Header = ({
                   </button>
                 </div>
               </div>
-
-              {/* Notifikasi Sukses Update Avatar */}
-              {avatarSuccessMsg && (
-                <div
-                  style={{
-                    backgroundColor: '#ecfdf5',
-                    color: '#065f46',
-                    fontSize: '12px',
-                    fontWeight: '500',
-                    padding: '8px 16px',
-                    borderBottom: '1px solid #a7f3d0'
-                  }}
-                >
-                  {avatarSuccessMsg}
-                </div>
-              )}
 
               {/* Logout Button Section */}
               <div
