@@ -75,6 +75,12 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, onOpenGuide, isGuideOpen }) =>
       style={{
         width: isCollapsed ? '80px' : '260px',
         minWidth: isCollapsed ? '80px' : '260px',
+        height: '100vh',
+        maxHeight: '100vh',
+        position: 'sticky',
+        top: 0,
+        left: 0,
+        flexShrink: 0,
         backgroundColor: '#ba181b',
         color: '#ffffff',
         borderTopRightRadius: '24px',
@@ -86,8 +92,10 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, onOpenGuide, isGuideOpen }) =>
         transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
         zIndex: 40,
         boxShadow: '4px 0 15px rgba(0, 0, 0, 0.04)',
-        minHeight: '100vh',
-        boxSizing: 'border-box'
+        boxSizing: 'border-box',
+        overflowY: 'auto',
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none'
       }}
     >
       {/* Top Header & Brand */}

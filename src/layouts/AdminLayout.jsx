@@ -29,14 +29,39 @@ const AdminLayout = ({
   };
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', width: '100vw', background: '#f8fafc', fontFamily: "'Plus Jakarta Sans', Inter, sans-serif" }}>
+    <div
+      className="admin-shell"
+      style={{
+        display: 'flex',
+        height: '100vh',
+        maxHeight: '100vh',
+        width: '100vw',
+        overflow: 'hidden',
+        background: '#f8fafc',
+        fontFamily: "'Plus Jakarta Sans', Inter, sans-serif"
+      }}
+    >
       <AdminSidebar 
         isCollapsed={isSidebarCollapsed} 
         onToggleCollapse={() => setIsSidebarCollapsed((c) => !c)} 
         onOpenGuide={() => setIsGuideOpen(true)}
         isGuideOpen={isGuideOpen}
       />
-      <main style={{ flex: 1, minWidth: 0, padding: '28px 36px', overflowY: 'auto', boxSizing: 'border-box' }}>
+      <main
+        className="admin-main"
+        style={{
+          flex: 1,
+          height: '100vh',
+          maxHeight: '100vh',
+          minWidth: 0,
+          padding: '28px 36px',
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
         <Header
           title={title}
           subtitle={subtitle}
@@ -47,7 +72,9 @@ const AdminLayout = ({
           onLogout={onLogout}
           onUpdateAvatar={onUpdateAvatar}
         />
-        {children}
+        <div style={{ flex: 1 }}>
+          {children}
+        </div>
       </main>
 
       <AdminGuideModal 

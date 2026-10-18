@@ -30,7 +30,36 @@ const AdminSidebar = ({ isCollapsed, onToggleCollapse, onOpenGuide }) => {
     opacity: 0.9, transition: 'all .15s ease', border: 'none', cursor: 'pointer', width: '100%', boxSizing: 'border-box'
   };
 
-  return <aside className="admin-sidebar" style={{ width: isCollapsed ? '80px' : '260px', minWidth: isCollapsed ? '80px' : '260px', minHeight: '100vh', alignSelf: 'stretch', background: '#ba181b', color: '#FFFFFF', borderTopRightRadius: '24px', borderBottomRightRadius: '24px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '24px 16px', transition: 'width .25s cubic-bezier(.4,0,.2,1), min-width .25s cubic-bezier(.4,0,.2,1)', zIndex: 40, boxShadow: '4px 0 15px rgba(0,0,0,.04)', boxSizing: 'border-box', flexShrink: 0 }}>
+  return (
+    <aside
+      className="admin-sidebar"
+      style={{
+        width: isCollapsed ? '80px' : '260px',
+        minWidth: isCollapsed ? '80px' : '260px',
+        height: '100vh',
+        maxHeight: '100vh',
+        position: 'sticky',
+        top: 0,
+        left: 0,
+        flexShrink: 0,
+        alignSelf: 'stretch',
+        background: '#ba181b',
+        color: '#FFFFFF',
+        borderTopRightRadius: '24px',
+        borderBottomRightRadius: '24px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        padding: '24px 16px',
+        transition: 'width .25s cubic-bezier(.4,0,.2,1), min-width .25s cubic-bezier(.4,0,.2,1)',
+        zIndex: 40,
+        boxShadow: '4px 0 15px rgba(0,0,0,.04)',
+        boxSizing: 'border-box',
+        overflowY: 'auto',
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none'
+      }}
+    >
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: isCollapsed ? 'center' : 'space-between', marginBottom: '32px', padding: '0 8px' }}>
         {!isCollapsed ? <div style={{ display: 'flex', alignItems: 'center', maxWidth: '170px' }}><CaresLogoWhite size="42px" /></div> : <img src="/normal logo.svg" alt="Cares" style={{ width: '32px', height: '32px', filter: 'brightness(0) invert(1)' }} />}
@@ -55,7 +84,8 @@ const AdminSidebar = ({ isCollapsed, onToggleCollapse, onOpenGuide }) => {
         {renderItems(bottomNavItems)}
       </nav>
     </div>
-  </aside>;
+    </aside>
+  );
 };
 
 export default AdminSidebar;

@@ -16,6 +16,19 @@ const Header = ({
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isNotifActive, setIsNotifActive] = useState(() => {
+    const saved = localStorage.getItem('user_notif_enabled');
+    return saved !== null ? saved === 'true' : true;
+  });
+
+  const handleToggleNotif = (e) => {
+    e.stopPropagation();
+    setIsNotifActive((prev) => {
+      const next = !prev;
+      localStorage.setItem('user_notif_enabled', String(next));
+      return next;
+    });
+  };
   const profileRef = useRef(null);
   const notifRef = useRef(null);
   const avatarInputRef = useRef(null);
@@ -183,7 +196,7 @@ const Header = ({
             </svg>
             <span>Notifikasi</span>
 
-            {unreadCount > 0 && (
+            {isNotifActive && unreadCount > 0 && (
               <span
                 style={{
                   width: '8px',
@@ -494,6 +507,64 @@ const Header = ({
                   >
                     Ubah Foto Profil
                   </button>
+                </div>
+              </div>
+
+              {/* Notifikasi Toggle Row */}
+              <div
+                onClick={handleToggleNotif}
+                style={{
+                  padding: '12px 18px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer',
+                  borderTop: '1px solid #f3f4f6',
+                  userSelect: 'none',
+                  transition: 'background-color 0.15s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f9fafb';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: '13.5px',
+                    fontWeight: '600',
+                    color: '#374151'
+                  }}
+                >
+                  Notifikasi
+                </span>
+
+                {/* Switch Toggle */}
+                <div
+                  style={{
+                    width: '38px',
+                    height: '20px',
+                    borderRadius: '9999px',
+                    backgroundColor: isNotifActive ? '#ba181b' : '#cbd5e1',
+                    position: 'relative',
+                    transition: 'background-color 0.2s ease',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '16px',
+                      height: '16px',
+                      borderRadius: '50%',
+                      backgroundColor: '#ffffff',
+                      position: 'absolute',
+                      top: '2px',
+                      left: isNotifActive ? '20px' : '2px',
+                      transition: 'left 0.2s ease',
+                      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.2)'
+                    }}
+                  />
                 </div>
               </div>
 

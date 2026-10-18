@@ -36,8 +36,10 @@ const MainLayout = ({
       className="app-shell"
       style={{
         display: 'flex',
-        minHeight: '100vh',
+        height: '100vh',
+        maxHeight: '100vh',
         width: '100vw',
+        overflow: 'hidden',
         backgroundColor: '#f8fafc',
         fontFamily: "'Plus Jakarta Sans', sans-serif"
       }}
@@ -55,10 +57,13 @@ const MainLayout = ({
         className="app-main"
         style={{
           flex: 1,
+          height: '100vh',
+          maxHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
           padding: '28px 36px',
           overflowY: 'auto',
+          overflowX: 'hidden',
           minWidth: 0,
           boxSizing: 'border-box'
         }}
