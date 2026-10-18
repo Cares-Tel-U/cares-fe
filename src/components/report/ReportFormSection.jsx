@@ -284,7 +284,7 @@ const ReportFormSection = ({ onSubmit, isSubmitting = false }) => {
         </div>
 
         {/* Nama Gedung & Nama Ruangan — Searchable Autocomplete */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '20px' }}>
+        <div className="report-location-grid">
           {/* Gedung Autocomplete */}
           <AutocompleteField
             label="Nama Gedung"

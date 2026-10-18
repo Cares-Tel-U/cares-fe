@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Sidebar from '../components/layout/Sidebar';
 import Header from '../components/layout/Header';
 import GuideModal from '../components/GuideModal';
+import MobileNavBar from '../components/layout/MobileNavBar';
 
 const MainLayout = ({
   children,
@@ -95,6 +96,7 @@ const MainLayout = ({
         </div>
       </main>
 
+      <MobileNavBar role="pelapor" />
       <GuideModal isOpen={isGuideOpen} onClose={() => setIsGuideOpen(false)} />
     </div>
   );

@@ -6,8 +6,8 @@ const ReportTable = ({ reports = [], onSelectReport, showPagination = true, limi
 
   return (
     <div style={{ background: '#fff', overflow: 'hidden' }}>
-      <div style={{ width: '100%', overflow: 'hidden' }}>
-        <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', textAlign: 'left' }}>
+      <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <table style={{ width: '100%', minWidth: '580px', tableLayout: 'fixed', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid #d9d9d9', background: '#f3f3f3', color: '#7b7c82', fontSize: '10px', fontWeight: 500 }}>
               <th style={{ width: '5%', padding: '9px 8px', textAlign: 'center' }}>No</th>

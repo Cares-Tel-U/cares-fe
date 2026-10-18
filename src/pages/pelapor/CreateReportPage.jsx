@@ -107,14 +107,7 @@ const CreateReportPage = ({
       onLogout={onLogout}
       onUpdateAvatar={onUpdateAvatar}
     >
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '2fr 1fr',
-          gap: '24px',
-          alignItems: 'start'
-        }}
-      >
+      <div className="create-report-grid">
         {/* Left: Identity and Report Form */}
         <div>
           <IdentitySection

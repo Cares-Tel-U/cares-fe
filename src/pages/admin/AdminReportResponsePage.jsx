@@ -165,14 +165,7 @@ const AdminReportResponsePage = ({
       </div>
 
       {/* Main 2-Column Grid */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1.45fr 1fr',
-          gap: '24px',
-          alignItems: 'flex-start'
-        }}
-      >
+      <div className="admin-response-grid">
         {/* Left Column: Form Respon */}
         <div
           style={{

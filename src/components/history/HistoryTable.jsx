@@ -14,17 +14,19 @@ const HistoryTable = ({ reports = [], onSelectDetail }) => {
   const changePage = (page) => setCurrentPage(Math.min(Math.max(page, 1), totalPages));
 
   return <>
-    <table style={{ width: '100%', tableLayout: 'fixed', borderCollapse: 'collapse', textAlign: 'left' }}>
-      <thead><tr style={{ borderBottom: '1px solid #d9d9d9' }}><th style={headerCell('5%', 'center')}>No</th><th style={headerCell('20%')}>Lokasi</th><th style={headerCell('31%')}>Deskripsi</th><th style={headerCell('13%')}>Tanggal</th><th style={headerCell('18%', 'center')}>Status</th><th style={headerCell('13%', 'center')}>Aksi</th></tr></thead>
-      <tbody>{currentReports.length ? currentReports.map((report, index) => <tr key={report.id} style={{ borderBottom: '1px solid #ededed' }}>
-        <td style={cell('center')}>{startIndex + index + 1}</td>
-        <td style={{ ...cell(), overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={report.lokasi}>{report.lokasi}</td>
-        <td style={{ ...cell(), overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={report.deskripsi}>{report.deskripsi}</td>
-        <td style={{ ...cell(), whiteSpace: 'nowrap' }}>{report.tanggal}</td>
-        <td style={cell('center')}><BadgeStatus status={report.status} /></td>
-        <td style={cell('center')}><button type="button" onClick={() => onSelectDetail(report)} style={{ border: '1px solid #ff5964', color: '#df1e2d', background: '#fff', borderRadius: '3px', padding: '4px 8px', fontSize: '9px', lineHeight: 1.2, whiteSpace: 'nowrap', cursor: 'pointer' }}>Lihat detail</button></td>
-      </tr>) : <tr><td colSpan="6" style={{ padding: '28px', textAlign: 'center', color: '#9ca3af', fontSize: '11px' }}>Tidak ada laporan yang sesuai dengan filter.</td></tr>}</tbody>
-    </table>
+    <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+      <table style={{ width: '100%', minWidth: '580px', tableLayout: 'fixed', borderCollapse: 'collapse', textAlign: 'left' }}>
+        <thead><tr style={{ borderBottom: '1px solid #d9d9d9' }}><th style={headerCell('5%', 'center')}>No</th><th style={headerCell('20%')}>Lokasi</th><th style={headerCell('31%')}>Deskripsi</th><th style={headerCell('13%')}>Tanggal</th><th style={headerCell('18%', 'center')}>Status</th><th style={headerCell('13%', 'center')}>Aksi</th></tr></thead>
+        <tbody>{currentReports.length ? currentReports.map((report, index) => <tr key={report.id} style={{ borderBottom: '1px solid #ededed' }}>
+          <td style={cell('center')}>{startIndex + index + 1}</td>
+          <td style={{ ...cell(), overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={report.lokasi}>{report.lokasi}</td>
+          <td style={{ ...cell(), overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={report.deskripsi}>{report.deskripsi}</td>
+          <td style={{ ...cell(), whiteSpace: 'nowrap' }}>{report.tanggal}</td>
+          <td style={cell('center')}><BadgeStatus status={report.status} /></td>
+          <td style={cell('center')}><button type="button" onClick={() => onSelectDetail(report)} style={{ border: '1px solid #ff5964', color: '#df1e2d', background: '#fff', borderRadius: '3px', padding: '4px 8px', fontSize: '9px', lineHeight: 1.2, whiteSpace: 'nowrap', cursor: 'pointer' }}>Lihat detail</button></td>
+        </tr>) : <tr><td colSpan="6" style={{ padding: '28px', textAlign: 'center', color: '#9ca3af', fontSize: '11px' }}>Tidak ada laporan yang sesuai dengan filter.</td></tr>}</tbody>
+      </table>
+    </div>
     <footer style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', color: '#73737a', fontSize: '9px', flexWrap: 'wrap', gap: '10px' }}>
       <span>Menampilkan {reports.length ? startIndex + 1 : 0} sampai {endIndex} dari {reports.length} data</span>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

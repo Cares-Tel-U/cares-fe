@@ -72,13 +72,7 @@ const DashboardPage = ({
       </div>
 
       {/* 4 Stat Cards in a Grid */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '18px'
-        }}
-      >
+      <div className="user-stat-grid">
         <StatCard
           isPrimary
           title="Total Laporan Anda"

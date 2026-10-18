@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import AdminSidebar from '../components/admin/AdminSidebar';
 import Header from '../components/layout/Header';
 import AdminGuideModal from '../components/AdminGuideModal';
+import MobileNavBar from '../components/layout/MobileNavBar';
 
 const AdminLayout = ({
   title,
@@ -88,6 +89,7 @@ const AdminLayout = ({
         </div>
       </main>
 
+      <MobileNavBar role="admin" />
       <AdminGuideModal 
         isOpen={isGuideOpen} 
         onClose={() => setIsGuideOpen(false)} 
