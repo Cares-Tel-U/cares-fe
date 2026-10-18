@@ -4,12 +4,36 @@ import MainLayout from '../../layouts/MainLayout';
 import IdentitySection from '../../components/report/IdentitySection';
 import ReportFormSection from '../../components/report/ReportFormSection';
 import ImportantInfoCard from '../../components/report/ImportantInfoCard';
+import { reportService, facilityService } from '../../services';
 
-const CreateReportPage = ({ user, reports = [], onAddReport, notifications = [], onLogout, onUpdateAvatar }) => {
+const CreateReportPage = ({
+  user,
+  reports = [],
+  onAddReport,
+  notifications = [],
+  onMarkAllNotificationsAsRead,
+  onMarkNotificationAsRead,
+  onLogout,
+  onUpdateAvatar
+}) => {
   const navigate = useNavigate();
   const [isAnonim, setIsAnonim] = useState(true);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showDailyLimitModal, setShowDailyLimitModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [facilities, setFacilities] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    facilityService
+      .getFacilities()
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setFacilities(data);
+        }
+      })
+      .catch((err) => console.warn('Gagal memuat master fasilitas:', err.message));
+  }, []);
 
   useEffect(() => {
     if (!showSuccessModal) return undefined;
@@ -23,50 +47,53 @@ const CreateReportPage = ({ user, reports = [], onAddReport, notifications = [],
     return () => window.clearTimeout(closeTimer);
   }, [showDailyLimitModal]);
 
-  const handleSubmit = (formData) => {
-    const today = new Date();
-    const formattedDate = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
-    const reporterId = user?.email || user?.id || 'pelapor';
-    const reportsToday = reports.filter((report) => {
-      const sameReporter = report.reporterId ? report.reporterId === reporterId : true;
-      return sameReporter && report.tanggal === formattedDate;
-    });
+  const handleSubmit = async (formData) => {
+    setErrorMessage('');
+    setSubmitting(true);
 
-    if (reportsToday.length >= 3) {
-      setShowDailyLimitModal(true);
-      return;
+    try {
+      // 1. Temukan ID fasilitas yang cocok atau fallback ke fasilitas pertama
+      let targetFacilityId = '';
+      if (facilities.length > 0) {
+        const found = facilities.find(
+          (f) =>
+            f.nama.toLowerCase().includes(formData.namaRuangan?.toLowerCase()) ||
+            f.lokasi.toLowerCase().includes(formData.namaGedung?.toLowerCase()) ||
+            formData.lokasi?.toLowerCase().includes(f.nama.toLowerCase())
+        );
+        targetFacilityId = found ? found.id : facilities[0].id;
+      }
+
+      if (!targetFacilityId && facilities.length > 0) {
+        targetFacilityId = facilities[0].id;
+      }
+
+      // 2. Kirim laporan ke backend API
+      const judulLaporan = `Kerusakan Fasilitas di ${formData.namaRuangan || formData.lokasi || 'Kampus'}`;
+      const payload = {
+        judul: judulLaporan,
+        deskripsi: formData.deskripsi,
+        facilityId: targetFacilityId,
+        isAnonymous: isAnonim,
+        photos: formData.photoFiles || formData.foto || [],
+      };
+
+      const createdReport = await reportService.createReport(payload);
+
+      if (onAddReport) {
+        onAddReport(createdReport);
+      }
+      setShowSuccessModal(true);
+    } catch (err) {
+      const msg = err.message || '';
+      if (msg.includes('3 laporan harian') || msg.includes('melebihi batas')) {
+        setShowDailyLimitModal(true);
+      } else {
+        setErrorMessage(msg || 'Gagal mengirimkan laporan. Silakan periksa kembali formulir Anda.');
+      }
+    } finally {
+      setSubmitting(false);
     }
-
-    const newReport = {
-      id: `LAP-${Date.now().toString().slice(-4)}`,
-      nomor: 1,
-      lokasi: formData.lokasi,
-      jenisLokasi: formData.jenisLokasi,
-      namaGedung: formData.namaGedung,
-      namaRuangan: formData.namaRuangan,
-      deskripsi: formData.deskripsi,
-      tanggal: formattedDate,
-      status: 'Menunggu Verifikasi',
-      reporterId,
-      isAnonim: isAnonim,
-      foto: formData.foto,
-      timeline: [
-        {
-          step: 'Laporan terkirim',
-          date: `${today.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}, ${String(today.getHours()).padStart(2, '0')}:${String(today.getMinutes()).padStart(2, '0')} WIB`,
-          completed: true,
-          current: true
-        },
-        { step: 'Laporan berhasil diverifikasi', date: '-', completed: false, current: false },
-        { step: 'Laporan dalam proses', date: '-', completed: false, current: false },
-        { step: 'Laporan selesai', date: '-', completed: false, current: false }
-      ]
-    };
-
-    if (onAddReport) {
-      onAddReport(newReport);
-    }
-    setShowSuccessModal(true);
   };
 
   return (
@@ -75,6 +102,8 @@ const CreateReportPage = ({ user, reports = [], onAddReport, notifications = [],
       subtitle="Laporkan masalah fasilitas kampus dengan melengkapi informasi berikut"
       user={user}
       notifications={notifications}
+      onMarkAllNotificationsAsRead={onMarkAllNotificationsAsRead}
+      onMarkNotificationAsRead={onMarkNotificationAsRead}
       onLogout={onLogout}
       onUpdateAvatar={onUpdateAvatar}
     >
@@ -94,7 +123,24 @@ const CreateReportPage = ({ user, reports = [], onAddReport, notifications = [],
             onToggleAnonim={setIsAnonim}
           />
 
-          <ReportFormSection onSubmit={handleSubmit} />
+          {errorMessage && (
+            <div
+              style={{
+                backgroundColor: '#fef2f2',
+                border: '1px solid #fecaca',
+                color: '#b91c1c',
+                padding: '12px 16px',
+                borderRadius: '8px',
+                fontSize: '12.5px',
+                marginBottom: '16px',
+                fontWeight: '500'
+              }}
+            >
+              {errorMessage}
+            </div>
+          )}
+
+          <ReportFormSection onSubmit={handleSubmit} isSubmitting={submitting} />
         </div>
 
         {/* Right: Important Information Card */}

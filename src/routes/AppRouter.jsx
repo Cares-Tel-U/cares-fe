@@ -28,9 +28,12 @@ const AppRouter = ({
   onCompleteReport,
   notifications,
   onMarkAllNotificationsAsRead,
+  onMarkNotificationAsRead,
   adminNotifications,
   onMarkAllAdminNotificationsAsRead,
-  onUpdateAvatar
+  onUpdateAvatar,
+  isLoadingData,
+  onRefreshData
 }) => {
   const currentAdminNotifs = adminNotifications || notifications;
   const currentAdminMarkRead = onMarkAllAdminNotificationsAsRead || onMarkAllNotificationsAsRead;
@@ -57,8 +60,11 @@ const AppRouter = ({
               user={user}
               reports={reports}
               notifications={notifications}
+              onMarkAllNotificationsAsRead={onMarkAllNotificationsAsRead}
+              onMarkNotificationAsRead={onMarkNotificationAsRead}
               onLogout={onLogout}
               onUpdateAvatar={onUpdateAvatar}
+              onRefreshData={onRefreshData}
             />
           ) : (
             <Navigate to="/login" replace />
@@ -74,6 +80,8 @@ const AppRouter = ({
               reports={reports}
               onAddReport={onAddReport}
               notifications={notifications}
+              onMarkAllNotificationsAsRead={onMarkAllNotificationsAsRead}
+              onMarkNotificationAsRead={onMarkNotificationAsRead}
               onLogout={onLogout}
               onUpdateAvatar={onUpdateAvatar}
             />
@@ -90,8 +98,11 @@ const AppRouter = ({
               user={user}
               reports={reports}
               notifications={notifications}
+              onMarkAllNotificationsAsRead={onMarkAllNotificationsAsRead}
+              onMarkNotificationAsRead={onMarkNotificationAsRead}
               onLogout={onLogout}
               onUpdateAvatar={onUpdateAvatar}
+              onRefreshData={onRefreshData}
             />
           ) : (
             <Navigate to="/login" replace />
@@ -112,6 +123,7 @@ const AppRouter = ({
               reports={reports}
               notifications={currentAdminNotifs}
               onMarkAllNotificationsAsRead={currentAdminMarkRead}
+              onMarkNotificationAsRead={onMarkNotificationAsRead}
               onVerifyReport={onVerifyReport}
               onRejectReport={onRejectReport}
               onLogout={onLogout}
@@ -130,6 +142,7 @@ const AppRouter = ({
               reports={reports}
               notifications={currentAdminNotifs}
               onMarkAllNotificationsAsRead={currentAdminMarkRead}
+              onMarkNotificationAsRead={onMarkNotificationAsRead}
               onVerifyReport={onVerifyReport}
               onVerifyReports={currentVerifyReports}
               onRejectReport={onRejectReport}
@@ -149,6 +162,7 @@ const AppRouter = ({
               reports={reports}
               notifications={currentAdminNotifs}
               onMarkAllNotificationsAsRead={currentAdminMarkRead}
+              onMarkNotificationAsRead={onMarkNotificationAsRead}
               onVerifyReports={currentVerifyReports}
               onCompleteReport={onCompleteReport}
               onLogout={onLogout}
@@ -167,6 +181,7 @@ const AppRouter = ({
               reports={reports}
               notifications={currentAdminNotifs}
               onMarkAllNotificationsAsRead={currentAdminMarkRead}
+              onMarkNotificationAsRead={onMarkNotificationAsRead}
               onVerifyReports={currentVerifyReports}
               onCompleteReport={onCompleteReport}
               onLogout={onLogout}
@@ -185,6 +200,7 @@ const AppRouter = ({
               reports={reports}
               notifications={currentAdminNotifs}
               onMarkAllNotificationsAsRead={currentAdminMarkRead}
+              onMarkNotificationAsRead={onMarkNotificationAsRead}
               onLogout={onLogout}
             />
           ) : (

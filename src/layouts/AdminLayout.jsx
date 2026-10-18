@@ -9,6 +9,7 @@ const AdminLayout = ({
   user,
   notifications = [],
   onMarkAllNotificationsAsRead,
+  onMarkNotificationAsRead,
   onLogout,
   onUpdateAvatar,
   children
@@ -25,6 +26,15 @@ const AdminLayout = ({
     setNotifList((prev) => prev.map((item) => ({ ...item, isUnread: false })));
     if (onMarkAllNotificationsAsRead) {
       onMarkAllNotificationsAsRead();
+    }
+  };
+
+  const handleMarkNotificationAsRead = (id) => {
+    setNotifList((prev) =>
+      prev.map((item) => (String(item.id) === String(id) ? { ...item, isUnread: false } : item))
+    );
+    if (onMarkNotificationAsRead) {
+      onMarkNotificationAsRead(id);
     }
   };
 
@@ -69,6 +79,7 @@ const AdminLayout = ({
           unreadCount={notifList.filter((item) => item.isUnread).length}
           notifications={notifList}
           onMarkAllAsRead={handleMarkAllAsRead}
+          onMarkNotificationAsRead={handleMarkNotificationAsRead}
           onLogout={onLogout}
           onUpdateAvatar={onUpdateAvatar}
         />

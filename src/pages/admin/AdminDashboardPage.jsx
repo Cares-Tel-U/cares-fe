@@ -15,6 +15,7 @@ const AdminDashboardPage = ({
   reports = [],
   notifications = mockNotificationsAdmin,
   onMarkAllNotificationsAsRead,
+  onMarkNotificationAsRead,
   onVerifyReport,
   onRejectReport,
   onLogout
@@ -50,6 +51,7 @@ const AdminDashboardPage = ({
       user={user}
       notifications={notifications}
       onMarkAllNotificationsAsRead={onMarkAllNotificationsAsRead}
+      onMarkNotificationAsRead={onMarkNotificationAsRead}
       onLogout={onLogout}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -60,7 +62,7 @@ const AdminDashboardPage = ({
             <ReportChart />
           </div>
           <div style={{ minWidth: 0 }}>
-            <LocationStatsCard />
+            <LocationStatsCard reports={reports} />
           </div>
         </div>
 

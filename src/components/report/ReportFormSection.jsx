@@ -139,7 +139,7 @@ const AutocompleteField = ({ label, required, placeholder, value, onChange, sugg
   );
 };
 
-const ReportFormSection = ({ onSubmit }) => {
+const ReportFormSection = ({ onSubmit, isSubmitting = false }) => {
   const [jenisLokasi, setJenisLokasi] = useState('Dalam Gedung');
 
   // Gedung autocomplete state
@@ -509,13 +509,15 @@ const ReportFormSection = ({ onSubmit }) => {
             type="submit"
             variant="primary"
             size="md"
+            disabled={isSubmitting}
             style={{
-              backgroundColor: '#dc2626',
+              backgroundColor: isSubmitting ? '#9ca3af' : '#dc2626',
               padding: '9px 28px',
-              borderRadius: '8px'
+              borderRadius: '8px',
+              cursor: isSubmitting ? 'not-allowed' : 'pointer'
             }}
           >
-            Laporkan
+            {isSubmitting ? 'Mengirim...' : 'Laporkan'}
           </Button>
         </div>
       </form>

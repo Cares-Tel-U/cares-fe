@@ -1,11 +1,11 @@
 import React from 'react';
 
 const MetricCards = ({ reports = [] }) => {
-  const total = reports.length || 124;
-  const waiting = reports.filter((r) => r.status === 'Menunggu Verifikasi').length || 2;
-  const inProgress = reports.filter((r) => r.status === 'Diproses').length || 2;
-  const completed = reports.filter((r) => r.status === 'Selesai').length || 110;
-  const rejected = reports.filter((r) => r.status === 'Ditolak').length || 10;
+  const total = reports.length;
+  const waiting = reports.filter((r) => r.status === 'Menunggu Verifikasi').length;
+  const inProgress = reports.filter((r) => r.status === 'Diproses').length;
+  const completed = reports.filter((r) => r.status === 'Selesai').length;
+  const rejected = reports.filter((r) => r.status === 'Ditolak').length;
 
   const cards = [
     {

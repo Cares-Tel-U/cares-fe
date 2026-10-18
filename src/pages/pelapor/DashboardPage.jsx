@@ -7,9 +7,34 @@ import RecentReportTable from '../../components/dashboard/RecentReportTable';
 import ReportDetailModal from '../../components/report/ReportDetailModal';
 
 
-const DashboardPage = ({ user, reports = [], notifications = [], onLogout, onUpdateAvatar }) => {
+import { reportService } from '../../services';
+
+const DashboardPage = ({
+  user,
+  reports = [],
+  notifications = [],
+  onMarkAllNotificationsAsRead,
+  onMarkNotificationAsRead,
+  onLogout,
+  onUpdateAvatar,
+  onRefreshData
+}) => {
   const navigate = useNavigate();
   const [selectedReport, setSelectedReport] = useState(null);
+
+  const handleSelectDetail = async (report) => {
+    setSelectedReport(report);
+    if (report?.id) {
+      try {
+        const freshDetail = await reportService.getReportById(report.id);
+        if (freshDetail) {
+          setSelectedReport(freshDetail);
+        }
+      } catch (err) {
+        console.warn('Gagal memuat detail laporan terbaru dari backend:', err.message);
+      }
+    }
+  };
 
   // Statistics
   const totalCount = reports.length;
@@ -19,10 +44,12 @@ const DashboardPage = ({ user, reports = [], notifications = [], onLogout, onUpd
 
   return (
     <MainLayout
-      title={`Halo, ${user?.name || 'Amba Ngawi'}`}
+      title={`Halo, ${user?.name || user?.nama || 'Civitas Akademika'}`}
       subtitle="Laporkan masalah fasilitas kampus dengan mudah"
       user={user}
       notifications={notifications}
+      onMarkAllNotificationsAsRead={onMarkAllNotificationsAsRead}
+      onMarkNotificationAsRead={onMarkNotificationAsRead}
       onLogout={onLogout}
       onUpdateAvatar={onUpdateAvatar}
     >
@@ -106,7 +133,7 @@ const DashboardPage = ({ user, reports = [], notifications = [], onLogout, onUpd
       {/* Recent Report Table */}
       <RecentReportTable
         reports={reports}
-        onSelectDetail={(report) => setSelectedReport(report)}
+        onSelectDetail={handleSelectDetail}
       />
 
       {/* Modal Detail Laporan */}

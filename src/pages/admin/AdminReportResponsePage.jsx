@@ -9,6 +9,7 @@ const AdminReportResponsePage = ({
   reports = [],
   notifications = [],
   onMarkAllNotificationsAsRead,
+  onMarkNotificationAsRead,
   onVerifyReports,
   onCompleteReport,
   onLogout
@@ -131,6 +132,7 @@ const AdminReportResponsePage = ({
       user={user}
       notifications={notifications}
       onMarkAllNotificationsAsRead={onMarkAllNotificationsAsRead}
+      onMarkNotificationAsRead={onMarkNotificationAsRead}
       onLogout={onLogout}
     >
       {/* Breadcrumb Navigation */}

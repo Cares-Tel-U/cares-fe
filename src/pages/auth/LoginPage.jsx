@@ -3,60 +3,52 @@ import { Link, useNavigate } from 'react-router-dom';
 import AuthLayout from '../../layouts/AuthLayout';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
+import { authService } from '../../services/auth.service';
 
 const LoginPage = ({ onLoginSuccess }) => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('ambangawi@gmail.com');
+  const [email, setEmail] = useState('ambangawi@telkomuniversity.ac.id');
   const [password, setPassword] = useState('password123');
   const [loginError, setLoginError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Cek akun yang disimpan dari RegisterPage
-    let savedUser = null;
-    try {
-      const stored = localStorage.getItem('cares_registered_user');
-      if (stored) savedUser = JSON.parse(stored);
-    } catch (err) {
-      console.error(err);
-    }
-
-    // Simulasi validasi password:
-    // Password benar jika cocok dengan user yang baru register ATAU default demo 'password123' (atau password >= 8 jika tidak sengaja dibuat salah)
-    const isSavedUser = savedUser && savedUser.email?.toLowerCase() === email?.toLowerCase();
-    const isCorrectPassword = isSavedUser
-      ? password === savedUser.password
-      : password === 'password123' || (password.length >= 8 && password !== 'salah' && password !== '12345678');
-
-    // Jika kata sandi salah / tidak valid (< 8 atau bernilai salah)
-    if (!isCorrectPassword || password.length < 8) {
-      setLoginError(true);
-      return;
-    }
-
-    // Login berhasil
     setLoginError(false);
+    setErrorMessage('');
+    setLoading(true);
 
-    if (email.includes('admin')) {
+    try {
+      const data = await authService.login(email.trim(), password);
+      const user = data.user;
+      const isAdmin = user.role === 'SARPRAS' || user.role === 'ADMIN';
+
+      const userPayload = {
+        id: user.id,
+        email: user.email,
+        name: user.nama,
+        nama: user.nama,
+        role: isAdmin ? 'Admin' : 'Mahasiswa',
+        rawRole: user.role,
+        avatar: user.avatar,
+        notificationPreference: user.notificationPreference,
+      };
+
       if (onLoginSuccess) {
-        onLoginSuccess({
-          email,
-          name: 'Admin Cares',
-          role: 'Admin'
-        });
+        onLoginSuccess(userPayload);
       }
-      navigate('/admin/dashboard');
-    } else {
-      if (onLoginSuccess) {
-        onLoginSuccess({
-          email,
-          name: savedUser?.name || 'Amba Ngawi',
-          role: 'Mahasiswa',
-          nim: savedUser?.nim || '103012400229'
-        });
+
+      if (isAdmin) {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/dashboard');
       }
-      navigate('/dashboard');
+    } catch (err) {
+      setLoginError(true);
+      setErrorMessage(err.message || 'Email atau kata sandi tidak valid. Silakan coba kembali.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -79,7 +71,7 @@ const LoginPage = ({ onLoginSuccess }) => {
             marginBottom: '20px'
           }}
         >
-          Kata sandi yang Anda masukkan tidak valid atau salah. Silakan coba kembali
+          {errorMessage || 'Kata sandi yang Anda masukkan tidak valid atau salah. Silakan coba kembali'}
         </div>
       )}
 
@@ -133,14 +125,16 @@ const LoginPage = ({ onLoginSuccess }) => {
           type="submit"
           variant="primary"
           size="lg"
+          disabled={loading}
           style={{
             width: '100%',
             backgroundColor: '#dc2626',
             color: '#ffffff',
-            marginTop: '4px'
+            marginTop: '4px',
+            opacity: loading ? 0.7 : 1,
           }}
         >
-          Login
+          {loading ? 'Memproses...' : 'Login'}
         </Button>
       </form>
 

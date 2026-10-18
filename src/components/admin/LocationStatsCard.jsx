@@ -1,13 +1,35 @@
 import React from 'react';
 
-const LocationStatsCard = () => {
-  const locations = [
-    { name: 'Parkir Motor TULT', percent: '25,81%', count: 32 },
-    { name: 'TULT 0712', percent: '22,58%', count: 28 },
-    { name: 'Parkir Asrama', percent: '19,35%', count: 24 },
-    { name: 'Parkir GKU', percent: '14,52%', count: 18 },
-    { name: 'Lainnya', percent: '17,74%', count: 22 }
-  ];
+const LocationStatsCard = ({ reports = [] }) => {
+  const locations = React.useMemo(() => {
+    if (!reports || reports.length === 0) {
+      return [
+        { name: 'Parkir Motor TULT', percent: '25,81%', count: 32 },
+        { name: 'TULT 0712', percent: '22,58%', count: 28 },
+        { name: 'Parkir Asrama', percent: '19,35%', count: 24 },
+        { name: 'Parkir GKU', percent: '14,52%', count: 18 },
+        { name: 'Lainnya', percent: '17,74%', count: 22 }
+      ];
+    }
+
+    const counts = {};
+    reports.forEach((r) => {
+      const loc = r.namaRuangan || r.lokasi || 'Umum';
+      counts[loc] = (counts[loc] || 0) + 1;
+    });
+
+    const total = reports.length;
+    const sorted = Object.entries(counts)
+      .map(([name, count]) => {
+        const pct = ((count / total) * 100).toFixed(1);
+        return { name, count, percent: `${pct.replace('.', ',')}%` };
+      })
+      .sort((a, b) => b.count - a.count);
+
+    return sorted.slice(0, 5);
+  }, [reports]);
+
+  const topLocation = locations[0]?.name || 'Fasilitas Kampus';
 
   return (
     <div style={{ height: '100%', minHeight: '342px', boxSizing: 'border-box', background: '#fff', padding: '16px', borderRadius: '8px', border: '1px solid #d7d7d7', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -44,7 +66,7 @@ const LocationStatsCard = () => {
         <div>
           <h4 style={{ margin: '0 0 5px', fontSize: '9px', fontWeight: 700 }}>Perhatian</h4>
           <p style={{ margin: 0, fontSize: '8px', lineHeight: 1.4, color: '#77777b' }}>
-            Parkir Motor TULT menjadi lokasi dengan laporan terbanyak minggu ini
+            {topLocation} menjadi lokasi dengan laporan terbanyak saat ini
           </p>
         </div>
       </div>

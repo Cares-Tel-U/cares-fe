@@ -10,6 +10,7 @@ const MainLayout = ({
   user,
   notifications = [],
   onMarkAllNotificationsAsRead,
+  onMarkNotificationAsRead,
   onLogout,
   onUpdateAvatar
 }) => {
@@ -28,6 +29,15 @@ const MainLayout = ({
     setNotifList((prev) => prev.map((n) => ({ ...n, isUnread: false })));
     if (onMarkAllNotificationsAsRead) {
       onMarkAllNotificationsAsRead();
+    }
+  };
+
+  const handleMarkNotificationAsRead = (id) => {
+    setNotifList((prev) =>
+      prev.map((n) => (String(n.id) === String(id) ? { ...n, isUnread: false } : n))
+    );
+    if (onMarkNotificationAsRead) {
+      onMarkNotificationAsRead(id);
     }
   };
 
@@ -75,6 +85,7 @@ const MainLayout = ({
           unreadCount={unreadCount}
           notifications={notifList}
           onMarkAllAsRead={handleMarkAllAsRead}
+          onMarkNotificationAsRead={handleMarkNotificationAsRead}
           onLogout={onLogout}
           onUpdateAvatar={onUpdateAvatar}
         />

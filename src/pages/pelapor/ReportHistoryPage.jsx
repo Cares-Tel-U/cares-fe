@@ -1,13 +1,45 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import MainLayout from '../../layouts/MainLayout';
 import HistoryFilter from '../../components/history/HistoryFilter';
 import HistoryTable from '../../components/history/HistoryTable';
 import ReportDetailModal from '../../components/report/ReportDetailModal';
+import { reportService } from '../../services';
 
-const ReportHistoryPage = ({ user, reports = [], notifications = [], onLogout, onUpdateAvatar }) => {
+const ReportHistoryPage = ({
+  user,
+  reports = [],
+  notifications = [],
+  onMarkAllNotificationsAsRead,
+  onMarkNotificationAsRead,
+  onLogout,
+  onUpdateAvatar,
+  onRefreshData
+}) => {
   const [sortBy, setSortBy] = useState('Terbaru');
   const [statusFilter, setStatusFilter] = useState('Semua Status');
   const [selectedReport, setSelectedReport] = useState(null);
+
+  // Muat data riwayat terbaru dari backend saat halaman dibuka
+  useEffect(() => {
+    if (onRefreshData) {
+      onRefreshData();
+    }
+  }, [onRefreshData]);
+
+  // Handle buka detail laporan dengan sinkronisasi API jika ID valid
+  const handleSelectDetail = async (report) => {
+    setSelectedReport(report);
+    if (report?.id) {
+      try {
+        const freshDetail = await reportService.getReportById(report.id);
+        if (freshDetail) {
+          setSelectedReport(freshDetail);
+        }
+      } catch (err) {
+        console.warn('Gagal memuat detail laporan terbaru dari backend:', err.message);
+      }
+    }
+  };
 
   // Filter & Sort logic
   const filteredAndSortedReports = useMemo(() => {
@@ -32,6 +64,8 @@ const ReportHistoryPage = ({ user, reports = [], notifications = [], onLogout, o
       subtitle="Lihat dan pantau perkembangan laporan fasilitas yang telah Anda dikirimkan"
       user={user}
       notifications={notifications}
+      onMarkAllNotificationsAsRead={onMarkAllNotificationsAsRead}
+      onMarkNotificationAsRead={onMarkNotificationAsRead}
       onLogout={onLogout}
       onUpdateAvatar={onUpdateAvatar}
     >
@@ -56,7 +90,7 @@ const ReportHistoryPage = ({ user, reports = [], notifications = [], onLogout, o
         {/* Table with Pagination */}
         <HistoryTable
           reports={filteredAndSortedReports}
-          onSelectDetail={(report) => setSelectedReport(report)}
+          onSelectDetail={handleSelectDetail}
         />
       </div>
 

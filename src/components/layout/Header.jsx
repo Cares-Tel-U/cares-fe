@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { authService, notificationService } from '../../services';
 
 const Header = ({
   title,
@@ -9,6 +10,7 @@ const Header = ({
   unreadCount = 0,
   notifications = [],
   onMarkAllAsRead,
+  onMarkNotificationAsRead,
   onLogout,
   onUpdateAvatar
 }) => {
@@ -16,24 +18,32 @@ const Header = ({
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [avatarSuccessMsg, setAvatarSuccessMsg] = useState('');
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isNotifActive, setIsNotifActive] = useState(() => {
+    if (user?.notificationPreference !== undefined) {
+      return Boolean(user.notificationPreference);
+    }
     const saved = localStorage.getItem('user_notif_enabled');
     return saved !== null ? saved === 'true' : true;
   });
 
-  const handleToggleNotif = (e) => {
+  const handleToggleNotif = async (e) => {
     e.stopPropagation();
-    setIsNotifActive((prev) => {
-      const next = !prev;
-      localStorage.setItem('user_notif_enabled', String(next));
-      return next;
-    });
+    const next = !isNotifActive;
+    setIsNotifActive(next);
+    localStorage.setItem('user_notif_enabled', String(next));
+    try {
+      await authService.updateNotificationPreference(next);
+    } catch (err) {
+      console.warn('Gagal sinkron preferensi notifikasi ke backend:', err.message);
+    }
   };
   const profileRef = useRef(null);
   const notifRef = useRef(null);
   const avatarInputRef = useRef(null);
 
-  const handleAvatarUpload = (e) => {
+  const handleAvatarUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -42,16 +52,42 @@ const Header = ({
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const newAvatarUrl = event.target?.result;
-      if (newAvatarUrl && onUpdateAvatar) {
-        onUpdateAvatar(newAvatarUrl);
+    try {
+      setIsUploadingAvatar(true);
+      if (onUpdateAvatar) {
+        await onUpdateAvatar(file);
+      } else {
+        await authService.updateAvatar(file);
       }
       setAvatarSuccessMsg('Foto profil berhasil diperbarui.');
       setTimeout(() => setAvatarSuccessMsg(''), 3500);
-    };
-    reader.readAsDataURL(file);
+    } catch (err) {
+      console.warn('Gagal unggah avatar via API, mencoba fallback lokal:', err.message);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const newAvatarUrl = event.target?.result;
+        if (newAvatarUrl && onUpdateAvatar) {
+          onUpdateAvatar(newAvatarUrl);
+        }
+        setAvatarSuccessMsg('Foto profil berhasil diperbarui.');
+        setTimeout(() => setAvatarSuccessMsg(''), 3500);
+      };
+      reader.readAsDataURL(file);
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
+  const handleNotificationClick = async (item) => {
+    if (!item.isUnread) return;
+    try {
+      await notificationService.markAsRead(item.id);
+    } catch (err) {
+      console.warn('Gagal tandai notifikasi dibaca via API:', err.message);
+    }
+    if (onMarkNotificationAsRead) {
+      onMarkNotificationAsRead(item.id);
+    }
   };
 
   useEffect(() => {
@@ -272,12 +308,14 @@ const Header = ({
                         {todayNotifs.map((item) => (
                           <div
                             key={item.id}
+                            onClick={() => handleNotificationClick(item)}
                             style={{
                               backgroundColor: item.isUnread ? '#fff1f2' : '#f9fafb',
                               borderRadius: '10px',
                               padding: '12px 14px',
                               border: item.isUnread ? '1px solid #fecdd3' : '1px solid #f3f4f6',
-                              transition: 'background-color 0.15s ease'
+                              transition: 'background-color 0.15s ease',
+                              cursor: item.isUnread ? 'pointer' : 'default'
                             }}
                           >
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
@@ -309,12 +347,14 @@ const Header = ({
                         {previousNotifs.map((item) => (
                           <div
                             key={item.id}
+                            onClick={() => handleNotificationClick(item)}
                             style={{
                               backgroundColor: item.isUnread ? '#fff1f2' : '#f9fafb',
                               borderRadius: '10px',
                               padding: '12px 14px',
                               border: item.isUnread ? '1px solid #fecdd3' : '1px solid #f3f4f6',
-                              transition: 'background-color 0.15s ease'
+                              transition: 'background-color 0.15s ease',
+                              cursor: item.isUnread ? 'pointer' : 'default'
                             }}
                           >
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
@@ -507,6 +547,16 @@ const Header = ({
                   >
                     Ubah Foto Profil
                   </button>
+                  {avatarSuccessMsg && (
+                    <div style={{ color: '#16a34a', fontSize: '10.5px', marginTop: '4px', fontWeight: '600' }}>
+                      {avatarSuccessMsg}
+                    </div>
+                  )}
+                  {isUploadingAvatar && (
+                    <div style={{ color: '#6b7280', fontSize: '10.5px', marginTop: '4px' }}>
+                      Mengunggah foto...
+                    </div>
+                  )}
                 </div>
               </div>
 

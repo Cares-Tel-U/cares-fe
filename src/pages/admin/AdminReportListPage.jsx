@@ -1,10 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../layouts/AdminLayout';
 import BadgeStatus from '../../components/common/BadgeStatus';
 import DetailReportModal from '../../components/modals/DetailReportModal';
 import RejectReportModal from '../../components/modals/RejectReportModal';
 import SuccessModal from '../../components/modals/SuccessModal';
+import { reportService } from '../../services';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -13,12 +14,20 @@ const AdminReportListPage = ({
   reports = [],
   notifications = [],
   onMarkAllNotificationsAsRead,
+  onMarkNotificationAsRead,
   onVerifyReport,
   onVerifyReports,
   onRejectReport,
-  onLogout
+  onLogout,
+  onRefreshData
 }) => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (onRefreshData) {
+      onRefreshData();
+    }
+  }, [onRefreshData]);
 
   // Filters & Sorting state
   const [filterSort, setFilterSort] = useState('Terbaru');
@@ -88,8 +97,18 @@ const AdminReportListPage = ({
   };
 
   // Handle open detail modal
-  const handleOpenDetail = (report) => {
+  const handleOpenDetail = async (report) => {
     setSelectedReport(report);
+    if (report?.id) {
+      try {
+        const freshDetail = await reportService.getReportById(report.id);
+        if (freshDetail) {
+          setSelectedReport(freshDetail);
+        }
+      } catch (err) {
+        console.warn('Gagal memuat detail laporan admin dari backend:', err.message);
+      }
+    }
   };
 
   // Handle single verify
@@ -140,6 +159,7 @@ const AdminReportListPage = ({
       user={user}
       notifications={notifications}
       onMarkAllNotificationsAsRead={onMarkAllNotificationsAsRead}
+      onMarkNotificationAsRead={onMarkNotificationAsRead}
       onLogout={onLogout}
     >
       {/* Main Card Container */}

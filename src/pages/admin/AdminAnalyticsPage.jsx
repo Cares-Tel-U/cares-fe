@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
+import { adminService } from '../../services';
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
+// Data Cadangan Lokal (Fallback)
 const AREA_CHART_DATA = [
   { label: '30 Ags', value: 6 },
   { label: '31 Ags', value: 3 },
@@ -27,37 +28,32 @@ const LOCATION_DATA = [
   { name: 'Lainnya',            percent: 17.74, count: 22 }
 ];
 
-const HOURLY_DATA = [
-  { hour: '00:00', val: 0 }, { hour: '03:00', val: 2 }, { hour: '06:00', val: 4 },
-  { hour: '09:00', val: 8 }, { hour: '12:00', val: 14 }, { hour: '15:00', val: 22 },
-  { hour: '18:00', val: 17 }, { hour: '21:00', val: 8 }
-];
-
-// All hours 0-23 for bar chart
 const ALL_HOURS = [];
 for (let h = 0; h < 24; h++) {
-  // bell curve peaking around 15
   const dist = Math.abs(h - 15);
   const val = Math.max(0, Math.round(22 * Math.exp(-0.08 * dist * dist)));
   ALL_HOURS.push({ hour: h, val });
 }
 
-// ─── SVG Area Chart ────────────────────────────────────────────────────────────
-const AreaChart = () => {
+// SVG Area Chart Dinamis
+const AreaChart = ({ data = AREA_CHART_DATA }) => {
+  const chartData = data && data.length > 0 ? data : AREA_CHART_DATA;
   const W = 480, H = 160, padL = 28, padR = 12, padT = 12, padB = 28;
   const chartW = W - padL - padR;
   const chartH = H - padT - padB;
-  const maxVal = 9;
+  const maxVal = Math.max(...chartData.map((d) => d.value), 4);
 
-  const pts = AREA_CHART_DATA.map((d, i) => ({
-    x: padL + (i / (AREA_CHART_DATA.length - 1)) * chartW,
+  const pts = chartData.map((d, i) => ({
+    x: padL + (chartData.length > 1 ? (i / (chartData.length - 1)) * chartW : chartW / 2),
     y: padT + chartH - (d.value / maxVal) * chartH
   }));
 
   const linePath = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
-  const areaPath = `${linePath} L${pts[pts.length-1].x},${padT+chartH} L${pts[0].x},${padT+chartH} Z`;
+  const areaPath = pts.length > 1
+    ? `${linePath} L${pts[pts.length - 1].x},${padT + chartH} L${pts[0].x},${padT + chartH} Z`
+    : '';
 
-  const yTicks = [0, 3, 6, 9];
+  const yTicks = [0, Math.round(maxVal / 3), Math.round((maxVal * 2) / 3), maxVal];
 
   return (
     <svg width="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ overflow: 'visible' }}>
@@ -78,7 +74,7 @@ const AreaChart = () => {
         );
       })}
       {/* Area fill */}
-      <path d={areaPath} fill="url(#areaGrad)" />
+      {areaPath && <path d={areaPath} fill="url(#areaGrad)" />}
       {/* Line */}
       <path d={linePath} fill="none" stroke="#dc2626" strokeWidth="2.2" strokeLinejoin="round" strokeLinecap="round" />
       {/* Dots */}
@@ -86,10 +82,10 @@ const AreaChart = () => {
         <circle key={i} cx={p.x} cy={p.y} r="3.5" fill="#dc2626" stroke="#fff" strokeWidth="1.5" />
       ))}
       {/* X labels */}
-      {AREA_CHART_DATA.map((d, i) => (
+      {chartData.map((d, i) => (
         <text
           key={i}
-          x={padL + (i / (AREA_CHART_DATA.length - 1)) * chartW}
+          x={padL + (chartData.length > 1 ? (i / (chartData.length - 1)) * chartW : chartW / 2)}
           y={H - 2}
           fontSize="9"
           fill="#9ca3af"
@@ -102,14 +98,15 @@ const AreaChart = () => {
   );
 };
 
-// ─── SVG Donut Chart ───────────────────────────────────────────────────────────
-const DonutChart = () => {
+// SVG Donut Chart Dinamis
+const DonutChart = ({ data = DONUT_DATA }) => {
+  const chartData = data && data.length > 0 ? data : DONUT_DATA;
   const cx = 80, cy = 80, R = 65, r = 44;
-  const total = DONUT_DATA.reduce((s, d) => s + d.count, 0);
+  const total = chartData.reduce((s, d) => s + (d.count || 0), 0);
   let startAngle = -Math.PI / 2;
 
-  const slices = DONUT_DATA.map((d) => {
-    const angle = (d.count / total) * 2 * Math.PI;
+  const slices = chartData.map((d) => {
+    const angle = total > 0 ? ((d.count || 0) / total) * 2 * Math.PI : 0;
     const x1 = cx + R * Math.cos(startAngle);
     const y1 = cy + R * Math.sin(startAngle);
     const x2 = cx + R * Math.cos(startAngle + angle);
@@ -119,7 +116,9 @@ const DonutChart = () => {
     const x4 = cx + r * Math.cos(startAngle);
     const y4 = cy + r * Math.sin(startAngle);
     const large = angle > Math.PI ? 1 : 0;
-    const path = `M${x1},${y1} A${R},${R} 0 ${large},1 ${x2},${y2} L${x3},${y3} A${r},${r} 0 ${large},0 ${x4},${y4} Z`;
+    const path = angle > 0
+      ? `M${x1},${y1} A${R},${R} 0 ${large},1 ${x2},${y2} L${x3},${y3} A${r},${r} 0 ${large},0 ${x4},${y4} Z`
+      : '';
     startAngle += angle;
     return { ...d, path };
   });
@@ -129,7 +128,7 @@ const DonutChart = () => {
       <div style={{ flexShrink: 0 }}>
         <svg width="160" height="160" viewBox="0 0 160 160">
           {slices.map((s, i) => (
-            <path key={i} d={s.path} fill={s.color} />
+            s.path ? <path key={i} d={s.path} fill={s.color} /> : null
           ))}
           <circle cx={cx} cy={cy} r={r - 1} fill="white" />
           <text x={cx} y={cy - 6} textAnchor="middle" fontSize="20" fontWeight="800" fill="#111827">{total}</text>
@@ -137,7 +136,7 @@ const DonutChart = () => {
         </svg>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', flex: 1 }}>
-        {DONUT_DATA.map((d, i) => (
+        {chartData.map((d, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: d.color, flexShrink: 0 }} />
@@ -153,12 +152,13 @@ const DonutChart = () => {
   );
 };
 
-// ─── Hourly Bar Chart ──────────────────────────────────────────────────────────
-const HourlyBarChart = () => {
-  const maxVal = Math.max(...ALL_HOURS.map((d) => d.val));
+// Hourly Bar Chart Dinamis
+const HourlyBarChart = ({ data = ALL_HOURS }) => {
+  const chartData = data && data.length > 0 ? data : ALL_HOURS;
+  const maxVal = Math.max(...chartData.map((d) => d.val), 1);
   const showLabels = [0, 3, 6, 9, 12, 15, 18, 21];
   const W = 400, H = 120, padB = 18;
-  const barW = W / ALL_HOURS.length;
+  const barW = W / chartData.length;
 
   return (
     <svg width="100%" viewBox={`0 0 ${W} ${H + padB}`} preserveAspectRatio="none" style={{ overflow: 'visible' }}>
@@ -173,7 +173,7 @@ const HourlyBarChart = () => {
         );
       })}
       {/* Bars */}
-      {ALL_HOURS.map((d, i) => {
+      {chartData.map((d, i) => {
         const bh = (d.val / (maxVal || 1)) * H;
         return (
           <rect
@@ -188,7 +188,7 @@ const HourlyBarChart = () => {
         );
       })}
       {/* X labels */}
-      {ALL_HOURS.map((d, i) => {
+      {chartData.map((d, i) => {
         const label = `${String(d.hour).padStart(2,'0')}:00`;
         if (!showLabels.includes(d.hour)) return null;
         return (
@@ -214,10 +214,120 @@ const AdminAnalyticsPage = ({
   reports = [],
   notifications = [],
   onMarkAllNotificationsAsRead,
+  onMarkNotificationAsRead,
   onLogout
 }) => {
   const [activeFilter, setActiveFilter] = useState('Semua');
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(false);
   const filters = ['Semua', 'Minggu Ini', 'Bulan Ini'];
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        const timeframe = activeFilter === 'Minggu Ini' ? 'weekly' : activeFilter === 'Bulan Ini' ? 'monthly' : 'weekly';
+        const res = await adminService.getAdminStats(timeframe);
+        if (isMounted && res) {
+          setStats(res);
+        }
+      } catch (err) {
+        console.warn('Gagal memuat statistik dari API:', err.message);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+    fetchStats();
+    return () => {
+      isMounted = false;
+    };
+  }, [activeFilter]);
+
+  // Perhitungan Angka Metrik Dinamis
+  const totalReportsCount = stats?.summary?.total ?? reports.length;
+  const pendingReportsCount = stats?.summary?.pending ?? reports.filter((r) => r.status === 'Menunggu Verifikasi').length;
+  const inProgressReportsCount = stats?.summary?.inProgress ?? reports.filter((r) => r.status === 'Diproses').length;
+  const completedReportsCount = stats?.summary?.completed ?? reports.filter((r) => r.status === 'Selesai').length;
+  const rejectedReportsCount = stats?.summary?.rejected ?? reports.filter((r) => r.status === 'Ditolak').length;
+
+  // Data Donut Chart Dinamis
+  const donutData = useMemo(() => {
+    const total = totalReportsCount || 1;
+    return [
+      {
+        label: 'Menunggu Verifikasi',
+        count: pendingReportsCount,
+        percent: Number(((pendingReportsCount / total) * 100).toFixed(2)),
+        color: '#facc15'
+      },
+      {
+        label: 'Diproses',
+        count: inProgressReportsCount,
+        percent: Number(((inProgressReportsCount / total) * 100).toFixed(2)),
+        color: '#38bdf8'
+      },
+      {
+        label: 'Selesai',
+        count: completedReportsCount,
+        percent: Number(((completedReportsCount / total) * 100).toFixed(2)),
+        color: '#22c55e'
+      },
+      {
+        label: 'Ditolak',
+        count: rejectedReportsCount,
+        percent: Number(((rejectedReportsCount / total) * 100).toFixed(2)),
+        color: '#ef4444'
+      }
+    ];
+  }, [totalReportsCount, pendingReportsCount, inProgressReportsCount, completedReportsCount, rejectedReportsCount]);
+
+  // Data Area Chart Dinamis
+  const areaChartData = useMemo(() => {
+    if (stats?.chartData && Array.isArray(stats.chartData) && stats.chartData.length > 0) {
+      return stats.chartData.map((d) => {
+        const parts = d.date.split('-');
+        const label = parts.length === 3 ? `${parseInt(parts[2], 10)}/${parseInt(parts[1], 10)}` : d.date;
+        return { label, value: d.count };
+      });
+    }
+    return AREA_CHART_DATA;
+  }, [stats]);
+
+  // Data Lokasi Terbanyak Dinamis
+  const locationData = useMemo(() => {
+    if (!reports || reports.length === 0) return LOCATION_DATA;
+    const map = {};
+    reports.forEach((r) => {
+      const loc = r.namaRuangan || r.lokasi || 'Fasilitas Kampus';
+      map[loc] = (map[loc] || 0) + 1;
+    });
+    const total = reports.length || 1;
+    return Object.entries(map)
+      .map(([name, count]) => ({
+        name,
+        count,
+        percent: Number(((count / total) * 100).toFixed(2))
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+  }, [reports]);
+
+  // Data Jam Ramai Dinamis
+  const hourlyData = useMemo(() => {
+    if (!reports || reports.length === 0) return ALL_HOURS;
+    const hours = Array.from({ length: 24 }, (_, h) => ({ hour: h, val: 0 }));
+    reports.forEach((r) => {
+      if (r.createdAt) {
+        const d = new Date(r.createdAt);
+        const h = d.getHours();
+        if (h >= 0 && h < 24) {
+          hours[h].val += 1;
+        }
+      }
+    });
+    return hours;
+  }, [reports]);
 
   const cardStyle = {
     backgroundColor: '#ffffff',
@@ -234,6 +344,7 @@ const AdminAnalyticsPage = ({
       user={user}
       notifications={notifications}
       onMarkAllNotificationsAsRead={onMarkAllNotificationsAsRead}
+      onMarkNotificationAsRead={onMarkNotificationAsRead}
       onLogout={onLogout}
     >
       {/* Pill Filter */}
@@ -260,9 +371,9 @@ const AdminAnalyticsPage = ({
         ))}
       </div>
 
-      {/* ── 3 Metric Cards ── */}
+      {/* 3 Metric Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '20px' }}>
-        {/* Card 1 – Total (red gradient) */}
+        {/* Card 1 – Total */}
         <div
           style={{
             background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
@@ -276,9 +387,9 @@ const AdminAnalyticsPage = ({
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
               <div style={{ fontSize: '12.5px', fontWeight: '500', opacity: 0.88, marginBottom: '10px' }}>
-                Total Laporan Anda
+                Total Laporan Masuk
               </div>
-              <div style={{ fontSize: '36px', fontWeight: '800', lineHeight: 1 }}>24</div>
+              <div style={{ fontSize: '36px', fontWeight: '800', lineHeight: 1 }}>{totalReportsCount}</div>
             </div>
             <div style={{ opacity: 0.3 }}>
               <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -290,7 +401,6 @@ const AdminAnalyticsPage = ({
               </svg>
             </div>
           </div>
-          {/* decorative circle */}
           <div style={{ position: 'absolute', bottom: '-18px', right: '-18px', width: '80px', height: '80px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.1)' }} />
         </div>
 
@@ -301,7 +411,7 @@ const AdminAnalyticsPage = ({
               <div style={{ fontSize: '12.5px', color: '#6b7280', fontWeight: '500', marginBottom: '10px' }}>
                 Menunggu Verifikasi
               </div>
-              <div style={{ fontSize: '36px', fontWeight: '800', color: '#111827', lineHeight: 1 }}>3</div>
+              <div style={{ fontSize: '36px', fontWeight: '800', color: '#111827', lineHeight: 1 }}>{pendingReportsCount}</div>
             </div>
             <div style={{ color: '#d1d5db' }}>
               <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -320,7 +430,7 @@ const AdminAnalyticsPage = ({
               <div style={{ fontSize: '12.5px', color: '#6b7280', fontWeight: '500', marginBottom: '10px' }}>
                 Laporan Diproses
               </div>
-              <div style={{ fontSize: '36px', fontWeight: '800', color: '#111827', lineHeight: 1 }}>8</div>
+              <div style={{ fontSize: '36px', fontWeight: '800', color: '#111827', lineHeight: 1 }}>{inProgressReportsCount}</div>
             </div>
             <div style={{ color: '#d1d5db' }}>
               <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -332,14 +442,14 @@ const AdminAnalyticsPage = ({
         </div>
       </div>
 
-      {/* ── Middle Row: Area Chart + Donut ── */}
+      {/* Middle Row: Area Chart + Donut */}
       <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '16px', marginBottom: '20px' }}>
         {/* Grafik Laporan */}
         <div style={cardStyle}>
           <div style={{ fontSize: '14px', fontWeight: '700', color: '#111827', marginBottom: '16px' }}>
             Grafik Laporan
           </div>
-          <AreaChart />
+          <AreaChart data={areaChartData} />
         </div>
 
         {/* Distribusi Status Laporan */}
@@ -353,12 +463,12 @@ const AdminAnalyticsPage = ({
             </div>
           </div>
           <div style={{ marginTop: '12px' }}>
-            <DonutChart />
+            <DonutChart data={donutData} />
           </div>
         </div>
       </div>
 
-      {/* ── Bottom Row: Location + Hourly ── */}
+      {/* Bottom Row: Location + Hourly */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
         {/* Jumlah Laporan Berdasarkan Lokasi */}
         <div style={cardStyle}>
@@ -369,7 +479,7 @@ const AdminAnalyticsPage = ({
             Lokasi yang paling banyak dilaporkan
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {LOCATION_DATA.map((loc, i) => (
+            {locationData.map((loc, i) => (
               <div key={i}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                   <span style={{ fontSize: '12.5px', color: '#374151', fontWeight: '500' }}>{loc.name}</span>
@@ -401,7 +511,7 @@ const AdminAnalyticsPage = ({
           <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '16px', marginTop: '2px' }}>
             Menunjukkan waktu dengan jumlah laporan yang paling banyak masuk
           </div>
-          <HourlyBarChart />
+          <HourlyBarChart data={hourlyData} />
         </div>
       </div>
     </AdminLayout>
