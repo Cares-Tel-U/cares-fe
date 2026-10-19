@@ -8,12 +8,11 @@ import ReportTable from '../../components/admin/ReportTable';
 import DetailReportModal from '../../components/modals/DetailReportModal';
 import RejectReportModal from '../../components/modals/RejectReportModal';
 import SuccessModal from '../../components/modals/SuccessModal';
-import { mockNotificationsAdmin } from '../../data/mockNotificationsAdmin';
 
 const AdminDashboardPage = ({
   user,
   reports = [],
-  notifications = mockNotificationsAdmin,
+  notifications = [],
   onMarkAllNotificationsAsRead,
   onMarkNotificationAsRead,
   onVerifyReport,

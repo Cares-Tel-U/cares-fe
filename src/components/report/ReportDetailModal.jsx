@@ -59,24 +59,26 @@ const ReportDetailModal = ({ isOpen, onClose, report }) => {
             Bukti Foto
           </div>
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-            {(report.foto && report.foto.length > 0 ? report.foto : [
-              'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=300&q=80',
-              'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=300&q=80',
-              'https://images.unsplash.com/photo-1581092162384-8987c1d64718?auto=format&fit=crop&w=300&q=80'
-            ]).map((imgSrc, idx) => (
-              <img
-                key={idx}
-                src={imgSrc}
-                alt={`Bukti foto ${idx + 1}`}
-                style={{
-                  width: '80px',
-                  height: '80px',
-                  borderRadius: '8px',
-                  objectFit: 'cover',
-                  border: '1px solid #e5e7eb'
-                }}
-              />
-            ))}
+            {report.foto && report.foto.length > 0 ? (
+              report.foto.map((imgSrc, idx) => (
+                <img
+                  key={idx}
+                  src={imgSrc}
+                  alt={`Bukti foto ${idx + 1}`}
+                  style={{
+                    width: '80px',
+                    height: '80px',
+                    borderRadius: '8px',
+                    objectFit: 'cover',
+                    border: '1px solid #e5e7eb'
+                  }}
+                />
+              ))
+            ) : (
+              <span style={{ fontSize: '12.5px', color: '#9ca3af', fontStyle: 'italic' }}>
+                Tidak ada lampiran foto
+              </span>
+            )}
           </div>
         </div>
 

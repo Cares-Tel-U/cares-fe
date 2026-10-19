@@ -1,10 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import AppRouter from './routes/AppRouter';
-import { mockUser, mockAdminUser } from './data/mockUser';
-import { mockReports } from './data/mockReports';
-import { mockNotifications } from './data/mockNotifications';
-import { mockNotificationsAdmin } from './data/mockNotificationsAdmin';
 import {
   authService,
   reportService,
@@ -19,23 +15,23 @@ function App() {
     const stored = getStoredUser();
     if (stored) {
       const isAdmin = stored.role === 'SARPRAS' || stored.role === 'ADMIN' || stored.role === 'Admin';
-      return isAdmin ? null : { ...mockUser, ...stored, name: stored.nama || stored.name };
+      return isAdmin ? null : { ...stored, name: stored.nama || stored.name };
     }
-    return mockUser;
+    return null;
   });
 
   const [adminUser, setAdminUser] = useState(() => {
     const stored = getStoredUser();
     if (stored) {
       const isAdmin = stored.role === 'SARPRAS' || stored.role === 'ADMIN' || stored.role === 'Admin';
-      return isAdmin ? { ...mockAdminUser, ...stored, name: stored.nama || stored.name } : null;
+      return isAdmin ? { ...stored, name: stored.nama || stored.name } : null;
     }
-    return mockAdminUser;
+    return null;
   });
 
-  const [reports, setReports] = useState(mockReports);
-  const [notifications, setNotifications] = useState(mockNotifications);
-  const [adminNotifications, setAdminNotifications] = useState(mockNotificationsAdmin);
+  const [reports, setReports] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [adminNotifications, setAdminNotifications] = useState([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
 
   // Fungsi memuat data riil dari backend API
@@ -62,20 +58,22 @@ function App() {
         };
 
         if (isAdmin) {
-          setAdminUser((prev) => ({ ...mockAdminUser, ...prev, ...formattedUser }));
+          setAdminUser(formattedUser);
+          setUser(null);
         } else {
-          setUser((prev) => ({ ...mockUser, ...prev, ...formattedUser }));
+          setUser(formattedUser);
+          setAdminUser(null);
         }
 
         // 2. Muat Laporan Riil Sesuai Role
         if (isAdmin) {
           const adminReportsRes = await adminService.getAdminReports({ per_page: 50 }).catch(() => null);
-          if (adminReportsRes?.data && adminReportsRes.data.length > 0) {
+          if (adminReportsRes?.data) {
             setReports(adminReportsRes.data);
           }
         } else {
           const myReportsRes = await reportService.getMyReports({ per_page: 50 }).catch(() => null);
-          if (myReportsRes?.data && myReportsRes.data.length > 0) {
+          if (myReportsRes?.data) {
             setReports(myReportsRes.data);
           }
         }
@@ -83,11 +81,12 @@ function App() {
 
       // 3. Muat Notifikasi Riil Pengguna
       const notifsRes = await notificationService.getNotifications().catch(() => null);
-      if (Array.isArray(notifsRes) && notifsRes.length > 0) {
+      if (Array.isArray(notifsRes)) {
         setNotifications(notifsRes);
+        setAdminNotifications(notifsRes);
       }
     } catch (err) {
-      console.warn('Backend API tidak dapat dijangkau, menggunakan data cadangan lokal:', err.message);
+      console.warn('Gagal memuat data dari backend API:', err.message);
     } finally {
       setIsLoadingData(false);
     }
@@ -100,10 +99,10 @@ function App() {
 
   const handleLoginSuccess = async (userData) => {
     if (userData?.role === 'Admin' || userData?.role === 'admin' || userData?.rawRole === 'SARPRAS') {
-      setAdminUser({ ...mockAdminUser, ...userData });
+      setAdminUser({ ...userData, name: userData.nama || userData.name });
       setUser(null);
     } else {
-      setUser({ ...mockUser, ...userData });
+      setUser({ ...userData, name: userData.nama || userData.name });
       setAdminUser(null);
     }
 
@@ -112,7 +111,7 @@ function App() {
   };
 
   const handleRegisterSuccess = (userData) => {
-    setUser({ ...mockUser, ...userData });
+    setUser({ ...userData, name: userData.nama || userData.name });
   };
 
   const handleLogout = () => {

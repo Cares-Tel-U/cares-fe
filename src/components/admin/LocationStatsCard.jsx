@@ -3,13 +3,7 @@ import React from 'react';
 const LocationStatsCard = ({ reports = [] }) => {
   const locations = React.useMemo(() => {
     if (!reports || reports.length === 0) {
-      return [
-        { name: 'Parkir Motor TULT', percent: '25,81%', count: 32 },
-        { name: 'TULT 0712', percent: '22,58%', count: 28 },
-        { name: 'Parkir Asrama', percent: '19,35%', count: 24 },
-        { name: 'Parkir GKU', percent: '14,52%', count: 18 },
-        { name: 'Lainnya', percent: '17,74%', count: 22 }
-      ];
+      return [];
     }
 
     const counts = {};
@@ -43,19 +37,25 @@ const LocationStatsCard = ({ reports = [] }) => {
         <p style={{ fontSize: '9px', color: '#a3a3a7', margin: '0 0 13px', lineHeight: 1.25 }}>Lokasi yang paling banyak dilaporkan pada minggu ini</p>
 
         <div style={{ display: 'grid', gap: '9px' }}>
-          {locations.map((loc, idx) => (
-            <div key={idx}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#343438', marginBottom: '4px', fontSize: '8px', fontWeight: 600 }}>
-                <span>{loc.name}</span>
-                <span>{loc.percent} ({loc.count})</span>
+          {locations.length > 0 ? (
+            locations.map((loc, idx) => (
+              <div key={idx}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#343438', marginBottom: '4px', fontSize: '8px', fontWeight: 600 }}>
+                  <span>{loc.name}</span>
+                  <span>{loc.percent} ({loc.count})</span>
+                </div>
+                <div style={{ width: '100%', height: '6px', background: '#c9c9cc', borderRadius: '99px', overflow: 'hidden' }}>
+                  <div
+                    style={{ width: loc.percent.replace(',', '.'), height: '100%', borderRadius: '99px', background: '#ed2735' }}
+                  ></div>
+                </div>
               </div>
-              <div style={{ width: '100%', height: '6px', background: '#c9c9cc', borderRadius: '99px', overflow: 'hidden' }}>
-                <div
-                  style={{ width: loc.percent.replace(',', '.'), height: '100%', borderRadius: '99px', background: '#ed2735' }}
-                ></div>
-              </div>
+            ))
+          ) : (
+            <div style={{ padding: '24px 0', textAlign: 'center', color: '#9ca3af', fontSize: '11px' }}>
+              Belum ada data laporan lokasi
             </div>
-          ))}
+          )}
         </div>
       </div>
 

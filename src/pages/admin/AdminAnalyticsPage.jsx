@@ -2,42 +2,16 @@ import React, { useState, useEffect, useMemo } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
 import { adminService } from '../../services';
 
-// Data Cadangan Lokal (Fallback)
-const AREA_CHART_DATA = [
-  { label: '30 Ags', value: 6 },
-  { label: '31 Ags', value: 3 },
-  { label: '1 Sep',  value: 5 },
-  { label: '2 Sep',  value: 6 },
-  { label: '3 Sep',  value: 9 },
-  { label: '4 Sep',  value: 6 },
-  { label: '5 Sep',  value: 7 }
-];
-
-const DONUT_DATA = [
-  { label: 'Menunggu Verifikasi', percent: 1.61, count: 2,   color: '#facc15' },
-  { label: 'Diproses',            percent: 1.61, count: 2,   color: '#38bdf8' },
-  { label: 'Selesai',             percent: 88.71, count: 110, color: '#22c55e' },
-  { label: 'Ditolak',             percent: 8.07,  count: 10,  color: '#ef4444' }
-];
-
-const LOCATION_DATA = [
-  { name: 'Parkir Motor TULT', percent: 25.81, count: 32 },
-  { name: 'TULT 0712',          percent: 22.58, count: 28 },
-  { name: 'Parkir Asrama',      percent: 19.35, count: 24 },
-  { name: 'Parkir GKU',         percent: 14.52, count: 18 },
-  { name: 'Lainnya',            percent: 17.74, count: 22 }
-];
-
-const ALL_HOURS = [];
-for (let h = 0; h < 24; h++) {
-  const dist = Math.abs(h - 15);
-  const val = Math.max(0, Math.round(22 * Math.exp(-0.08 * dist * dist)));
-  ALL_HOURS.push({ hour: h, val });
-}
-
-// SVG Area Chart Dinamis
-const AreaChart = ({ data = AREA_CHART_DATA }) => {
-  const chartData = data && data.length > 0 ? data : AREA_CHART_DATA;
+// Area Chart Dinamis berbasis Data Riil API
+const AreaChart = ({ data = [] }) => {
+  const chartData = data && data.length > 0 ? data : [];
+  if (chartData.length === 0) {
+    return (
+      <div style={{ height: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: '11px' }}>
+        Belum ada data tren laporan pada periode ini
+      </div>
+    );
+  }
   const W = 480, H = 160, padL = 28, padR = 12, padT = 12, padB = 28;
   const chartW = W - padL - padR;
   const chartH = H - padT - padB;
@@ -153,8 +127,9 @@ const DonutChart = ({ data = DONUT_DATA }) => {
 };
 
 // Hourly Bar Chart Dinamis
-const HourlyBarChart = ({ data = ALL_HOURS }) => {
-  const chartData = data && data.length > 0 ? data : ALL_HOURS;
+const default24Hours = Array.from({ length: 24 }, (_, h) => ({ hour: h, val: 0 }));
+const HourlyBarChart = ({ data = default24Hours }) => {
+  const chartData = data && data.length > 0 ? data : default24Hours;
   const maxVal = Math.max(...chartData.map((d) => d.val), 1);
   const showLabels = [0, 3, 6, 9, 12, 15, 18, 21];
   const W = 400, H = 120, padB = 18;
@@ -291,12 +266,12 @@ const AdminAnalyticsPage = ({
         return { label, value: d.count };
       });
     }
-    return AREA_CHART_DATA;
+    return [];
   }, [stats]);
 
   // Data Lokasi Terbanyak Dinamis
   const locationData = useMemo(() => {
-    if (!reports || reports.length === 0) return LOCATION_DATA;
+    if (!reports || reports.length === 0) return [];
     const map = {};
     reports.forEach((r) => {
       const loc = r.namaRuangan || r.lokasi || 'Fasilitas Kampus';
@@ -315,8 +290,8 @@ const AdminAnalyticsPage = ({
 
   // Data Jam Ramai Dinamis
   const hourlyData = useMemo(() => {
-    if (!reports || reports.length === 0) return ALL_HOURS;
     const hours = Array.from({ length: 24 }, (_, h) => ({ hour: h, val: 0 }));
+    if (!reports || reports.length === 0) return hours;
     reports.forEach((r) => {
       if (r.createdAt) {
         const d = new Date(r.createdAt);
@@ -479,27 +454,33 @@ const AdminAnalyticsPage = ({
             Lokasi yang paling banyak dilaporkan
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {locationData.map((loc, i) => (
-              <div key={i}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                  <span style={{ fontSize: '12.5px', color: '#374151', fontWeight: '500' }}>{loc.name}</span>
-                  <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>
-                    {loc.percent}% ({loc.count})
-                  </span>
+            {locationData.length > 0 ? (
+              locationData.map((loc, i) => (
+                <div key={i}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '12.5px', color: '#374151', fontWeight: '500' }}>{loc.name}</span>
+                    <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>
+                      {loc.percent}% ({loc.count})
+                    </span>
+                  </div>
+                  <div style={{ height: '6px', backgroundColor: '#f3f4f6', borderRadius: '9999px', overflow: 'hidden' }}>
+                    <div
+                      style={{
+                        height: '100%',
+                        width: `${loc.percent}%`,
+                        backgroundColor: '#dc2626',
+                        borderRadius: '9999px',
+                        transition: 'width 0.6s ease'
+                      }}
+                    />
+                  </div>
                 </div>
-                <div style={{ height: '6px', backgroundColor: '#f3f4f6', borderRadius: '9999px', overflow: 'hidden' }}>
-                  <div
-                    style={{
-                      height: '100%',
-                      width: `${loc.percent}%`,
-                      backgroundColor: '#dc2626',
-                      borderRadius: '9999px',
-                      transition: 'width 0.6s ease'
-                    }}
-                  />
-                </div>
+              ))
+            ) : (
+              <div style={{ padding: '24px 0', textAlign: 'center', color: '#9ca3af', fontSize: '12px' }}>
+                Belum ada data laporan lokasi
               </div>
-            ))}
+            )}
           </div>
         </div>
 

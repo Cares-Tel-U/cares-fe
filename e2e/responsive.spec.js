@@ -43,6 +43,12 @@ test.describe('Audit Responsivitas UI di Berbagai Device', () => {
 
     test(`Pemeriksaan Responsivitas Form Buat Laporan [${vp.name}: ${vp.width}x${vp.height}]`, async ({ page }) => {
       await page.setViewportSize({ width: vp.width, height: vp.height });
+      await page.goto('/login');
+      await page.locator('input[type="email"]').fill('ambangawi@telkomuniversity.ac.id');
+      await page.locator('input[type="password"]').fill('password123');
+      await page.getByRole('button', { name: 'Login' }).click();
+      await page.waitForURL(/.*dashboard/, { timeout: 10000 });
+
       await page.goto('/buat-laporan');
       await page.waitForURL(/.*buat-laporan/, { timeout: 10000 });
 

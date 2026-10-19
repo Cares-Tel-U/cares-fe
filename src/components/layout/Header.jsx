@@ -516,7 +516,7 @@ const Header = ({
                       overflow: 'hidden'
                     }}
                   >
-                    {user?.name || 'Amba Ngawi'}
+                    {user?.name || user?.nama || '-'}
                   </div>
                   <div
                     style={{
@@ -528,7 +528,7 @@ const Header = ({
                       overflow: 'hidden'
                     }}
                   >
-                    {user?.email || 'amba@gmail.com'}
+                    {user?.email || '-'}
                   </div>
                   <button
                     type="button"

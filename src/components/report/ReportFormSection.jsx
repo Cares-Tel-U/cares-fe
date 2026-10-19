@@ -150,7 +150,7 @@ const ReportFormSection = ({ onSubmit, isSubmitting = false }) => {
   const [ruanganQuery, setRuanganQuery] = useState('');
   const [selectedRuangan, setSelectedRuangan] = useState('');
 
-  const [deskripsi, setDeskripsi] = useState('AC dikelas KU3.03.12 tidak dingin dan yang satunya lagi tidak bisa nyala');
+  const [deskripsi, setDeskripsi] = useState('');
   const [uploadedPhotos, setUploadedPhotos] = useState([]);
   const [photoError, setPhotoError] = useState('');
   const fileInputRef = useRef(null);
@@ -233,9 +233,7 @@ const ReportFormSection = ({ onSubmit, isSubmitting = false }) => {
       namaRuangan: selectedRuangan,
       lokasi: `${selectedGedung} - ${selectedRuangan}`,
       deskripsi,
-      foto: uploadedPhotos.length > 0 ? uploadedPhotos : [
-        'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=300&q=80'
-      ]
+      foto: uploadedPhotos,
     };
 
     onSubmit(reportData);

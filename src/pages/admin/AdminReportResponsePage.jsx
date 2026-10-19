@@ -32,25 +32,10 @@ const AdminReportResponsePage = ({
       const single = reports.find((r) => String(r.id) === String(id));
       if (single) return [single];
     }
-    // Fallback: pick pending verification reports or default mock report
+    // Fallback: pick pending verification reports or empty array
     const pending = reports.filter((r) => r.status === 'Menunggu Verifikasi');
     if (pending.length > 0) return pending.slice(0, 3);
-    return [
-      {
-        id: 'LAP-001',
-        status: 'Menunggu Verifikasi',
-        jenisLokasi: 'Dalam Gedung',
-        namaGedung: 'Gedung A',
-        namaRuangan: 'KU3.02.12',
-        deskripsi: 'AC dikelas KU3.03.12 tidak dingin dan yang satunya lagi tidak bisa nyala',
-        isAnonim: true,
-        foto: [
-          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'
-        ]
-      }
-    ];
+    return [];
   }, [location.state, id, reports]);
 
   const [activeReports, setActiveReports] = useState(initialReports);
@@ -215,7 +200,7 @@ const AdminReportResponsePage = ({
                   Nama Gedung
                 </div>
                 <div style={{ fontSize: '13px', color: '#1f2937', fontWeight: '600' }}>
-                  {primaryReport.namaGedung || primaryReport.gedung || (primaryReport.lokasi ? primaryReport.lokasi.split(' - ')[0] : 'Gedung A')}
+                  {primaryReport.namaGedung || primaryReport.gedung || (primaryReport.lokasi ? primaryReport.lokasi.split(' - ')[0] : '-')}
                 </div>
               </div>
               <div>
@@ -223,7 +208,7 @@ const AdminReportResponsePage = ({
                   Nama Ruangan
                 </div>
                 <div style={{ fontSize: '13px', color: '#1f2937', fontWeight: '600' }}>
-                  {primaryReport.namaRuangan || primaryReport.ruangan || (primaryReport.lokasi ? primaryReport.lokasi.split(' - ')[1] : 'KU3.02.12')}
+                  {primaryReport.namaRuangan || primaryReport.ruangan || (primaryReport.lokasi ? primaryReport.lokasi.split(' - ')[1] : '-')}
                 </div>
               </div>
             </div>
@@ -446,11 +431,7 @@ const AdminReportResponsePage = ({
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             {activeReports.map((report, index) => {
-              const photoList = report.foto && report.foto.length > 0 ? report.foto : [
-                'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-                'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
-                'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'
-              ];
+              const photoList = report.foto && report.foto.length > 0 ? report.foto : [];
 
               return (
                 <div
@@ -500,7 +481,7 @@ const AdminReportResponsePage = ({
                       Deskripsi Masalah
                     </div>
                     <div style={{ fontSize: '12.5px', color: '#4b5563', lineHeight: '1.45' }}>
-                      {report.deskripsi || 'AC dikelas KU3.03.12 tidak dingin dan yang satunya lagi tidak bisa nyala'}
+                      {report.deskripsi || '-'}
                     </div>
                   </div>
 
@@ -510,20 +491,26 @@ const AdminReportResponsePage = ({
                       Bukti Foto
                     </div>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      {photoList.map((imgSrc, imgIdx) => (
-                        <img
-                          key={imgIdx}
-                          src={imgSrc}
-                          alt={`Bukti Foto ${imgIdx + 1}`}
-                          style={{
-                            width: '56px',
-                            height: '56px',
-                            borderRadius: '8px',
-                            objectFit: 'cover',
-                            border: '1px solid #e5e7eb'
-                          }}
-                        />
-                      ))}
+                      {photoList.length > 0 ? (
+                        photoList.map((imgSrc, imgIdx) => (
+                          <img
+                            key={imgIdx}
+                            src={imgSrc}
+                            alt={`Bukti Foto ${imgIdx + 1}`}
+                            style={{
+                              width: '56px',
+                              height: '56px',
+                              borderRadius: '8px',
+                              objectFit: 'cover',
+                              border: '1px solid #e5e7eb'
+                            }}
+                          />
+                        ))
+                      ) : (
+                        <span style={{ fontSize: '11.5px', color: '#9ca3af', fontStyle: 'italic' }}>
+                          Tidak ada lampiran foto
+                        </span>
+                      )}
                     </div>
                   </div>
 

@@ -42,7 +42,7 @@ export function transformReport(r) {
     tanggal: formattedDate,
     createdAt: r.createdAt,
     isAnonim: Boolean(r.isAnonymous ?? r.isAnonim),
-    foto: photos.length > 0 ? photos : ['https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=300&q=80'],
+    foto: photos,
     reporterId: r.userId || r.reporterId,
     pelapor: r.user ? r.user.nama : (r.pelapor || (r.isAnonymous ? 'Anonim' : 'Civitas Akademika')),
     rejectReason: r.rejectionReason || r.rejectReason || '',

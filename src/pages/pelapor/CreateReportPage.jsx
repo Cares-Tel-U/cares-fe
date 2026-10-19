@@ -52,20 +52,36 @@ const CreateReportPage = ({
     setSubmitting(true);
 
     try {
-      // 1. Temukan ID fasilitas yang cocok atau fallback ke fasilitas pertama
+      // 1. Temukan ID fasilitas yang cocok atau fallback ke fasilitas yang tersedia tanpa laporan aktif
       let targetFacilityId = '';
       if (facilities.length > 0) {
-        const found = facilities.find(
+        // Ambil daftar ID fasilitas yang sedang memiliki laporan aktif (PENDING atau DIPROSES)
+        const activeFacilityIds = new Set(
+          (reports || [])
+            .filter((r) => r.rawStatus === 'PENDING' || r.rawStatus === 'DIPROSES' || r.status === 'Menunggu Verifikasi' || r.status === 'Diproses')
+            .map((r) => r.facilityId)
+        );
+
+        // Cari semua fasilitas yang cocok berdasarkan nama ruangan, nama gedung, atau lokasi
+        const matching = facilities.filter(
           (f) =>
             f.nama.toLowerCase().includes(formData.namaRuangan?.toLowerCase()) ||
             f.lokasi.toLowerCase().includes(formData.namaGedung?.toLowerCase()) ||
-            formData.lokasi?.toLowerCase().includes(f.nama.toLowerCase())
+            formData.lokasi?.toLowerCase().includes(f.nama.toLowerCase()) ||
+            formData.lokasi?.toLowerCase().includes(f.lokasi.toLowerCase())
         );
-        targetFacilityId = found ? found.id : facilities[0].id;
-      }
 
-      if (!targetFacilityId && facilities.length > 0) {
-        targetFacilityId = facilities[0].id;
+        // Prioritaskan fasilitas yang belum memiliki laporan aktif
+        const availableInMatch = matching.find((f) => !activeFacilityIds.has(f.id));
+        if (availableInMatch) {
+          targetFacilityId = availableInMatch.id;
+        } else if (matching.length > 0) {
+          targetFacilityId = matching[0].id;
+        } else {
+          // Jika tidak ada yang cocok sama sekali, cari fasilitas manapun yang tidak memiliki laporan aktif
+          const anyAvailable = facilities.find((f) => !activeFacilityIds.has(f.id));
+          targetFacilityId = anyAvailable ? anyAvailable.id : facilities[0].id;
+        }
       }
 
       // 2. Kirim laporan ke backend API
