@@ -30,7 +30,7 @@ const AreaChart = ({ data = [] }) => {
   const yTicks = [0, Math.round(maxVal / 3), Math.round((maxVal * 2) / 3), maxVal];
 
   return (
-    <svg width="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ overflow: 'visible' }}>
+    <svg width="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ overflow: 'hidden' }}>
       <defs>
         <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#dc2626" stopOpacity="0.25" />
@@ -131,31 +131,36 @@ const default24Hours = Array.from({ length: 24 }, (_, h) => ({ hour: h, val: 0 }
 const HourlyBarChart = ({ data = default24Hours }) => {
   const chartData = data && data.length > 0 ? data : default24Hours;
   const maxVal = Math.max(...chartData.map((d) => d.val), 1);
+  const effMax = Math.max(maxVal, 4);
   const showLabels = [0, 3, 6, 9, 12, 15, 18, 21];
-  const W = 400, H = 120, padB = 18;
-  const barW = W / chartData.length;
+  const W = 400, H = 120, padB = 18, padT = 10, padL = 20;
+  const chartW = W - padL;
+  const chartH = H - padT;
+  const barW = chartW / chartData.length;
+
+  const yTicks = [0, Math.round(effMax / 3), Math.round((effMax * 2) / 3), effMax];
 
   return (
-    <svg width="100%" viewBox={`0 0 ${W} ${H + padB}`} preserveAspectRatio="none" style={{ overflow: 'visible' }}>
-      {/* Y axis ticks */}
-      {[0, 5, 10, 15, 20, 25].map((t) => {
-        const y = H - (t / (maxVal || 1)) * H;
+    <svg width="100%" viewBox={`0 0 ${W} ${H + padB}`} preserveAspectRatio="none" style={{ overflow: 'hidden' }}>
+      {/* Y axis ticks & grid lines */}
+      {yTicks.map((t) => {
+        const y = padT + chartH - (t / effMax) * chartH;
         return (
           <g key={t}>
-            <line x1={0} y1={y} x2={W} y2={y} stroke="#f3f4f6" strokeWidth="0.5" />
-            <text x={-2} y={y + 4} fontSize="8" fill="#9ca3af" textAnchor="end">{t}</text>
+            <line x1={padL} y1={y} x2={W} y2={y} stroke="#f3f4f6" strokeWidth="0.8" />
+            <text x={padL - 4} y={y + 3} fontSize="8" fill="#9ca3af" textAnchor="end">{t}</text>
           </g>
         );
       })}
       {/* Bars */}
       {chartData.map((d, i) => {
-        const bh = (d.val / (maxVal || 1)) * H;
+        const bh = (d.val / effMax) * chartH;
         return (
           <rect
             key={i}
-            x={i * barW + 1}
-            y={H - bh}
-            width={barW - 2}
+            x={padL + i * barW + 1}
+            y={padT + chartH - bh}
+            width={Math.max(barW - 2, 1)}
             height={bh}
             fill="#dc2626"
             rx="2"
@@ -169,8 +174,8 @@ const HourlyBarChart = ({ data = default24Hours }) => {
         return (
           <text
             key={i}
-            x={i * barW + barW / 2}
-            y={H + padB - 2}
+            x={padL + i * barW + barW / 2}
+            y={H + padB - 4}
             fontSize="8"
             fill="#9ca3af"
             textAnchor="middle"
@@ -309,7 +314,8 @@ const AdminAnalyticsPage = ({
     borderRadius: '14px',
     border: '1px solid #e5e7eb',
     padding: '20px',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.03)'
+    boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+    overflow: 'hidden'
   };
 
   return (
