@@ -61,20 +61,22 @@ const ReportChart = () => {
   }, [chartData, filter]);
 
   // Hitung metrik dan koordinat SVG grafik
-  const { pts, linePath, areaPath, maxVal, yTicks } = useMemo(() => {
+  const { pts, linePath, areaPath, maxVal, yTicks, W, H, baselineY, padT, chartH, padX } = useMemo(() => {
     const counts = processedData.map((d) => d.count);
     const highest = Math.max(...counts, 4);
     const ticks = [highest, Math.round((highest * 2) / 3), Math.round(highest / 3), 0];
 
     const W = 500;
     const H = 160;
-    const padT = 12;
-    const padB = 10;
+    const padX = 14; // padding horizontal aman agar titik di tepi kiri & kanan tidak terpotong
+    const padT = 16; // padding vertikal atas aman agar titik puncak tidak terpotong
+    const padB = 12;
+    const chartW = W - padX * 2;
     const chartH = H - padT - padB;
     const baselineY = padT + chartH;
 
     const points = processedData.map((d, idx) => {
-      const x = processedData.length > 1 ? (idx / (processedData.length - 1)) * W : W / 2;
+      const x = processedData.length > 1 ? padX + (idx / (processedData.length - 1)) * chartW : W / 2;
       const y = padT + chartH - (d.count / highest) * chartH;
       return {
         x: Math.round(x * 10) / 10,
@@ -104,7 +106,8 @@ const ReportChart = () => {
       H,
       baselineY,
       padT,
-      chartH
+      chartH,
+      padX
     };
   }, [processedData]);
 
@@ -211,73 +214,91 @@ const ReportChart = () => {
             ))}
           </div>
 
-          {/* Wrapper SVG Grafik */}
-          <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+          {/* Wrapper SVG Grafik & Titik Bulat Presisi */}
+          <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'visible' }}>
             {isLoading ? (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#9ca3af', fontSize: '12.5px' }}>
                 Memuat grafik tren...
               </div>
             ) : (
-              <svg
-                viewBox="0 0 500 160"
-                preserveAspectRatio="none"
-                style={{ width: '100%', height: '100%', overflow: 'hidden', display: 'block' }}
-                aria-label="Grafik jumlah laporan"
-              >
-                <defs>
-                  <linearGradient id="adminReportFillGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#df3541" stopOpacity="0.45" />
-                    <stop offset="100%" stopColor="#f6d5d7" stopOpacity="0.03" />
-                  </linearGradient>
-                </defs>
+              <>
+                <svg
+                  viewBox={`0 0 ${W} ${H}`}
+                  preserveAspectRatio="none"
+                  style={{ width: '100%', height: '100%', overflow: 'visible', display: 'block' }}
+                  aria-label="Grafik jumlah laporan"
+                >
+                  <defs>
+                    <linearGradient id="adminReportFillGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#df3541" stopOpacity="0.45" />
+                      <stop offset="100%" stopColor="#f6d5d7" stopOpacity="0.03" />
+                    </linearGradient>
+                  </defs>
 
-                {/* Garis Kisi Horizontal Sejajar dengan Sumbu Y */}
-                {yTicks.map((t, idx) => {
-                  const y = 12 + 138 - (t / maxVal) * 138;
-                  return (
-                    <line
-                      key={idx}
-                      x1="0"
-                      y1={y}
-                      x2="500"
-                      y2={y}
-                      stroke="#ededed"
-                      strokeWidth="1"
+                  {/* Garis Kisi Horizontal Sejajar dengan Sumbu Y */}
+                  {yTicks.map((t, idx) => {
+                    const y = padT + chartH - (t / maxVal) * chartH;
+                    return (
+                      <line
+                        key={idx}
+                        x1="0"
+                        y1={y}
+                        x2={W}
+                        y2={y}
+                        stroke="#ededed"
+                        strokeWidth="1"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    );
+                  })}
+
+                  {/* Area Gradien Merah Halus */}
+                  {areaPath && <path d={areaPath} fill="url(#adminReportFillGrad)" />}
+
+                  {/* Garis Kurva Tren Merah */}
+                  {linePath && (
+                    <path
+                      d={linePath}
+                      fill="none"
+                      stroke="#c81d27"
+                      strokeWidth="1.5"
                       vectorEffect="non-scaling-stroke"
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
                     />
-                  );
-                })}
+                  )}
+                </svg>
 
-                {/* Area Gradien Merah Halus */}
-                {areaPath && <path d={areaPath} fill="url(#adminReportFillGrad)" />}
-
-                {/* Garis Kurva Tren Merah */}
-                {linePath && (
-                  <path
-                    d={linePath}
-                    fill="none"
-                    stroke="#c81d27"
-                    strokeWidth="1.5"
-                    vectorEffect="non-scaling-stroke"
-                    strokeLinejoin="round"
-                    strokeLinecap="round"
-                  />
-                )}
-
-                {/* Titik Lingkaran Data (Dots) */}
-                {pts.map((p, idx) => (
-                  <circle
-                    key={idx}
-                    cx={p.x}
-                    cy={p.y}
-                    r={p.count > 0 ? 3.5 : 2}
-                    fill={p.count > 0 ? '#c81d27' : '#e5e7eb'}
-                    stroke={p.count > 0 ? '#ffffff' : '#9ca3af'}
-                    strokeWidth="1.5"
-                    vectorEffect="non-scaling-stroke"
-                  />
-                ))}
-              </svg>
+                {/* Titik Lingkaran Data (HTML Overlay: Bulat Sempurna 1:1, Tidak Gepeng, Tidak Terpotong, Animasi Denyut Halus) */}
+                <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'visible' }}>
+                  {pts.map((p, idx) => {
+                    const hasData = p.count > 0;
+                    return (
+                      <div
+                        key={idx}
+                        title={`${p.label}: ${p.count} Laporan`}
+                        style={{
+                          position: 'absolute',
+                          left: `${(p.x / W) * 100}%`,
+                          top: `${(p.y / H) * 100}%`,
+                          transform: 'translate(-50%, -50%)',
+                          width: hasData ? '11px' : '6px',
+                          height: hasData ? '11px' : '6px',
+                          borderRadius: '50%',
+                          backgroundColor: hasData ? '#dc2626' : '#d1d5db',
+                          border: hasData ? '2.5px solid #ffffff' : '1px solid #9ca3af',
+                          boxShadow: hasData ? '0 1px 3px rgba(220, 38, 38, 0.4)' : 'none',
+                          pointerEvents: 'auto',
+                          cursor: 'pointer',
+                          boxSizing: 'border-box',
+                          animation: hasData ? 'chartPulse 2s infinite ease-in-out' : 'none',
+                          zIndex: hasData ? 2 : 1
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              </>
             )}
           </div>
         </div>

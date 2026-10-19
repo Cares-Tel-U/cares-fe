@@ -17,19 +17,31 @@ const AreaChart = ({ data = [] }) => {
 
   const W = 500;
   const H = 140;
-  const padT = 8;
-  const padB = 8;
+  const padX = 14;
+  const padT = 14;
+  const padB = 10;
+  const chartW = W - padX * 2;
   const chartH = H - padT - padB;
+  const baselineY = padT + chartH;
 
   const pts = chartData.map((d, i) => ({
-    x: chartData.length > 1 ? (i / (chartData.length - 1)) * W : W / 2,
-    y: padT + chartH - (d.value / maxVal) * chartH
+    x: chartData.length > 1 ? padX + (i / (chartData.length - 1)) * chartW : W / 2,
+    y: padT + chartH - (d.value / maxVal) * chartH,
+    value: d.value,
+    label: d.label
   }));
 
   const linePath = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
   const areaPath = pts.length > 1
-    ? `${linePath} L${pts[pts.length - 1].x},${padT + chartH} L${pts[0].x},${padT + chartH} Z`
+    ? `${linePath} L${pts[pts.length - 1].x},${baselineY} L${pts[0].x},${baselineY} Z`
     : '';
+
+  // Filter label sumbu X agar rapi dan tidak tumpang tindih untuk rentang data panjang (misal 30 hari)
+  const visibleXLabels = useMemo(() => {
+    if (pts.length <= 8) return pts;
+    const step = Math.ceil(pts.length / 6);
+    return pts.filter((_, idx) => idx === 0 || idx === pts.length - 1 || idx % step === 0);
+  }, [pts]);
 
   return (
     <div style={{ width: '100%', userSelect: 'none' }}>
@@ -41,8 +53,8 @@ const AreaChart = ({ data = [] }) => {
           ))}
         </div>
 
-        {/* Chart SVG */}
-        <div style={{ position: 'relative', width: '100%', height: '140px' }}>
+        {/* Chart Container & Titik Bulat Presisi */}
+        <div style={{ position: 'relative', width: '100%', height: '140px', overflow: 'visible' }}>
           <svg width="100%" height="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ overflow: 'visible', display: 'block' }}>
             <defs>
               <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
@@ -81,44 +93,63 @@ const AreaChart = ({ data = [] }) => {
               strokeLinejoin="round"
               strokeLinecap="round"
             />
-
-            {/* Dots: titik data proporsional */}
-            {pts.map((p, i) => (
-              <circle
-                key={i}
-                cx={p.x}
-                cy={p.y}
-                r="3"
-                fill="#dc2626"
-                stroke="#fff"
-                strokeWidth="1.5"
-                vectorEffect="non-scaling-stroke"
-              />
-            ))}
           </svg>
+
+          {/* Titik Lingkaran Data (HTML Overlay: Bulat Sempurna 1:1, Tidak Gepeng, Animasi Denyut Halus) */}
+          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'visible' }}>
+            {pts.map((p, i) => {
+              const hasData = p.value > 0;
+              return (
+                <div
+                  key={i}
+                  title={`${p.label}: ${p.value} Laporan`}
+                  style={{
+                    position: 'absolute',
+                    left: `${(p.x / W) * 100}%`,
+                    top: `${(p.y / H) * 100}%`,
+                    transform: 'translate(-50%, -50%)',
+                    width: hasData ? '11px' : '6px',
+                    height: hasData ? '11px' : '6px',
+                    borderRadius: '50%',
+                    backgroundColor: hasData ? '#dc2626' : '#d1d5db',
+                    border: hasData ? '2.5px solid #ffffff' : '1px solid #9ca3af',
+                    boxShadow: hasData ? '0 1px 3px rgba(220, 38, 38, 0.4)' : 'none',
+                    pointerEvents: 'auto',
+                    cursor: 'pointer',
+                    boxSizing: 'border-box',
+                    animation: hasData ? 'chartPulse 2s infinite ease-in-out' : 'none',
+                    zIndex: hasData ? 2 : 1
+                  }}
+                />
+              );
+            })}
+          </div>
         </div>
       </div>
 
       {/* X Axis Labels (HTML: proporsional, ukuran 11px, terpusat persis di bawah titik data) */}
       <div style={{ display: 'grid', gridTemplateColumns: '24px 1fr', gap: '10px', marginTop: '10px' }}>
         <div />
-        <div style={{ position: 'relative', width: '100%', height: '16px' }}>
-          {pts.map((p, i) => (
-            <span
-              key={i}
-              style={{
-                position: 'absolute',
-                left: `${(p.x / W) * 100}%`,
-                transform: 'translateX(-50%)',
-                fontSize: '11px',
-                color: '#9ca3af',
-                fontWeight: 500,
-                whiteSpace: 'nowrap'
-              }}
-            >
-              {p.label}
-            </span>
-          ))}
+        <div style={{ position: 'relative', width: '100%', height: '18px' }}>
+          {visibleXLabels.map((p, i) => {
+            const leftPercent = (p.x / W) * 100;
+            return (
+              <span
+                key={i}
+                style={{
+                  position: 'absolute',
+                  left: `${leftPercent}%`,
+                  transform: leftPercent === 0 ? 'none' : leftPercent === 100 ? 'translateX(-100%)' : 'translateX(-50%)',
+                  fontSize: '11px',
+                  color: '#9ca3af',
+                  fontWeight: 500,
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {p.label}
+              </span>
+            );
+          })}
         </div>
       </div>
     </div>
@@ -356,17 +387,50 @@ const AdminAnalyticsPage = ({
     ];
   }, [totalReportsCount, pendingReportsCount, inProgressReportsCount, completedReportsCount, rejectedReportsCount]);
 
-  // Data Area Chart Dinamis
+  // Data Area Chart Dinamis (Deret Harian Kontinu dari API & Fallback Reports)
   const areaChartData = useMemo(() => {
-    if (stats?.chartData && Array.isArray(stats.chartData) && stats.chartData.length > 0) {
-      return stats.chartData.map((d) => {
-        const parts = d.date.split('-');
-        const label = parts.length === 3 ? `${parseInt(parts[2], 10)}/${parseInt(parts[1], 10)}` : d.date;
-        return { label, value: d.count };
+    const rawMap = {};
+
+    // 1. Ambil data tren dari API stats jika tersedia
+    if (stats?.chartData && Array.isArray(stats.chartData)) {
+      stats.chartData.forEach((d) => {
+        if (d && d.date) {
+          rawMap[d.date] = Number(d.count) || 0;
+        }
       });
     }
-    return [];
-  }, [stats]);
+
+    // 2. Jika rawMap masih kosong tapi ada props reports, gunakan reports sebagai fallback
+    if (Object.keys(rawMap).length === 0 && Array.isArray(reports) && reports.length > 0) {
+      reports.forEach((r) => {
+        if (r.createdAt) {
+          const isoKey = new Date(r.createdAt).toISOString().slice(0, 10);
+          rawMap[isoKey] = (rawMap[isoKey] || 0) + 1;
+        }
+      });
+    }
+
+    // Tentukan jumlah hari berdasarkan filter ('Bulan Ini' = 30 hari, 'Minggu Ini' & 'Semua' = 7 hari)
+    const daysCount = activeFilter === 'Bulan Ini' ? 30 : 7;
+    const result = [];
+    const today = new Date();
+
+    for (let i = daysCount - 1; i >= 0; i--) {
+      const targetDate = new Date(today);
+      targetDate.setDate(today.getDate() - i);
+      const isoKey = targetDate.toISOString().slice(0, 10);
+      const d = targetDate.getDate();
+      const m = targetDate.getMonth() + 1;
+      const label = `${d}/${m}`;
+      result.push({
+        date: isoKey,
+        label,
+        value: rawMap[isoKey] || 0
+      });
+    }
+
+    return result;
+  }, [stats, reports, activeFilter]);
 
   // Data Lokasi Terbanyak Dinamis
   const locationData = useMemo(() => {
