@@ -8,6 +8,7 @@ import {
   adminService,
   getAuthToken,
   getStoredUser,
+  setStoredUser,
 } from './services';
 
 function App() {
@@ -238,6 +239,10 @@ function App() {
     if (finalAvatarUrl) {
       setUser((prev) => (prev ? { ...prev, avatar: finalAvatarUrl } : prev));
       setAdminUser((prev) => (prev ? { ...prev, avatar: finalAvatarUrl } : prev));
+      const stored = getStoredUser();
+      if (stored) {
+        setStoredUser({ ...stored, avatar: finalAvatarUrl });
+      }
     }
 
     const newNotif = {

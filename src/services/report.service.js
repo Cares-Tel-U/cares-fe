@@ -112,14 +112,17 @@ export const reportService = {
   },
 
   // Membuat Laporan Kerusakan Baru (Mendukung upload File foto dan JSON)
-  async createReport({ judul, deskripsi, facilityId, isAnonymous, photos }) {
+  // Membuat Laporan Kerusakan Baru (Mendukung upload File foto dan JSON)
+  async createReport({ judul, deskripsi, facilityId, isAnonymous, photos, namaGedung, namaRuangan }) {
     const hasPhysicalFiles = Array.isArray(photos) && photos.some((p) => typeof File !== 'undefined' && p instanceof File);
 
     if (hasPhysicalFiles) {
       const formData = new FormData();
       formData.append('judul', judul);
       formData.append('deskripsi', deskripsi);
-      formData.append('facilityId', facilityId);
+      if (facilityId) formData.append('facilityId', facilityId);
+      if (namaGedung) formData.append('namaGedung', namaGedung);
+      if (namaRuangan) formData.append('namaRuangan', namaRuangan);
       formData.append('isAnonymous', String(Boolean(isAnonymous)));
 
       photos.forEach((photo) => {
@@ -142,7 +145,9 @@ export const reportService = {
       body: {
         judul,
         deskripsi,
-        facilityId,
+        facilityId: facilityId || undefined,
+        namaGedung: namaGedung || undefined,
+        namaRuangan: namaRuangan || undefined,
         isAnonymous: Boolean(isAnonymous),
         photos: Array.isArray(photos) ? photos : [],
       },

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import './GuideModal.css';
 
 const GUIDE_DATA = {
@@ -145,7 +146,7 @@ const AdminGuideModal = ({ isOpen, onClose }) => {
     }
   };
 
-  return (
+  const modalNode = (
     <div className="admin-guide-backdrop" onClick={onClose}>
       <div className="admin-guide-modal-card" onClick={(e) => e.stopPropagation()}>
         <div className="admin-guide-content-grid">
@@ -856,6 +857,8 @@ const AdminGuideModal = ({ isOpen, onClose }) => {
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalNode, document.body) : modalNode;
 };
 
 export default AdminGuideModal;

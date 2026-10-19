@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '../../layouts/MainLayout';
 import IdentitySection from '../../components/report/IdentitySection';
 import ReportFormSection from '../../components/report/ReportFormSection';
 import ImportantInfoCard from '../../components/report/ImportantInfoCard';
+import ReportLoadingModal from '../../components/modals/ReportLoadingModal';
 import { reportService, facilityService } from '../../services';
 
 const CreateReportPage = ({
@@ -18,6 +20,7 @@ const CreateReportPage = ({
 }) => {
   const navigate = useNavigate();
   const [isAnonim, setIsAnonim] = useState(true);
+  const [showLoadingModal, setShowLoadingModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showDailyLimitModal, setShowDailyLimitModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -50,6 +53,7 @@ const CreateReportPage = ({
   const handleSubmit = async (formData) => {
     setErrorMessage('');
     setSubmitting(true);
+    setShowLoadingModal(true);
 
     try {
       // 1. Temukan ID fasilitas yang cocok atau fallback ke fasilitas yang tersedia tanpa laporan aktif
@@ -113,6 +117,8 @@ const CreateReportPage = ({
             facilityId: fId,
             isAnonymous: isAnonim,
             photos: formData.photoFiles || formData.foto || [],
+            namaGedung: formData.namaGedung,
+            namaRuangan: formData.namaRuangan,
           });
           if (createdReport) break;
         } catch (subErr) {
@@ -133,8 +139,11 @@ const CreateReportPage = ({
       if (onAddReport && createdReport) {
         onAddReport(createdReport);
       }
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      setShowLoadingModal(false);
       setShowSuccessModal(true);
     } catch (err) {
+      setShowLoadingModal(false);
       const msg = err.message || '';
       if (msg.includes('3 laporan harian') || msg.includes('melebihi batas')) {
         setShowDailyLimitModal(true);
@@ -192,8 +201,10 @@ const CreateReportPage = ({
         </div>
       </div>
 
-      {showSuccessModal && (
-        <div className="success-modal-backdrop" role="presentation">
+      <ReportLoadingModal isOpen={showLoadingModal} text="loading to laporan berhasil" />
+
+      {showSuccessModal && typeof document !== 'undefined' && createPortal(
+        <div className="success-modal-backdrop" role="presentation" style={{ zIndex: 99999 }}>
           <section className="success-modal-card" role="status" aria-live="polite" aria-label="Laporan berhasil dibuat">
             <div className="success-icon-wrapper" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -202,17 +213,18 @@ const CreateReportPage = ({
             </div>
             <p>Laporan berhasil dibuat</p>
           </section>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {showDailyLimitModal && (
+      {showDailyLimitModal && typeof document !== 'undefined' && createPortal(
         <div
           role="presentation"
           onClick={() => setShowDailyLimitModal(false)}
           style={{
             position: 'fixed',
             inset: 0,
-            zIndex: 10000,
+            zIndex: 99999,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -238,11 +250,12 @@ const CreateReportPage = ({
             <div style={{ display: 'grid', placeItems: 'center', width: '36px', height: '36px', margin: '0 auto 16px', borderRadius: '50%', background: '#ff654f', color: '#ffffff' }}>
               <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="m7 7 10 10M17 7 7 17" /></svg>
             </div>
-            <p style={{ margin: 0, color: '#171717', fontSize: '10px', fontWeight: 600, lineHeight: 1.38 }}>
+            <p style={{ margin: 0, color: '#171717', fontSize: '13.5px', fontWeight: 600, lineHeight: 1.45 }}>
               Laporan gagal dibuat karena melebihi batas laporan harian
             </p>
           </section>
-        </div>
+        </div>,
+        document.body
       )}
     </MainLayout>
   );

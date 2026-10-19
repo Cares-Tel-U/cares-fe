@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { authService, notificationService } from '../../services';
+import { resolveMediaUrl } from '../../services/api';
 
 const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'><rect width='64' height='64' rx='32' fill='%23E5E7EB'/><circle cx='32' cy='25' r='12' fill='%239CA3AF'/><path d='M12 54c0-11.046 8.954-20 20-20s20 8.954 20 20' fill='%239CA3AF'/></svg>";
 
@@ -257,8 +259,8 @@ const Header = ({
                 backgroundColor: '#ffffff',
                 borderRadius: '16px',
                 boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.04)',
-                border: '1px solid #f3f4f6',
-                width: '380px',
+                width: 'min(380px, calc(100vw - 28px))',
+                maxWidth: 'calc(100vw - 28px)',
                 zIndex: 80,
                 padding: '18px 20px',
                 maxHeight: '480px',
@@ -398,8 +400,12 @@ const Header = ({
             }}
           >
             <img
-              src={user?.avatar || DEFAULT_AVATAR}
+              src={resolveMediaUrl(user?.avatar) || DEFAULT_AVATAR}
               alt={user?.name || "User Avatar"}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = DEFAULT_AVATAR;
+              }}
               style={{
                 width: '42px',
                 height: '42px',
@@ -476,8 +482,12 @@ const Header = ({
                   }}
                 >
                   <img
-                    src={user?.avatar || DEFAULT_AVATAR}
+                    src={resolveMediaUrl(user?.avatar) || DEFAULT_AVATAR}
                     alt={user?.name || "User"}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = DEFAULT_AVATAR;
+                    }}
                     style={{
                       width: '100%',
                       height: '100%',
@@ -674,22 +684,19 @@ const Header = ({
         </div>
       </div>
 
-      {/* Confirmation Modal: "Keluar dari Akun?" (Matches Screenshot 1) */}
-      {showLogoutModal && (
+      {/* Confirmation Modal: "Keluar dari Akun?" (Rendered via Portal to document.body) */}
+      {showLogoutModal && typeof document !== 'undefined' && createPortal(
         <div
           onClick={() => setShowLogoutModal(false)}
           style={{
             position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
+            inset: 0,
             backgroundColor: 'rgba(0, 0, 0, 0.45)',
             backdropFilter: 'blur(2px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: 9999,
+            zIndex: 99999,
             padding: '20px'
           }}
         >
@@ -801,7 +808,8 @@ const Header = ({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </header>
   );

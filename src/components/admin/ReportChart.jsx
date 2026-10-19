@@ -28,42 +28,124 @@ const ReportChart = () => {
     };
   }, [filter]);
 
-  const { path, dates, maxVal } = useMemo(() => {
-    if (!chartData || chartData.length === 0) {
-      return { path: '', dates: [], maxVal: 4 };
+  // Siapkan rentang data lengkap berdasarkan filter waktu
+  const processedData = useMemo(() => {
+    const rawMap = {};
+    if (Array.isArray(chartData)) {
+      chartData.forEach((d) => {
+        if (d && d.date) {
+          rawMap[d.date] = Number(d.count) || 0;
+        }
+      });
     }
 
-    const datesFormatted = chartData.map((d) => {
-      const parts = d.date.split('-');
-      return parts.length === 3 ? `${parseInt(parts[2], 10)}/${parseInt(parts[1], 10)}` : d.date;
-    });
+    const daysCount = filter === 'Mingguan' ? 7 : 30;
+    const result = [];
+    const today = new Date();
 
-    const counts = chartData.map((d) => d.count);
+    for (let i = daysCount - 1; i >= 0; i--) {
+      const targetDate = new Date(today);
+      targetDate.setDate(today.getDate() - i);
+      const isoKey = targetDate.toISOString().slice(0, 10);
+      const d = targetDate.getDate();
+      const m = targetDate.getMonth() + 1;
+      const label = `${d}/${m}`;
+      result.push({
+        date: isoKey,
+        label,
+        count: rawMap[isoKey] || 0
+      });
+    }
+
+    return result;
+  }, [chartData, filter]);
+
+  // Hitung metrik dan koordinat SVG grafik
+  const { pts, linePath, areaPath, maxVal, yTicks } = useMemo(() => {
+    const counts = processedData.map((d) => d.count);
     const highest = Math.max(...counts, 4);
+    const ticks = [highest, Math.round((highest * 2) / 3), Math.round(highest / 3), 0];
 
-    const W = 420;
-    const H = 150;
-    const padY = 15;
-    const effH = H - padY * 2;
+    const W = 500;
+    const H = 160;
+    const padT = 12;
+    const padB = 10;
+    const chartH = H - padT - padB;
+    const baselineY = padT + chartH;
 
-    const points = chartData.map((d, idx) => {
-      const x = chartData.length > 1 ? (idx / (chartData.length - 1)) * W : W / 2;
-      const y = H - padY - (d.count / highest) * effH;
-      return `${Math.round(x)} ${Math.round(y)}`;
+    const points = processedData.map((d, idx) => {
+      const x = processedData.length > 1 ? (idx / (processedData.length - 1)) * W : W / 2;
+      const y = padT + chartH - (d.count / highest) * chartH;
+      return {
+        x: Math.round(x * 10) / 10,
+        y: Math.round(y * 10) / 10,
+        count: d.count,
+        label: d.label
+      };
     });
 
-    const svgPath = points.length > 0 ? `M${points.join(' L')}` : '';
+    let lPath = '';
+    let aPath = '';
 
-    return { path: svgPath, dates: datesFormatted, maxVal: highest };
-  }, [chartData]);
+    if (points.length > 1) {
+      lPath = points.map((p, idx) => `${idx === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
+      const firstX = points[0].x;
+      const lastX = points[points.length - 1].x;
+      aPath = `${lPath} L${lastX},${baselineY} L${firstX},${baselineY} Z`;
+    }
 
-  const yTicks = [maxVal, Math.round((maxVal * 2) / 3), Math.round(maxVal / 3), 0];
+    return {
+      pts: points,
+      linePath: lPath,
+      areaPath: aPath,
+      maxVal: highest,
+      yTicks: ticks,
+      W,
+      H,
+      baselineY,
+      padT,
+      chartH
+    };
+  }, [processedData]);
+
+  // Filter label sumbu X agar rapi dan tidak tumpang tindih
+  const visibleXLabels = useMemo(() => {
+    if (filter === 'Mingguan') {
+      return pts;
+    }
+    // Untuk bulanan, tampilkan setiap 5-6 titik agar bersih
+    const step = Math.ceil(pts.length / 6);
+    return pts.filter((_, idx) => idx === 0 || idx === pts.length - 1 || idx % step === 0);
+  }, [pts, filter]);
 
   return (
-    <section style={{ height: '100%', minHeight: '342px', boxSizing: 'border-box', background: '#fff', border: '1px solid #d7d7d7', borderRadius: '8px', padding: '16px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-        <h3 style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: '#303038' }}>Grafik Laporan</h3>
-        <div style={{ display: 'flex', border: '1px solid #d8d8d8', borderRadius: '16px', padding: '1px', fontSize: '9px' }}>
+    <section
+      style={{
+        height: '100%',
+        minHeight: '342px',
+        boxSizing: 'border-box',
+        background: '#fff',
+        border: '1px solid #d7d7d7',
+        borderRadius: '8px',
+        padding: '16px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        overflow: 'hidden'
+      }}
+    >
+      {/* Header Kartu */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '14px',
+          flexShrink: 0
+        }}
+      >
+        <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 700, color: '#303038' }}>Grafik Laporan</h3>
+        <div style={{ display: 'flex', border: '1px solid #d8d8d8', borderRadius: '16px', padding: '2px', fontSize: '11.5px' }}>
           {['Mingguan', 'Bulanan'].map((option) => (
             <button
               key={option}
@@ -71,13 +153,15 @@ const ReportChart = () => {
               onClick={() => setFilter(option)}
               style={{
                 minWidth: '67px',
-                padding: '5px 10px',
+                padding: '4px 12px',
                 border: 0,
                 borderRadius: '14px',
-                color: filter === option ? '#fff' : '#c1c1c1',
+                color: filter === option ? '#fff' : '#888888',
                 background: filter === option ? '#d91f2c' : 'transparent',
-                fontSize: '9px',
-                cursor: 'pointer'
+                fontSize: '11.5px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'background 0.2s ease, color 0.2s ease'
               }}
             >
               {option}
@@ -86,38 +170,152 @@ const ReportChart = () => {
         </div>
       </div>
 
-      <div style={{ height: '260px', display: 'grid', gridTemplateColumns: '17px 1fr', gridTemplateRows: '1fr 18px', color: '#65666c', fontSize: '8px' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '7px 0 17px' }}>
-          {yTicks.map((t, idx) => (
-            <span key={idx}>{t}</span>
-          ))}
+      {/* Kontainer Grafik Presisi & Terkunci di Dalam Kotak */}
+      <div
+        style={{
+          flex: 1,
+          minHeight: '220px',
+          maxHeight: '260px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          overflow: 'hidden'
+        }}
+      >
+        {/* Area Sumbu Y & SVG */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '26px 1fr',
+            gap: '10px',
+            alignItems: 'stretch',
+            height: '180px',
+            overflow: 'hidden'
+          }}
+        >
+          {/* Label Sumbu Y */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              padding: '6px 0',
+              color: '#65666c',
+              fontSize: '11px',
+              fontWeight: 500,
+              textAlign: 'right'
+            }}
+          >
+            {yTicks.map((t, idx) => (
+              <span key={idx} style={{ lineHeight: 1 }}>{t}</span>
+            ))}
+          </div>
+
+          {/* Wrapper SVG Grafik */}
+          <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden' }}>
+            {isLoading ? (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#9ca3af', fontSize: '12.5px' }}>
+                Memuat grafik tren...
+              </div>
+            ) : (
+              <svg
+                viewBox="0 0 500 160"
+                preserveAspectRatio="none"
+                style={{ width: '100%', height: '100%', overflow: 'hidden', display: 'block' }}
+                aria-label="Grafik jumlah laporan"
+              >
+                <defs>
+                  <linearGradient id="adminReportFillGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#df3541" stopOpacity="0.45" />
+                    <stop offset="100%" stopColor="#f6d5d7" stopOpacity="0.03" />
+                  </linearGradient>
+                </defs>
+
+                {/* Garis Kisi Horizontal Sejajar dengan Sumbu Y */}
+                {yTicks.map((t, idx) => {
+                  const y = 12 + 138 - (t / maxVal) * 138;
+                  return (
+                    <line
+                      key={idx}
+                      x1="0"
+                      y1={y}
+                      x2="500"
+                      y2={y}
+                      stroke="#ededed"
+                      strokeWidth="1"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                  );
+                })}
+
+                {/* Area Gradien Merah Halus */}
+                {areaPath && <path d={areaPath} fill="url(#adminReportFillGrad)" />}
+
+                {/* Garis Kurva Tren Merah */}
+                {linePath && (
+                  <path
+                    d={linePath}
+                    fill="none"
+                    stroke="#c81d27"
+                    strokeWidth="1.5"
+                    vectorEffect="non-scaling-stroke"
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
+                  />
+                )}
+
+                {/* Titik Lingkaran Data (Dots) */}
+                {pts.map((p, idx) => (
+                  <circle
+                    key={idx}
+                    cx={p.x}
+                    cy={p.y}
+                    r={p.count > 0 ? 3.5 : 2}
+                    fill={p.count > 0 ? '#c81d27' : '#e5e7eb'}
+                    stroke={p.count > 0 ? '#ffffff' : '#9ca3af'}
+                    strokeWidth="1.5"
+                    vectorEffect="non-scaling-stroke"
+                  />
+                ))}
+              </svg>
+            )}
+          </div>
         </div>
 
-        {chartData.length > 0 && path ? (
-          <svg viewBox="0 0 420 150" preserveAspectRatio="none" style={{ width: '100%', height: '100%', overflow: 'visible' }} aria-label="Grafik jumlah laporan">
-            <defs>
-              <linearGradient id="adminReportFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#df3541" stopOpacity=".65" />
-                <stop offset="100%" stopColor="#f6d5d7" stopOpacity=".15" />
-              </linearGradient>
-            </defs>
-            {[0, 50, 100, 150].map((line) => (
-              <line key={line} x1="0" x2="420" y1={line} y2={line} stroke="#ededed" strokeWidth=".6" />
-            ))}
-            <path d={`${path} L420 150 L0 150 Z`} fill="url(#adminReportFill)" />
-            <path d={path} fill="none" stroke="#c81d27" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
-          </svg>
-        ) : (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#9ca3af', fontSize: '11px' }}>
-            {isLoading ? 'Memuat grafik tren...' : 'Belum ada tren laporan pada periode ini'}
+        {/* Label Sumbu X Terpisah Rapi */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '26px 1fr',
+            gap: '10px',
+            marginTop: '8px',
+            borderTop: '1px solid #d8d8d8',
+            paddingTop: '6px',
+            flexShrink: 0
+          }}
+        >
+          <div />
+          <div style={{ position: 'relative', width: '100%', height: '18px' }}>
+            {visibleXLabels.map((p, idx) => {
+              const leftPercent = (p.x / 500) * 100;
+              return (
+                <span
+                  key={idx}
+                  style={{
+                    position: 'absolute',
+                    left: `${leftPercent}%`,
+                    transform: leftPercent === 0 ? 'none' : leftPercent === 100 ? 'translateX(-100%)' : 'translateX(-50%)',
+                    fontSize: '11px',
+                    color: '#65666c',
+                    fontWeight: 500,
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {p.label}
+                </span>
+              );
+            })}
           </div>
-        )}
-
-        <div />
-        <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #9a9a9a', paddingTop: '4px', whiteSpace: 'nowrap' }}>
-          {dates.map((date, idx) => (
-            <span key={idx}>{date}</span>
-          ))}
         </div>
       </div>
     </section>

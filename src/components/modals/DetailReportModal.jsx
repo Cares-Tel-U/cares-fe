@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import Modal from '../common/Modal';
 import BadgeStatus from '../common/BadgeStatus';
 
@@ -8,13 +9,13 @@ import BadgeStatus from '../common/BadgeStatus';
 const BuktiModal = ({ proof, onClose }) => {
   if (!proof) return null;
 
-  return (
+  const content = (
     <div
       onClick={onClose}
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 11000,
+        zIndex: 100001,
         backgroundColor: 'rgba(0,0,0,0.55)',
         backdropFilter: 'blur(3px)',
         display: 'flex',
@@ -109,6 +110,8 @@ const BuktiModal = ({ proof, onClose }) => {
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(content, document.body) : content;
 };
 
 /* ─────────────────────────────────────────────

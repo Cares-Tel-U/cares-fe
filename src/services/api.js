@@ -1,4 +1,18 @@
 export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api/v1';
+export const BACKEND_URL = API_BASE_URL.replace(/\/api\/v1\/?$/, '');
+
+/**
+ * Mengubah path media relatif (seperti /uploads/...) menjadi URL lengkap backend
+ * Mendukung data URL, blob URL, dan URL absolut secara transparan.
+ */
+export const resolveMediaUrl = (url) => {
+  if (!url || typeof url !== 'string') return '';
+  if (url.startsWith('data:') || url.startsWith('blob:') || url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  const cleanPath = url.startsWith('/') ? url : `/${url}`;
+  return `${BACKEND_URL}${cleanPath}`;
+};
 
 export const getAuthToken = () => {
   return localStorage.getItem('cares_token');

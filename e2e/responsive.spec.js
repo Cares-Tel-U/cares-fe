@@ -27,8 +27,8 @@ test.describe('Audit Responsivitas UI di Berbagai Device', () => {
     test(`Pemeriksaan Responsivitas Dashboard Pelapor [${vp.name}: ${vp.width}x${vp.height}]`, async ({ page }) => {
       await page.setViewportSize({ width: vp.width, height: vp.height });
       await page.goto('/login');
-      await page.locator('input[type="email"]').fill('ambangawi@telkomuniversity.ac.id');
-      await page.locator('input[type="password"]').fill('password123');
+      await page.locator('input[type="email"]').fill('pengguna1@telkomuniversity.ac.id');
+      await page.locator('input[type="password"]').fill('Password123');
       await page.getByRole('button', { name: 'Login' }).click();
       await page.waitForURL(/.*dashboard/, { timeout: 10000 });
 
@@ -44,8 +44,8 @@ test.describe('Audit Responsivitas UI di Berbagai Device', () => {
     test(`Pemeriksaan Responsivitas Form Buat Laporan [${vp.name}: ${vp.width}x${vp.height}]`, async ({ page }) => {
       await page.setViewportSize({ width: vp.width, height: vp.height });
       await page.goto('/login');
-      await page.locator('input[type="email"]').fill('ambangawi@telkomuniversity.ac.id');
-      await page.locator('input[type="password"]').fill('password123');
+      await page.locator('input[type="email"]').fill('pengguna1@telkomuniversity.ac.id');
+      await page.locator('input[type="password"]').fill('Password123');
       await page.getByRole('button', { name: 'Login' }).click();
       await page.waitForURL(/.*dashboard/, { timeout: 10000 });
 
@@ -65,8 +65,8 @@ test.describe('Audit Responsivitas UI di Berbagai Device', () => {
     test(`Pemeriksaan Responsivitas Dashboard Admin [${vp.name}: ${vp.width}x${vp.height}]`, async ({ page }) => {
       await page.setViewportSize({ width: vp.width, height: vp.height });
       await page.goto('/login');
-      await page.locator('input[type="email"]').fill('admin@telkomuniversity.ac.id');
-      await page.locator('input[type="password"]').fill('admin123');
+      await page.locator('input[type="email"]').fill('admin1@telkomuniversity.ac.id');
+      await page.locator('input[type="password"]').fill('Admin123');
       await page.getByRole('button', { name: 'Login' }).click();
       await page.waitForURL(/.*admin\/dashboard/, { timeout: 10000 });
 

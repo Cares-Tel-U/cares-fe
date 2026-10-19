@@ -16,11 +16,17 @@ export const authService = {
     return res.data;
   },
 
-  // Registrasi Akun Baru
-  async register(nama, email, password, role = 'MAHASISWA') {
+  // Registrasi Akun Baru (Mahasiswa / Tendik / Dosen)
+  async register(nama, email, password, role = 'MAHASISWA', nim = '') {
     const res = await apiRequest('/auth/register', {
       method: 'POST',
-      body: { nama, email, password, role },
+      body: {
+        nama,
+        email,
+        password,
+        role,
+        nim: nim ? String(nim).trim() : undefined,
+      },
     });
     return res.data;
   },

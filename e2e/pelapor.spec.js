@@ -25,7 +25,7 @@ test.describe('E2E Testing Role Pelapor (Civitas Akademika / Mahasiswa)', () => 
     await page.locator('input[placeholder="Masukkan nama lengkap"]').fill(`Mahasiswa Uji ${uniqueTime}`);
     await page.locator('input[placeholder="Masukkan nomor induk mahasiswa/pegawai"]').fill(`130121${uniqueTime.toString().slice(-4)}`);
     await page.locator('input[type="email"]').fill(testEmail);
-    await passwordInput.fill('password123');
+    await passwordInput.fill('Password123');
 
     // 4. Submit form pendaftaran
     const submitButton = page.getByRole('button', { name: 'Sign Up' });
@@ -47,7 +47,7 @@ test.describe('E2E Testing Role Pelapor (Civitas Akademika / Mahasiswa)', () => 
     const loginButton = page.getByRole('button', { name: 'Login' });
 
     // 2. Percobaan login dengan kata sandi salah
-    await emailInput.fill('ambangawi@telkomuniversity.ac.id');
+    await emailInput.fill('pengguna1@telkomuniversity.ac.id');
     await passwordInput.fill('passwordsalah123');
     await loginButton.click();
 
@@ -56,8 +56,8 @@ test.describe('E2E Testing Role Pelapor (Civitas Akademika / Mahasiswa)', () => 
     await expect(errorBanner).toBeVisible({ timeout: 5000 });
 
     // 3. Login dengan kredensial yang valid serta mencentang opsi "Ingat saya"
-    await emailInput.fill('ambangawi@telkomuniversity.ac.id');
-    await passwordInput.fill('password123');
+    await emailInput.fill('pengguna1@telkomuniversity.ac.id');
+    await passwordInput.fill('Password123');
 
     // Verifikasi checkbox Ingat Saya terlihat dan dicentang
     const rememberMeCheckbox = page.locator('#rememberMe');
@@ -76,15 +76,15 @@ test.describe('E2E Testing Role Pelapor (Civitas Akademika / Mahasiswa)', () => 
     // 5. Verifikasi persistensi fitur "Ingat Saya": navigasi kembali ke /login
     await page.goto('/login');
     await page.waitForURL(/.*login/, { timeout: 10000 });
-    await expect(page.locator('input[type="email"]')).toHaveValue('ambangawi@telkomuniversity.ac.id');
+    await expect(page.locator('input[type="email"]')).toHaveValue('pengguna1@telkomuniversity.ac.id');
     await expect(page.locator('#rememberMe')).toBeChecked();
   });
 
   test('Step 3: Eksplorasi Dashboard Pelapor & Modal Detail Laporan', async ({ page }) => {
     // 1. Login terlebih dahulu
     await page.goto('/login');
-    await page.locator('input[type="email"]').fill('ambangawi@telkomuniversity.ac.id');
-    await page.locator('input[type="password"]').fill('password123');
+    await page.locator('input[type="email"]').fill('pengguna1@telkomuniversity.ac.id');
+    await page.locator('input[type="password"]').fill('Password123');
     await page.getByRole('button', { name: 'Login' }).click();
     await page.waitForURL(/.*dashboard/, { timeout: 10000 });
 
@@ -119,8 +119,8 @@ test.describe('E2E Testing Role Pelapor (Civitas Akademika / Mahasiswa)', () => 
   test('Step 4: Pembuatan Laporan Kerusakan Baru (Dengan Foto & Mode Anonim)', async ({ page }) => {
     // 1. Login
     await page.goto('/login');
-    await page.locator('input[type="email"]').fill('ambangawi@telkomuniversity.ac.id');
-    await page.locator('input[type="password"]').fill('password123');
+    await page.locator('input[type="email"]').fill('pengguna1@telkomuniversity.ac.id');
+    await page.locator('input[type="password"]').fill('Password123');
     await page.getByRole('button', { name: 'Login' }).click();
     await page.waitForURL(/.*dashboard/, { timeout: 10000 });
 
@@ -187,8 +187,8 @@ test.describe('E2E Testing Role Pelapor (Civitas Akademika / Mahasiswa)', () => 
   test('Step 5: Halaman Riwayat Laporan (Penyaringan Status & Pengurutan)', async ({ page }) => {
     // 1. Login
     await page.goto('/login');
-    await page.locator('input[type="email"]').fill('ambangawi@telkomuniversity.ac.id');
-    await page.locator('input[type="password"]').fill('password123');
+    await page.locator('input[type="email"]').fill('pengguna1@telkomuniversity.ac.id');
+    await page.locator('input[type="password"]').fill('Password123');
     await page.getByRole('button', { name: 'Login' }).click();
     await page.waitForURL(/.*dashboard/, { timeout: 10000 });
 
@@ -233,8 +233,8 @@ test.describe('E2E Testing Role Pelapor (Civitas Akademika / Mahasiswa)', () => 
   test('Step 6: Navigasi Header, Notifikasi, Pengaturan Profil, dan Logout', async ({ page }) => {
     // 1. Login
     await page.goto('/login');
-    await page.locator('input[type="email"]').fill('ambangawi@telkomuniversity.ac.id');
-    await page.locator('input[type="password"]').fill('password123');
+    await page.locator('input[type="email"]').fill('pengguna1@telkomuniversity.ac.id');
+    await page.locator('input[type="password"]').fill('Password123');
     await page.getByRole('button', { name: 'Login' }).click();
     await page.waitForURL(/.*dashboard/, { timeout: 10000 });
 
@@ -251,11 +251,11 @@ test.describe('E2E Testing Role Pelapor (Civitas Akademika / Mahasiswa)', () => 
     }
 
     // 3. Uji Menu Profil Pengguna
-    const profileAvatar = page.locator('img[alt="Amba Ngawi"]').or(page.locator('header img')).first();
+    const profileAvatar = page.locator('img[alt="Pengguna Satu"]').or(page.locator('header img')).first();
     await profileAvatar.click();
 
     // Verifikasi nama dan email pada dropdown profil
-    await expect(page.locator('text=amba@gmail.com').or(page.locator('text=@telkomuniversity.ac.id'))).toBeVisible();
+    await expect(page.locator('text=pengguna1@telkomuniversity.ac.id').first()).toBeVisible();
     await expect(page.locator('text=Ubah Foto Profil')).toBeVisible();
 
     // 4. Uji Tombol Keluar / Logout

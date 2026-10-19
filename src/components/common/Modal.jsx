@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 const Modal = ({ isOpen, onClose, title, children, maxWidth = '540px' }) => {
   useEffect(() => {
@@ -17,21 +18,18 @@ const Modal = ({ isOpen, onClose, title, children, maxWidth = '540px' }) => {
 
   if (!isOpen) return null;
 
-  return (
+  const modalNode = (
     <div
       onClick={onClose}
       style={{
         position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        inset: 0,
         backgroundColor: 'rgba(0, 0, 0, 0.45)',
         backdropFilter: 'blur(2px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 9999,
+        zIndex: 99999,
         padding: '20px'
       }}
     >
@@ -102,6 +100,8 @@ const Modal = ({ isOpen, onClose, title, children, maxWidth = '540px' }) => {
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalNode, document.body) : modalNode;
 };
 
 export default Modal;

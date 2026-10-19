@@ -17,7 +17,8 @@ const AdminDashboardPage = ({
   onMarkNotificationAsRead,
   onVerifyReport,
   onRejectReport,
-  onLogout
+  onLogout,
+  onUpdateAvatar
 }) => {
   const navigate = useNavigate();
   const [selectedReport, setSelectedReport] = useState(null);
@@ -52,15 +53,16 @@ const AdminDashboardPage = ({
       onMarkAllNotificationsAsRead={onMarkAllNotificationsAsRead}
       onMarkNotificationAsRead={onMarkNotificationAsRead}
       onLogout={onLogout}
+      onUpdateAvatar={onUpdateAvatar}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <MetricCards reports={reports} />
 
         <div className="admin-dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '2.12fr 1fr', gap: '12px', alignItems: 'stretch' }}>
-          <div style={{ minWidth: 0 }}>
+          <div style={{ minWidth: 0, height: '100%' }}>
             <ReportChart />
           </div>
-          <div style={{ minWidth: 0 }}>
+          <div style={{ minWidth: 0, height: '100%' }}>
             <LocationStatsCard reports={reports} />
           </div>
         </div>
@@ -77,7 +79,7 @@ const AdminDashboardPage = ({
             onSelectReport={(r) => setSelectedReport(r)}
           />
           <div style={{ display: 'flex', justifyContent: 'center', padding: '14px', borderTop: '1px solid #e5e7eb' }}>
-            <Link to="/admin/daftar-laporan" style={{ color: '#ba181b', fontSize: '12px', fontWeight: 700, textDecoration: 'none' }}>
+            <Link to="/admin/daftar-laporan" style={{ color: '#ba181b', fontSize: '13px', fontWeight: 700, textDecoration: 'none' }}>
               Lihat semua laporan
             </Link>
           </div>

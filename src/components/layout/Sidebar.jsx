@@ -103,10 +103,12 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, onOpenGuide, isGuideOpen }) =>
         <div
           style={{
             display: 'flex',
+            flexDirection: isCollapsed ? 'column' : 'row',
             alignItems: 'center',
             justifyContent: isCollapsed ? 'center' : 'space-between',
-            marginBottom: '32px',
-            padding: '0 8px'
+            gap: isCollapsed ? '12px' : '0',
+            marginBottom: isCollapsed ? '24px' : '32px',
+            padding: isCollapsed ? '0' : '0 8px'
           }}
         >
           {!isCollapsed ? (
@@ -131,20 +133,28 @@ const Sidebar = ({ isCollapsed, onToggleCollapse, onOpenGuide, isGuideOpen }) =>
             onClick={onToggleCollapse}
             title={isCollapsed ? 'Perluas Sidebar' : 'Ciutkan Sidebar'}
             style={{
-              backgroundColor: 'transparent',
+              backgroundColor: isCollapsed ? 'rgba(255,255,255,0.08)' : 'transparent',
               border: 'none',
               color: '#ffffff',
               cursor: 'pointer',
               padding: '6px',
-              borderRadius: '6px',
+              borderRadius: '8px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              width: isCollapsed ? '34px' : 'auto',
+              height: isCollapsed ? '34px' : 'auto',
               opacity: 0.85,
-              transition: 'opacity 0.15s ease'
+              transition: 'all 0.15s ease'
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.85')}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = '1';
+              e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.16)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = '0.85';
+              e.currentTarget.style.backgroundColor = isCollapsed ? 'rgba(255,255,255,0.08)' : 'transparent';
+            }}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>

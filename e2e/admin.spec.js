@@ -18,7 +18,7 @@ test.describe('E2E Testing Role Admin (Petugas Sarana & Prasarana)', () => {
     const loginButton = page.getByRole('button', { name: 'Login' });
 
     // 2. Coba login dengan password salah
-    await emailInput.fill('admin@telkomuniversity.ac.id');
+    await emailInput.fill('admin1@telkomuniversity.ac.id');
     await passwordInput.fill('passwordsalah123');
     await loginButton.click();
 
@@ -27,8 +27,8 @@ test.describe('E2E Testing Role Admin (Petugas Sarana & Prasarana)', () => {
     await expect(errorBanner).toBeVisible({ timeout: 5000 });
 
     // 3. Masukkan kredensial akun Admin Sarpras yang benar
-    await emailInput.fill('admin@telkomuniversity.ac.id');
-    await passwordInput.fill('admin123');
+    await emailInput.fill('admin1@telkomuniversity.ac.id');
+    await passwordInput.fill('Admin123');
     await loginButton.click();
 
     // 4. Verifikasi pengalihan sukses ke /admin/dashboard
@@ -40,8 +40,8 @@ test.describe('E2E Testing Role Admin (Petugas Sarana & Prasarana)', () => {
   test('Step 2: Inspeksi Kartu Metrik Operasional & Tabel Dashboard Admin', async ({ page }) => {
     // 1. Login sebagai Admin
     await page.goto('/login');
-    await page.locator('input[type="email"]').fill('admin@telkomuniversity.ac.id');
-    await page.locator('input[type="password"]').fill('admin123');
+    await page.locator('input[type="email"]').fill('admin1@telkomuniversity.ac.id');
+    await page.locator('input[type="password"]').fill('Admin123');
     await page.getByRole('button', { name: 'Login' }).click();
     await page.waitForURL(/.*admin\/dashboard/, { timeout: 10000 });
 
@@ -73,8 +73,8 @@ test.describe('E2E Testing Role Admin (Petugas Sarana & Prasarana)', () => {
   test('Step 3: Manajemen Daftar Laporan (Penyaringan Multi-Status & Pengurutan)', async ({ page }) => {
     // 1. Login sebagai Admin
     await page.goto('/login');
-    await page.locator('input[type="email"]').fill('admin@telkomuniversity.ac.id');
-    await page.locator('input[type="password"]').fill('admin123');
+    await page.locator('input[type="email"]').fill('admin1@telkomuniversity.ac.id');
+    await page.locator('input[type="password"]').fill('Admin123');
     await page.getByRole('button', { name: 'Login' }).click();
     await page.waitForURL(/.*admin\/dashboard/, { timeout: 10000 });
 
@@ -104,8 +104,8 @@ test.describe('E2E Testing Role Admin (Petugas Sarana & Prasarana)', () => {
   test('Step 4: Pemilihan Massal (Bulk Selection) & Alur Konfirmasi Update Status', async ({ page }) => {
     // 1. Login Admin & Masuk ke Daftar Laporan
     await page.goto('/login');
-    await page.locator('input[type="email"]').fill('admin@telkomuniversity.ac.id');
-    await page.locator('input[type="password"]').fill('admin123');
+    await page.locator('input[type="email"]').fill('admin1@telkomuniversity.ac.id');
+    await page.locator('input[type="password"]').fill('Admin123');
     await page.getByRole('button', { name: 'Login' }).click();
     await page.waitForURL(/.*admin\/dashboard/, { timeout: 10000 });
 
@@ -148,8 +148,8 @@ test.describe('E2E Testing Role Admin (Petugas Sarana & Prasarana)', () => {
   test('Step 5: Respons Laporan, Upload Bukti Pengerjaan, & Penyelesaian Laporan', async ({ page }) => {
     // 1. Login Admin
     await page.goto('/login');
-    await page.locator('input[type="email"]').fill('admin@telkomuniversity.ac.id');
-    await page.locator('input[type="password"]').fill('admin123');
+    await page.locator('input[type="email"]').fill('admin1@telkomuniversity.ac.id');
+    await page.locator('input[type="password"]').fill('Admin123');
     await page.getByRole('button', { name: 'Login' }).click();
     await page.waitForURL(/.*admin\/dashboard/, { timeout: 10000 });
 
@@ -185,8 +185,8 @@ test.describe('E2E Testing Role Admin (Petugas Sarana & Prasarana)', () => {
   test('Step 6: Penolakan Laporan dengan Alasan Penolakan Wajib', async ({ page }) => {
     // 1. Login Admin
     await page.goto('/login');
-    await page.locator('input[type="email"]').fill('admin@telkomuniversity.ac.id');
-    await page.locator('input[type="password"]').fill('admin123');
+    await page.locator('input[type="email"]').fill('admin1@telkomuniversity.ac.id');
+    await page.locator('input[type="password"]').fill('Admin123');
     await page.getByRole('button', { name: 'Login' }).click();
     await page.waitForURL(/.*admin\/dashboard/, { timeout: 10000 });
 
@@ -226,8 +226,8 @@ test.describe('E2E Testing Role Admin (Petugas Sarana & Prasarana)', () => {
   test('Step 7: Halaman Data Statistik & Analitik Sarpras Kampus', async ({ page }) => {
     // 1. Login Admin
     await page.goto('/login');
-    await page.locator('input[type="email"]').fill('admin@telkomuniversity.ac.id');
-    await page.locator('input[type="password"]').fill('admin123');
+    await page.locator('input[type="email"]').fill('admin1@telkomuniversity.ac.id');
+    await page.locator('input[type="password"]').fill('Admin123');
     await page.getByRole('button', { name: 'Login' }).click();
     await page.waitForURL(/.*admin\/dashboard/, { timeout: 10000 });
 
@@ -244,8 +244,8 @@ test.describe('E2E Testing Role Admin (Petugas Sarana & Prasarana)', () => {
   test('Step 8: Admin FAQ, Notifikasi Popover, dan Logout Admin', async ({ page }) => {
     // 1. Login Admin
     await page.goto('/login');
-    await page.locator('input[type="email"]').fill('admin@telkomuniversity.ac.id');
-    await page.locator('input[type="password"]').fill('admin123');
+    await page.locator('input[type="email"]').fill('admin1@telkomuniversity.ac.id');
+    await page.locator('input[type="password"]').fill('Admin123');
     await page.getByRole('button', { name: 'Login' }).click();
     await page.waitForURL(/.*admin\/dashboard/, { timeout: 10000 });
 

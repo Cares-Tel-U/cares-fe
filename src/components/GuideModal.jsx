@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import './GuideModal.css';
 
 const STEPS_DATA = [
@@ -75,7 +76,7 @@ const GuideModal = ({ isOpen, onClose }) => {
     }
   };
 
-  return (
+  const modalNode = (
     <div className="guide-backdrop" onClick={onClose}>
       <div className="guide-modal-card" onClick={(e) => e.stopPropagation()}>
         {/* Tombol Close */}
@@ -98,11 +99,11 @@ const GuideModal = ({ isOpen, onClose }) => {
                   <h3 className="guide-card-title">Identitas Pelapor</h3>
                   <div className="guide-info-row">
                     <span className="guide-label">Nama Pelapor</span>
-                    <span className="guide-value">Amba Ngawi</span>
+                    <span className="guide-value">Pengguna Satu</span>
                   </div>
                   <div className="guide-info-row">
                     <span className="guide-label">Email Pelapor</span>
-                    <span className="guide-value">amba@gmail.com</span>
+                    <span className="guide-value">pengguna1@telkomuniversity.ac.id</span>
                   </div>
                   <label className="guide-checkbox-label">
                     <input type="checkbox" defaultChecked readOnly />
@@ -240,6 +241,8 @@ const GuideModal = ({ isOpen, onClose }) => {
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalNode, document.body) : modalNode;
 };
 
 export default GuideModal;

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 const RejectReportModal = ({ onClose, onSubmit }) => {
   const [reason, setReason] = useState('');
@@ -9,15 +10,12 @@ const RejectReportModal = ({ onClose, onSubmit }) => {
     return () => document.removeEventListener('keydown', handleKey);
   }, [onClose]);
 
-  return (
+  const modalNode = (
     <div
       onClick={onClose}
       style={{
         position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        inset: 0,
         backgroundColor: 'rgba(0, 0, 0, 0.45)',
         backdropFilter: 'blur(2px)',
         display: 'flex',
@@ -135,6 +133,8 @@ const RejectReportModal = ({ onClose, onSubmit }) => {
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalNode, document.body) : modalNode;
 };
 
 export default RejectReportModal;

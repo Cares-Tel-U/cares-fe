@@ -127,6 +127,7 @@ const AppRouter = ({
               onVerifyReport={onVerifyReport}
               onRejectReport={onRejectReport}
               onLogout={onLogout}
+              onUpdateAvatar={onUpdateAvatar}
             />
           ) : (
             <Navigate to="/login" replace />
@@ -147,6 +148,7 @@ const AppRouter = ({
               onVerifyReports={currentVerifyReports}
               onRejectReport={onRejectReport}
               onLogout={onLogout}
+              onUpdateAvatar={onUpdateAvatar}
             />
           ) : (
             <Navigate to="/login" replace />
@@ -166,6 +168,7 @@ const AppRouter = ({
               onVerifyReports={currentVerifyReports}
               onCompleteReport={onCompleteReport}
               onLogout={onLogout}
+              onUpdateAvatar={onUpdateAvatar}
             />
           ) : (
             <Navigate to="/login" replace />
@@ -185,6 +188,7 @@ const AppRouter = ({
               onVerifyReports={currentVerifyReports}
               onCompleteReport={onCompleteReport}
               onLogout={onLogout}
+              onUpdateAvatar={onUpdateAvatar}
             />
           ) : (
             <Navigate to="/login" replace />
@@ -202,6 +206,7 @@ const AppRouter = ({
               onMarkAllNotificationsAsRead={currentAdminMarkRead}
               onMarkNotificationAsRead={onMarkNotificationAsRead}
               onLogout={onLogout}
+              onUpdateAvatar={onUpdateAvatar}
             />
           ) : (
             <Navigate to="/login" replace />
@@ -217,6 +222,7 @@ const AppRouter = ({
               user={adminUser}
               notifications={currentAdminNotifs}
               onLogout={onLogout}
+              onUpdateAvatar={onUpdateAvatar}
             />
           ) : (
             <Navigate to="/login" replace />

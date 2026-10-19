@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import AdminLayout from '../../layouts/AdminLayout';
 import BadgeStatus from '../../components/common/BadgeStatus';
 import SuccessModal from '../../components/modals/SuccessModal';
+import ReportLoadingModal from '../../components/modals/ReportLoadingModal';
 
 const AdminReportResponsePage = ({
   user,
@@ -12,7 +13,8 @@ const AdminReportResponsePage = ({
   onMarkNotificationAsRead,
   onVerifyReports,
   onCompleteReport,
-  onLogout
+  onLogout,
+  onUpdateAvatar
 }) => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -43,6 +45,8 @@ const AdminReportResponsePage = ({
   const [successMessage, setSuccessMessage] = useState('');
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [loadingText, setLoadingText] = useState('Memproses pembaruan laporan...');
 
   const primaryReport = activeReports[0] || initialReports[0] || {};
   const isProcessMode = primaryReport.status === 'Diproses';
@@ -86,21 +90,29 @@ const AdminReportResponsePage = ({
   };
 
   // Handle Verify all reports
-  const handleVerifyAll = () => {
+  const handleVerifyAll = async () => {
+    setLoadingText('Memproses verifikasi laporan...');
+    setIsProcessing(true);
+    await new Promise((r) => setTimeout(r, 600));
     const ids = activeReports.map((r) => r.id);
     if (onVerifyReports) {
       onVerifyReports(ids);
     }
+    setIsProcessing(false);
     setSuccessMessage('Laporan berhasil diverifikasi');
     setShowSuccess(true);
   };
 
   // Handle Complete single report - pass uploaded proof image URLs
-  const handleCompleteSingle = () => {
+  const handleCompleteSingle = async () => {
+    setLoadingText('Memproses penyelesaian laporan...');
+    setIsProcessing(true);
+    await new Promise((r) => setTimeout(r, 600));
     if (onCompleteReport && primaryReport.id) {
       const proofUrls = uploadedFiles.map((f) => f.url);
       onCompleteReport(primaryReport.id, proofUrls);
     }
+    setIsProcessing(false);
     setSuccessMessage('Laporan selesai ditangani');
     setShowSuccess(true);
   };
@@ -119,6 +131,7 @@ const AdminReportResponsePage = ({
       onMarkAllNotificationsAsRead={onMarkAllNotificationsAsRead}
       onMarkNotificationAsRead={onMarkNotificationAsRead}
       onLogout={onLogout}
+      onUpdateAvatar={onUpdateAvatar}
     >
       {/* Breadcrumb Navigation */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px' }}>
@@ -529,6 +542,8 @@ const AdminReportResponsePage = ({
           </div>
         </div>
       </div>
+
+      <ReportLoadingModal isOpen={isProcessing} text={loadingText} />
 
       {/* Success Modal (Screenshot 5) */}
       {showSuccess && (

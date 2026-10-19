@@ -7,18 +7,22 @@ const AreaChart = ({ data = [] }) => {
   const chartData = data && data.length > 0 ? data : [];
   if (chartData.length === 0) {
     return (
-      <div style={{ height: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: '11px' }}>
+      <div style={{ height: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: '11.5px' }}>
         Belum ada data tren laporan pada periode ini
       </div>
     );
   }
-  const W = 480, H = 160, padL = 28, padR = 12, padT = 12, padB = 28;
-  const chartW = W - padL - padR;
-  const chartH = H - padT - padB;
   const maxVal = Math.max(...chartData.map((d) => d.value), 4);
+  const yTicks = [maxVal, Math.round((maxVal * 2) / 3), Math.round(maxVal / 3), 0];
+
+  const W = 500;
+  const H = 140;
+  const padT = 8;
+  const padB = 8;
+  const chartH = H - padT - padB;
 
   const pts = chartData.map((d, i) => ({
-    x: padL + (chartData.length > 1 ? (i / (chartData.length - 1)) * chartW : chartW / 2),
+    x: chartData.length > 1 ? (i / (chartData.length - 1)) * W : W / 2,
     y: padT + chartH - (d.value / maxVal) * chartH
   }));
 
@@ -27,48 +31,97 @@ const AreaChart = ({ data = [] }) => {
     ? `${linePath} L${pts[pts.length - 1].x},${padT + chartH} L${pts[0].x},${padT + chartH} Z`
     : '';
 
-  const yTicks = [0, Math.round(maxVal / 3), Math.round((maxVal * 2) / 3), maxVal];
-
   return (
-    <svg width="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ overflow: 'hidden' }}>
-      <defs>
-        <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#dc2626" stopOpacity="0.25" />
-          <stop offset="100%" stopColor="#dc2626" stopOpacity="0.02" />
-        </linearGradient>
-      </defs>
-      {/* Y grid lines */}
-      {yTicks.map((t) => {
-        const y = padT + chartH - (t / maxVal) * chartH;
-        return (
-          <g key={t}>
-            <line x1={padL} y1={y} x2={padL + chartW} y2={y} stroke="#f3f4f6" strokeWidth="1" />
-            <text x={padL - 4} y={y + 4} fontSize="9" fill="#9ca3af" textAnchor="end">{t}</text>
-          </g>
-        );
-      })}
-      {/* Area fill */}
-      {areaPath && <path d={areaPath} fill="url(#areaGrad)" />}
-      {/* Line */}
-      <path d={linePath} fill="none" stroke="#dc2626" strokeWidth="2.2" strokeLinejoin="round" strokeLinecap="round" />
-      {/* Dots */}
-      {pts.map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r="3.5" fill="#dc2626" stroke="#fff" strokeWidth="1.5" />
-      ))}
-      {/* X labels */}
-      {chartData.map((d, i) => (
-        <text
-          key={i}
-          x={padL + (chartData.length > 1 ? (i / (chartData.length - 1)) * chartW : chartW / 2)}
-          y={H - 2}
-          fontSize="9"
-          fill="#9ca3af"
-          textAnchor="middle"
-        >
-          {d.label}
-        </text>
-      ))}
-    </svg>
+    <div style={{ width: '100%', userSelect: 'none' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '24px 1fr', gap: '10px', alignItems: 'stretch' }}>
+        {/* Y Axis Ticks (HTML: proporsional, rapi, tajam, ukuran 11px) */}
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '2px 0', fontSize: '11px', color: '#9ca3af', textAlign: 'right', fontWeight: 500, height: '140px' }}>
+          {yTicks.map((t, idx) => (
+            <span key={idx} style={{ lineHeight: 1 }}>{t}</span>
+          ))}
+        </div>
+
+        {/* Chart SVG */}
+        <div style={{ position: 'relative', width: '100%', height: '140px' }}>
+          <svg width="100%" height="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ overflow: 'visible', display: 'block' }}>
+            <defs>
+              <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#dc2626" stopOpacity="0.22" />
+                <stop offset="100%" stopColor="#dc2626" stopOpacity="0.01" />
+              </linearGradient>
+            </defs>
+
+            {/* Horizontal Grid lines */}
+            {yTicks.map((t, idx) => {
+              const y = padT + chartH - (t / maxVal) * chartH;
+              return (
+                <line
+                  key={idx}
+                  x1="0"
+                  y1={y}
+                  x2={W}
+                  y2={y}
+                  stroke="#f3f4f6"
+                  strokeWidth="1"
+                  vectorEffect="non-scaling-stroke"
+                />
+              );
+            })}
+
+            {/* Area fill */}
+            {areaPath && <path d={areaPath} fill="url(#areaGrad)" />}
+
+            {/* Line: garis ramping 1.5px presisi */}
+            <path
+              d={linePath}
+              fill="none"
+              stroke="#dc2626"
+              strokeWidth="1.5"
+              vectorEffect="non-scaling-stroke"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+
+            {/* Dots: titik data proporsional */}
+            {pts.map((p, i) => (
+              <circle
+                key={i}
+                cx={p.x}
+                cy={p.y}
+                r="3"
+                fill="#dc2626"
+                stroke="#fff"
+                strokeWidth="1.5"
+                vectorEffect="non-scaling-stroke"
+              />
+            ))}
+          </svg>
+        </div>
+      </div>
+
+      {/* X Axis Labels (HTML: proporsional, ukuran 11px, terpusat persis di bawah titik data) */}
+      <div style={{ display: 'grid', gridTemplateColumns: '24px 1fr', gap: '10px', marginTop: '10px' }}>
+        <div />
+        <div style={{ position: 'relative', width: '100%', height: '16px' }}>
+          {pts.map((p, i) => (
+            <span
+              key={i}
+              style={{
+                position: 'absolute',
+                left: `${(p.x / W) * 100}%`,
+                transform: 'translateX(-50%)',
+                fontSize: '11px',
+                color: '#9ca3af',
+                fontWeight: 500,
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {p.label}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -98,7 +151,7 @@ const DonutChart = ({ data = DONUT_DATA }) => {
   });
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
       <div style={{ flexShrink: 0 }}>
         <svg width="160" height="160" viewBox="0 0 160 160">
           {slices.map((s, i) => (
@@ -106,17 +159,17 @@ const DonutChart = ({ data = DONUT_DATA }) => {
           ))}
           <circle cx={cx} cy={cy} r={r - 1} fill="white" />
           <text x={cx} y={cy - 6} textAnchor="middle" fontSize="20" fontWeight="800" fill="#111827">{total}</text>
-          <text x={cx} y={cy + 12} textAnchor="middle" fontSize="10" fill="#9ca3af">Laporan</text>
+          <text x={cx} y={cy + 12} textAnchor="middle" fontSize="11" fill="#9ca3af">Laporan</text>
         </svg>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', flex: 1 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', flex: 1, minWidth: '160px' }}>
         {chartData.map((d, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: d.color, flexShrink: 0 }} />
-              <span style={{ fontSize: '11px', color: '#374151' }}>{d.label}</span>
+              <span style={{ fontSize: '12px', color: '#374151' }}>{d.label}</span>
             </div>
-            <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: '600', whiteSpace: 'nowrap' }}>
+            <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600', whiteSpace: 'nowrap' }}>
               {d.percent}% ({d.count})
             </span>
           </div>
@@ -132,59 +185,99 @@ const HourlyBarChart = ({ data = default24Hours }) => {
   const chartData = data && data.length > 0 ? data : default24Hours;
   const maxVal = Math.max(...chartData.map((d) => d.val), 1);
   const effMax = Math.max(maxVal, 4);
-  const showLabels = [0, 3, 6, 9, 12, 15, 18, 21];
-  const W = 400, H = 120, padB = 18, padT = 10, padL = 20;
-  const chartW = W - padL;
-  const chartH = H - padT;
-  const barW = chartW / chartData.length;
+  const showLabels = ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'];
+  const yTicks = [effMax, Math.round((effMax * 2) / 3), Math.round(effMax / 3), 0];
 
-  const yTicks = [0, Math.round(effMax / 3), Math.round((effMax * 2) / 3), effMax];
+  const W = 480;
+  const H = 120;
+  const padT = 6;
+  const chartH = H - padT;
+  const slotW = W / 24;
 
   return (
-    <svg width="100%" viewBox={`0 0 ${W} ${H + padB}`} preserveAspectRatio="none" style={{ overflow: 'hidden' }}>
-      {/* Y axis ticks & grid lines */}
-      {yTicks.map((t) => {
-        const y = padT + chartH - (t / effMax) * chartH;
-        return (
-          <g key={t}>
-            <line x1={padL} y1={y} x2={W} y2={y} stroke="#f3f4f6" strokeWidth="0.8" />
-            <text x={padL - 4} y={y + 3} fontSize="8" fill="#9ca3af" textAnchor="end">{t}</text>
-          </g>
-        );
-      })}
-      {/* Bars */}
-      {chartData.map((d, i) => {
-        const bh = (d.val / effMax) * chartH;
-        return (
-          <rect
-            key={i}
-            x={padL + i * barW + 1}
-            y={padT + chartH - bh}
-            width={Math.max(barW - 2, 1)}
-            height={bh}
-            fill="#dc2626"
-            rx="2"
-          />
-        );
-      })}
-      {/* X labels */}
-      {chartData.map((d, i) => {
-        const label = `${String(d.hour).padStart(2,'0')}:00`;
-        if (!showLabels.includes(d.hour)) return null;
-        return (
-          <text
-            key={i}
-            x={padL + i * barW + barW / 2}
-            y={H + padB - 4}
-            fontSize="8"
-            fill="#9ca3af"
-            textAnchor="middle"
+    <div style={{ width: '100%', userSelect: 'none' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '24px 1fr', gap: '10px', alignItems: 'stretch' }}>
+        {/* Y Axis Ticks (HTML: proporsional, ukuran 11px) */}
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '2px 0', fontSize: '11px', color: '#9ca3af', textAlign: 'right', fontWeight: 500, height: '120px' }}>
+          {yTicks.map((t, idx) => (
+            <span key={idx} style={{ lineHeight: 1 }}>{t}</span>
+          ))}
+        </div>
+
+        {/* Bars SVG */}
+        <div style={{ position: 'relative', width: '100%', height: '120px' }}>
+          <svg
+            width="100%"
+            height="100%"
+            viewBox={`0 0 ${W} ${H}`}
+            preserveAspectRatio="none"
+            style={{ overflow: 'visible', display: 'block' }}
           >
-            {label}
-          </text>
-        );
-      })}
-    </svg>
+            {/* Horizontal Grid lines */}
+            {yTicks.map((t, idx) => {
+              const y = padT + chartH - (t / effMax) * chartH;
+              return (
+                <line
+                  key={idx}
+                  x1="0"
+                  y1={y}
+                  x2={W}
+                  y2={y}
+                  stroke="#f3f4f6"
+                  strokeWidth="1"
+                  vectorEffect="non-scaling-stroke"
+                />
+              );
+            })}
+
+            {/* Bars: proporsional dan rapi */}
+            {chartData.map((d, i) => {
+              const bh = (d.val / effMax) * chartH;
+              const barWidth = Math.min(slotW * 0.55, 12);
+              const barX = i * slotW + (slotW - barWidth) / 2;
+              return (
+                <rect
+                  key={i}
+                  x={barX}
+                  y={padT + chartH - bh}
+                  width={barWidth}
+                  height={Math.max(bh, 0)}
+                  fill="#dc2626"
+                  rx="2"
+                />
+              );
+            })}
+          </svg>
+        </div>
+      </div>
+
+      {/* X Axis Labels (HTML: proporsional, ukuran 11px) */}
+      <div style={{ display: 'grid', gridTemplateColumns: '24px 1fr', gap: '10px', marginTop: '10px' }}>
+        <div />
+        <div style={{ position: 'relative', width: '100%', height: '16px' }}>
+          {showLabels.map((lbl, idx) => {
+            const hour = idx * 4; // 0, 4, 8, 12, 16, 20
+            const pct = ((hour + 0.5) / 24) * 100;
+            return (
+              <span
+                key={idx}
+                style={{
+                  position: 'absolute',
+                  left: `${pct}%`,
+                  transform: 'translateX(-50%)',
+                  fontSize: '11px',
+                  color: '#9ca3af',
+                  fontWeight: 500,
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {lbl}
+              </span>
+            );
+          })}
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -195,7 +288,8 @@ const AdminAnalyticsPage = ({
   notifications = [],
   onMarkAllNotificationsAsRead,
   onMarkNotificationAsRead,
-  onLogout
+  onLogout,
+  onUpdateAvatar
 }) => {
   const [activeFilter, setActiveFilter] = useState('Semua');
   const [stats, setStats] = useState(null);
@@ -327,6 +421,7 @@ const AdminAnalyticsPage = ({
       onMarkAllNotificationsAsRead={onMarkAllNotificationsAsRead}
       onMarkNotificationAsRead={onMarkNotificationAsRead}
       onLogout={onLogout}
+      onUpdateAvatar={onUpdateAvatar}
     >
       {/* Pill Filter */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
@@ -353,7 +448,7 @@ const AdminAnalyticsPage = ({
       </div>
 
       {/* 3 Metric Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '20px' }}>
+      <div className="analytics-metric-grid">
         {/* Card 1 – Total */}
         <div
           style={{
@@ -424,7 +519,7 @@ const AdminAnalyticsPage = ({
       </div>
 
       {/* Middle Row: Area Chart + Donut */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: '16px', marginBottom: '20px' }}>
+      <div className="analytics-chart-grid">
         {/* Grafik Laporan */}
         <div style={cardStyle}>
           <div style={{ fontSize: '14px', fontWeight: '700', color: '#111827', marginBottom: '16px' }}>
@@ -439,7 +534,7 @@ const AdminAnalyticsPage = ({
             <div style={{ fontSize: '14px', fontWeight: '700', color: '#111827' }}>
               Distribusi Status Laporan
             </div>
-            <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '2px' }}>
+            <div style={{ fontSize: '12px', color: '#9ca3af', marginTop: '2px' }}>
               Persentase status dari seluruh laporan yang masuk
             </div>
           </div>
@@ -450,13 +545,13 @@ const AdminAnalyticsPage = ({
       </div>
 
       {/* Bottom Row: Location + Hourly */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+      <div className="analytics-bottom-grid">
         {/* Jumlah Laporan Berdasarkan Lokasi */}
         <div style={cardStyle}>
           <div style={{ fontSize: '14px', fontWeight: '700', color: '#111827' }}>
             Jumlah Laporan Berdasarkan Lokasi
           </div>
-          <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '16px', marginTop: '2px' }}>
+          <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '16px', marginTop: '2px' }}>
             Lokasi yang paling banyak dilaporkan
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -495,7 +590,7 @@ const AdminAnalyticsPage = ({
           <div style={{ fontSize: '14px', fontWeight: '700', color: '#111827' }}>
             Jam Ramai Laporan
           </div>
-          <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '16px', marginTop: '2px' }}>
+          <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '16px', marginTop: '2px' }}>
             Menunjukkan waktu dengan jumlah laporan yang paling banyak masuk
           </div>
           <HourlyBarChart data={hourlyData} />

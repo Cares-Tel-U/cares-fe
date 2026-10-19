@@ -61,9 +61,61 @@ const AdminSidebar = ({ isCollapsed, onToggleCollapse, onOpenGuide }) => {
       }}
     >
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: isCollapsed ? 'center' : 'space-between', marginBottom: '32px', padding: '0 8px' }}>
-        {!isCollapsed ? <div style={{ display: 'flex', alignItems: 'center', maxWidth: '170px' }}><CaresLogoWhite size="42px" /></div> : <img src="/normal logo.svg" alt="Cares" style={{ width: '32px', height: '32px', filter: 'brightness(0) invert(1)' }} />}
-        <button type="button" onClick={onToggleCollapse} title={isCollapsed ? 'Perluas sidebar' : 'Ciutkan sidebar'} style={{ background: 'transparent', border: 0, color: '#FFFFFF', cursor: 'pointer', padding: '6px', borderRadius: '6px', display: 'flex', opacity: .85 }} onMouseEnter={(event) => { event.currentTarget.style.opacity = '1'; }} onMouseLeave={(event) => { event.currentTarget.style.opacity = '.85'; }}><Icon><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 3v18" /></Icon></button>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: isCollapsed ? 'column' : 'row',
+          alignItems: 'center',
+          justifyContent: isCollapsed ? 'center' : 'space-between',
+          gap: isCollapsed ? '12px' : '0',
+          marginBottom: isCollapsed ? '24px' : '32px',
+          padding: isCollapsed ? '0' : '0 8px'
+        }}
+      >
+        {!isCollapsed ? (
+          <div style={{ display: 'flex', alignItems: 'center', maxWidth: '170px' }}>
+            <CaresLogoWhite size="42px" />
+          </div>
+        ) : (
+          <img
+            src="/normal logo.svg"
+            alt="Cares"
+            style={{ width: '32px', height: '32px', filter: 'brightness(0) invert(1)' }}
+          />
+        )}
+        <button
+          type="button"
+          onClick={onToggleCollapse}
+          title={isCollapsed ? 'Perluas sidebar' : 'Ciutkan sidebar'}
+          style={{
+            background: isCollapsed ? 'rgba(255,255,255,.08)' : 'transparent',
+            border: 0,
+            color: '#FFFFFF',
+            cursor: 'pointer',
+            padding: '6px',
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: isCollapsed ? '34px' : 'auto',
+            height: isCollapsed ? '34px' : 'auto',
+            opacity: 0.85,
+            transition: 'all .15s ease'
+          }}
+          onMouseEnter={(event) => {
+            event.currentTarget.style.opacity = '1';
+            event.currentTarget.style.background = 'rgba(255,255,255,.16)';
+          }}
+          onMouseLeave={(event) => {
+            event.currentTarget.style.opacity = '.85';
+            event.currentTarget.style.background = isCollapsed ? 'rgba(255,255,255,.08)' : 'transparent';
+          }}
+        >
+          <Icon>
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <path d="M9 3v18" />
+          </Icon>
+        </button>
       </div>
       <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>{renderItems(navItems)}</nav>
     </div>

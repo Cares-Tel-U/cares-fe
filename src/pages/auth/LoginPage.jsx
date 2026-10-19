@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import AuthLayout from '../../layouts/AuthLayout';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
+import ReportLoadingModal from '../../components/modals/ReportLoadingModal';
+import ForgotPasswordModal from '../../components/modals/ForgotPasswordModal';
 import { authService } from '../../services/auth.service';
 
 const LoginPage = ({ onLoginSuccess }) => {
@@ -14,20 +16,48 @@ const LoginPage = ({ onLoginSuccess }) => {
   const [loginError, setLoginError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showForgotModal, setShowForgotModal] = useState(false);
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  const getEmailError = () => {
+    if (!isSubmitted) return '';
+    const trimmed = email.trim();
+    if (!trimmed) return 'Alamat email wajib diisi';
+    if (!emailRegex.test(trimmed)) return 'Format alamat email tidak valid';
+    return '';
+  };
+
+  const getPasswordError = () => {
+    if (!isSubmitted) return '';
+    if (!password) return 'Password wajib diisi';
+    return '';
+  };
+
+  const emailError = getEmailError();
+  const passwordError = getPasswordError();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitted(true);
     setLoginError(false);
     setErrorMessage('');
+
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !emailRegex.test(trimmedEmail) || !password) {
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const data = await authService.login(email.trim(), password, rememberMe);
+      const data = await authService.login(trimmedEmail, password, rememberMe);
       const user = data.user;
       const isAdmin = user.role === 'SARPRAS' || user.role === 'ADMIN';
 
       if (rememberMe) {
-        localStorage.setItem('cares_remembered_email', email.trim());
+        localStorage.setItem('cares_remembered_email', trimmedEmail);
       } else {
         localStorage.removeItem('cares_remembered_email');
       }
@@ -37,6 +67,7 @@ const LoginPage = ({ onLoginSuccess }) => {
         email: user.email,
         name: user.nama,
         nama: user.nama,
+        nim: user.nim,
         role: isAdmin ? 'Admin' : 'Mahasiswa',
         rawRole: user.role,
         avatar: user.avatar,
@@ -83,7 +114,7 @@ const LoginPage = ({ onLoginSuccess }) => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         <Input
           label="Alamat Email"
           type="email"
@@ -94,6 +125,7 @@ const LoginPage = ({ onLoginSuccess }) => {
             setEmail(e.target.value);
             if (loginError) setLoginError(false);
           }}
+          error={emailError}
         />
 
         <div style={{ position: 'relative' }}>
@@ -107,6 +139,7 @@ const LoginPage = ({ onLoginSuccess }) => {
               setPassword(e.target.value);
               if (loginError) setLoginError(false);
             }}
+            error={passwordError}
           />
 
           <div
@@ -148,10 +181,11 @@ const LoginPage = ({ onLoginSuccess }) => {
             <span
               style={{
                 fontSize: '12px',
-                color: '#6b7280',
-                cursor: 'pointer'
+                color: '#ba181b',
+                cursor: 'pointer',
+                fontWeight: '600'
               }}
-              onClick={() => alert('Fitur lupa password dapat menghubungi admin kampus.')}
+              onClick={() => setShowForgotModal(true)}
             >
               Lupa Password?
             </span>
@@ -195,6 +229,13 @@ const LoginPage = ({ onLoginSuccess }) => {
           Sign Up
         </Link>
       </div>
+
+      <ForgotPasswordModal
+        isOpen={showForgotModal}
+        onClose={() => setShowForgotModal(false)}
+      />
+
+      <ReportLoadingModal isOpen={loading} text="Memproses login..." />
     </AuthLayout>
   );
 };

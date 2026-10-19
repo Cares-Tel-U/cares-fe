@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../layouts/AdminLayout';
 import BadgeStatus from '../../components/common/BadgeStatus';
@@ -19,6 +20,7 @@ const AdminReportListPage = ({
   onVerifyReports,
   onRejectReport,
   onLogout,
+  onUpdateAvatar,
   onRefreshData
 }) => {
   const navigate = useNavigate();
@@ -161,17 +163,10 @@ const AdminReportListPage = ({
       onMarkAllNotificationsAsRead={onMarkAllNotificationsAsRead}
       onMarkNotificationAsRead={onMarkNotificationAsRead}
       onLogout={onLogout}
+      onUpdateAvatar={onUpdateAvatar}
     >
       {/* Main Card Container */}
-      <div
-        style={{
-          backgroundColor: '#ffffff',
-          borderRadius: '16px',
-          border: '1px solid #e5e7eb',
-          padding: '24px',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)'
-        }}
-      >
+      <div className="admin-card-container">
         {/* Top Bar / Filters */}
         <div
           style={{
@@ -376,10 +371,11 @@ const AdminReportListPage = ({
         </div>
 
         {/* Data Table */}
-        <div style={{ width: '100%', overflow: 'hidden' }}>
+        <div className="table-responsive-wrapper">
           <table
             style={{
               width: '100%',
+              minWidth: isSelectionMode ? '820px' : '785px',
               tableLayout: 'fixed',
               borderCollapse: 'collapse',
               textAlign: 'left'
@@ -388,7 +384,7 @@ const AdminReportListPage = ({
             <thead>
               <tr style={{ borderBottom: '1px solid #d9d9d9', background: '#f3f3f3' }}>
                 {isSelectionMode && (
-                  <th style={{ padding: '9px 8px', width: '4%', textAlign: 'center' }}>
+                  <th style={{ padding: '9px 4px 9px 16px', width: '45px', textAlign: 'center' }}>
                     <div
                       onClick={handleSelectAllVisible}
                       style={{
@@ -412,22 +408,22 @@ const AdminReportListPage = ({
                     </div>
                   </th>
                 )}
-                <th style={{ padding: '9px 8px', fontSize: '10px', fontWeight: '500', color: '#7b7c82', width: isSelectionMode ? '5%' : '5%', textAlign: 'center' }}>
+                <th style={{ padding: isSelectionMode ? '10px 8px' : '10px 8px 10px 16px', fontSize: '12px', fontWeight: '600', color: '#7b7c82', width: isSelectionMode ? '45px' : '55px', textAlign: 'center' }}>
                   No
                 </th>
-                <th style={{ padding: '9px 8px', fontSize: '10px', fontWeight: '500', color: '#7b7c82', width: isSelectionMode ? '19%' : '20%' }}>
+                <th style={{ padding: '10px 8px', fontSize: '12px', fontWeight: '600', color: '#7b7c82', width: '165px' }}>
                   Lokasi
                 </th>
-                <th style={{ padding: '9px 8px', fontSize: '10px', fontWeight: '500', color: '#7b7c82', width: isSelectionMode ? '29%' : '31%' }}>
+                <th style={{ padding: '10px 8px', fontSize: '12px', fontWeight: '600', color: '#7b7c82', width: '210px' }}>
                   Deskripsi
                 </th>
-                <th style={{ padding: '9px 8px', fontSize: '10px', fontWeight: '500', color: '#7b7c82', width: '13%' }}>
+                <th style={{ padding: '10px 8px', fontSize: '12px', fontWeight: '600', color: '#7b7c82', width: '105px' }}>
                   Tanggal
                 </th>
-                <th style={{ padding: '9px 8px', fontSize: '10px', fontWeight: '500', color: '#7b7c82', width: '18%', textAlign: 'center' }}>
+                <th style={{ padding: '10px 8px', fontSize: '12px', fontWeight: '600', color: '#7b7c82', width: '140px', textAlign: 'center' }}>
                   Status
                 </th>
-                <th style={{ padding: '9px 8px', fontSize: '10px', fontWeight: '500', color: '#7b7c82', textAlign: 'center', width: '13%' }}>
+                <th style={{ padding: '10px 16px 10px 8px', fontSize: '12px', fontWeight: '600', color: '#7b7c82', textAlign: 'center', width: '110px' }}>
                   Aksi
                 </th>
               </tr>
@@ -464,7 +460,7 @@ const AdminReportListPage = ({
                       }}
                     >
                       {isSelectionMode && (
-                        <td style={{ padding: '11px 8px', textAlign: 'center', verticalAlign: 'middle' }}>
+                        <td style={{ padding: '11px 4px 11px 16px', textAlign: 'center', verticalAlign: 'middle' }}>
                           <div
                             onClick={(e) => {
                               e.stopPropagation();
@@ -491,16 +487,16 @@ const AdminReportListPage = ({
                           </div>
                         </td>
                       )}
-                      <td style={{ padding: '11px 8px', fontSize: '9px', color: '#63636a', textAlign: 'center', verticalAlign: 'middle' }}>
+                      <td style={{ padding: isSelectionMode ? '12px 8px' : '12px 8px 12px 16px', fontSize: '12.5px', color: '#63636a', textAlign: 'center', verticalAlign: 'middle' }}>
                         {startIndex + index + 1}
                       </td>
-                      <td style={{ padding: '11px 8px', fontSize: '9px', color: '#63636a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', verticalAlign: 'middle' }} title={item.lokasi}>
+                      <td style={{ padding: '12px 8px', fontSize: '12.5px', color: '#63636a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', verticalAlign: 'middle' }} title={item.lokasi}>
                         {item.lokasi}
                       </td>
                       <td
                         style={{
-                          padding: '11px 8px',
-                          fontSize: '9px',
+                          padding: '12px 8px',
+                          fontSize: '12.5px',
                           color: '#4b5563',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
@@ -511,13 +507,13 @@ const AdminReportListPage = ({
                       >
                         {item.deskripsi}
                       </td>
-                      <td style={{ padding: '11px 8px', fontSize: '9px', color: '#63636a', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
+                      <td style={{ padding: '12px 8px', fontSize: '12.5px', color: '#63636a', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
                         {item.tanggal}
                       </td>
-                      <td style={{ padding: '11px 8px', textAlign: 'center', verticalAlign: 'middle' }}>
+                      <td style={{ padding: '12px 8px', textAlign: 'center', verticalAlign: 'middle' }}>
                         <BadgeStatus status={item.status} />
                       </td>
-                      <td style={{ padding: '11px 8px', textAlign: 'center', verticalAlign: 'middle' }}>
+                      <td style={{ padding: '12px 16px 12px 8px', textAlign: 'center', verticalAlign: 'middle' }}>
                         <button
                           type="button"
                           onClick={(e) => {
@@ -529,8 +525,8 @@ const AdminReportListPage = ({
                             color: '#df1e2d',
                             backgroundColor: '#ffffff',
                             borderRadius: '4px',
-                            padding: '4px 8px',
-                            fontSize: '9px',
+                            padding: '5px 10px',
+                            fontSize: '11.5px',
                             fontWeight: '500',
                             cursor: 'pointer',
                             whiteSpace: 'nowrap',
@@ -638,21 +634,18 @@ const AdminReportListPage = ({
       </div>
 
       {/* Confirmation Modal: Update Status Laporan? (Screenshot 3) */}
-      {showUpdateModal && (
+      {showUpdateModal && typeof document !== 'undefined' && createPortal(
         <div
           onClick={() => setShowUpdateModal(false)}
           style={{
             position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
+            inset: 0,
             backgroundColor: 'rgba(0, 0, 0, 0.45)',
             backdropFilter: 'blur(2px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            zIndex: 9999,
+            zIndex: 99999,
             padding: '20px'
           }}
         >
@@ -751,7 +744,8 @@ const AdminReportListPage = ({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Admin Detail Report Modal */}

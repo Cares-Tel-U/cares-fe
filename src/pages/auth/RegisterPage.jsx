@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import AuthLayout from '../../layouts/AuthLayout';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
+import ReportLoadingModal from '../../components/modals/ReportLoadingModal';
 import { authService } from '../../services/auth.service';
 
 const RegisterPage = ({ onRegisterSuccess }) => {
@@ -15,21 +16,92 @@ const RegisterPage = ({ onRegisterSuccess }) => {
   const [registerError, setRegisterError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Validasi format
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // Evaluasi error untuk setiap field
+  const getNameError = () => {
+    if (!isSubmitted) return '';
+    const trimmed = name.trim();
+    if (!trimmed) return 'Nama lengkap wajib diisi';
+    if (trimmed.length < 2 || trimmed.length > 50) {
+      return 'Nama lengkap harus terdiri dari 2 hingga 50 karakter';
+    }
+    return '';
+  };
+
+  const getNimError = () => {
+    if (!isSubmitted) return '';
+    const trimmed = nim.trim();
+    if (!trimmed) return 'Nomor induk mahasiswa/pegawai wajib diisi';
+    if (!/^\d+$/.test(trimmed)) {
+      return 'NIM harus berupa angka';
+    }
+    return '';
+  };
+
+  const getEmailError = () => {
+    if (!isSubmitted) return '';
+    const trimmed = email.trim();
+    if (!trimmed) return 'Alamat email wajib diisi';
+    if (!emailRegex.test(trimmed)) {
+      return 'Format alamat email tidak valid';
+    }
+    return '';
+  };
+
   const isPasswordShort = password.length > 0 && password.length < 8;
+
+  const getPasswordError = () => {
+    if (isPasswordShort) {
+      return 'Password kurang dari 8 karakter';
+    }
+    if (password.length >= 8 && !passwordRegex.test(password)) {
+      return 'Password wajib minimal 8 karakter dan mengandung kombinasi huruf besar, huruf kecil, serta angka';
+    }
+    if (isSubmitted && !password) {
+      return 'Password wajib diisi';
+    }
+    return '';
+  };
+
+  const nameError = getNameError();
+  const nimError = getNimError();
+  const emailError = getEmailError();
+  const passwordError = getPasswordError();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitted(true);
     setRegisterError('');
 
-    if (password.length < 8 || !name || !email) {
+    const trimmedName = name.trim();
+    const trimmedNim = nim.trim();
+    const trimmedEmail = email.trim();
+
+    if (
+      trimmedName.length < 2 ||
+      trimmedName.length > 50 ||
+      !trimmedNim ||
+      !/^\d+$/.test(trimmedNim) ||
+      !trimmedEmail ||
+      !emailRegex.test(trimmedEmail) ||
+      !passwordRegex.test(password)
+    ) {
       return;
     }
 
     setLoading(true);
     try {
-      const newUser = await authService.register(name.trim(), email.trim(), password, 'MAHASISWA');
-      
+      const newUser = await authService.register(
+        trimmedName,
+        trimmedEmail,
+        password,
+        'MAHASISWA',
+        trimmedNim
+      );
+
       if (onRegisterSuccess) {
         onRegisterSuccess({
           id: newUser.id,
@@ -77,7 +149,11 @@ const RegisterPage = ({ onRegisterSuccess }) => {
           required
           placeholder="Masukkan nama lengkap"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {
+            setName(e.target.value);
+            if (registerError) setRegisterError('');
+          }}
+          error={nameError}
         />
 
         <Input
@@ -86,7 +162,11 @@ const RegisterPage = ({ onRegisterSuccess }) => {
           required
           placeholder="Masukkan nomor induk mahasiswa/pegawai"
           value={nim}
-          onChange={(e) => setNim(e.target.value)}
+          onChange={(e) => {
+            setNim(e.target.value.replace(/\D/g, ''));
+            if (registerError) setRegisterError('');
+          }}
+          error={nimError}
         />
 
         <Input
@@ -95,7 +175,11 @@ const RegisterPage = ({ onRegisterSuccess }) => {
           required
           placeholder="Masukkan alamat email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (registerError) setRegisterError('');
+          }}
+          error={emailError}
         />
 
         <Input
@@ -104,9 +188,12 @@ const RegisterPage = ({ onRegisterSuccess }) => {
           required
           placeholder="Masukkan password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          error={isPasswordShort || (isSubmitted && password.length < 8) ? 'Password kurang dari 8 karakter' : ''}
-          helperText={!isPasswordShort && !(isSubmitted && password.length < 8) ? 'Password minimal 8 karakter' : ''}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            if (registerError) setRegisterError('');
+          }}
+          error={passwordError}
+          helperText={!passwordError ? 'Minimal 8 karakter dengan huruf besar, huruf kecil, dan angka' : ''}
         />
 
         <Button
@@ -147,6 +234,8 @@ const RegisterPage = ({ onRegisterSuccess }) => {
           Login
         </Link>
       </div>
+
+      <ReportLoadingModal isOpen={loading} text="Memproses pendaftaran..." />
     </AuthLayout>
   );
 };
