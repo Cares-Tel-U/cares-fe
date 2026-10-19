@@ -43,7 +43,7 @@ const AdminReportListPage = ({
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('Laporan berhasil diverifikasi');
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);

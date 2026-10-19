@@ -53,8 +53,21 @@ const CreateReportPage = ({
 
     try {
       // 1. Temukan ID fasilitas yang cocok atau fallback ke fasilitas yang tersedia tanpa laporan aktif
+      let currentFacilities = facilities;
+      if (!currentFacilities || currentFacilities.length === 0) {
+        try {
+          const fresh = await facilityService.getFacilities();
+          if (Array.isArray(fresh) && fresh.length > 0) {
+            currentFacilities = fresh;
+            setFacilities(fresh);
+          }
+        } catch {
+          // ignore error
+        }
+      }
+
       let targetFacilityId = '';
-      if (facilities.length > 0) {
+      if (currentFacilities && currentFacilities.length > 0) {
         // Ambil daftar ID fasilitas yang sedang memiliki laporan aktif (PENDING atau DIPROSES)
         const activeFacilityIds = new Set(
           (reports || [])
@@ -63,7 +76,7 @@ const CreateReportPage = ({
         );
 
         // Cari semua fasilitas yang cocok berdasarkan nama ruangan, nama gedung, atau lokasi
-        const matching = facilities.filter(
+        const matching = currentFacilities.filter(
           (f) =>
             f.nama.toLowerCase().includes(formData.namaRuangan?.toLowerCase()) ||
             f.lokasi.toLowerCase().includes(formData.namaGedung?.toLowerCase()) ||
@@ -71,32 +84,53 @@ const CreateReportPage = ({
             formData.lokasi?.toLowerCase().includes(f.lokasi.toLowerCase())
         );
 
-        // Prioritaskan fasilitas yang belum memiliki laporan aktif
+        // Prioritaskan fasilitas yang cocok DAN belum memiliki laporan aktif
         const availableInMatch = matching.find((f) => !activeFacilityIds.has(f.id));
         if (availableInMatch) {
           targetFacilityId = availableInMatch.id;
-        } else if (matching.length > 0) {
-          targetFacilityId = matching[0].id;
         } else {
-          // Jika tidak ada yang cocok sama sekali, cari fasilitas manapun yang tidak memiliki laporan aktif
-          const anyAvailable = facilities.find((f) => !activeFacilityIds.has(f.id));
-          targetFacilityId = anyAvailable ? anyAvailable.id : facilities[0].id;
+          // Jika seluruh fasilitas yang cocok sedang memiliki penanganan aktif, pilih fasilitas lain yang bebas dari laporan aktif
+          const anyAvailable = currentFacilities.find((f) => !activeFacilityIds.has(f.id));
+          targetFacilityId = anyAvailable ? anyAvailable.id : (matching[0]?.id || currentFacilities[0].id);
         }
       }
 
-      // 2. Kirim laporan ke backend API
+      // 2. Kirim laporan ke backend API dengan mekanisme kandidat fasilitas
       const judulLaporan = `Kerusakan Fasilitas di ${formData.namaRuangan || formData.lokasi || 'Kampus'}`;
-      const payload = {
-        judul: judulLaporan,
-        deskripsi: formData.deskripsi,
-        facilityId: targetFacilityId,
-        isAnonymous: isAnonim,
-        photos: formData.photoFiles || formData.foto || [],
-      };
+      const candidateIds = [
+        targetFacilityId,
+        ...(currentFacilities || []).map((f) => f.id).filter((id) => id && id !== targetFacilityId),
+      ];
 
-      const createdReport = await reportService.createReport(payload);
+      let createdReport = null;
+      let lastError = null;
 
-      if (onAddReport) {
+      for (const fId of candidateIds) {
+        try {
+          createdReport = await reportService.createReport({
+            judul: judulLaporan,
+            deskripsi: formData.deskripsi,
+            facilityId: fId,
+            isAnonymous: isAnonim,
+            photos: formData.photoFiles || formData.foto || [],
+          });
+          if (createdReport) break;
+        } catch (subErr) {
+          lastError = subErr;
+          // Jika error adalah fasilitas sedang ada penanganan aktif, coba kandidat fasilitas berikutnya
+          if (subErr.message && subErr.message.includes('sedang dalam penanganan')) {
+            continue;
+          }
+          // Jika batas kuota atau validasi lain, langsung hentikan
+          break;
+        }
+      }
+
+      if (!createdReport && lastError) {
+        throw lastError;
+      }
+
+      if (onAddReport && createdReport) {
         onAddReport(createdReport);
       }
       setShowSuccessModal(true);
@@ -149,7 +183,7 @@ const CreateReportPage = ({
             </div>
           )}
 
-          <ReportFormSection onSubmit={handleSubmit} isSubmitting={submitting} />
+          <ReportFormSection onSubmit={handleSubmit} isSubmitting={submitting} facilities={facilities} />
         </div>
 
         {/* Right: Important Information Card */}

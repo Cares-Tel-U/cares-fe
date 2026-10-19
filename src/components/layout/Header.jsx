@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService, notificationService } from '../../services';
 
+const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'><rect width='64' height='64' rx='32' fill='%23E5E7EB'/><circle cx='32' cy='25' r='12' fill='%239CA3AF'/><path d='M12 54c0-11.046 8.954-20 20-20s20 8.954 20 20' fill='%239CA3AF'/></svg>";
+
 const Header = ({
   title,
   subtitle,
@@ -396,7 +398,7 @@ const Header = ({
             }}
           >
             <img
-              src={user?.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80"}
+              src={user?.avatar || DEFAULT_AVATAR}
               alt={user?.name || "User Avatar"}
               style={{
                 width: '42px',
@@ -474,7 +476,7 @@ const Header = ({
                   }}
                 >
                   <img
-                    src={user?.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80"}
+                    src={user?.avatar || DEFAULT_AVATAR}
                     alt={user?.name || "User"}
                     style={{
                       width: '100%',

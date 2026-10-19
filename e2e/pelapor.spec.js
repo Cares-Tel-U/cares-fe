@@ -55,9 +55,16 @@ test.describe('E2E Testing Role Pelapor (Civitas Akademika / Mahasiswa)', () => 
     const errorBanner = page.locator('text=Email atau password salah').or(page.locator('text=tidak valid'));
     await expect(errorBanner).toBeVisible({ timeout: 5000 });
 
-    // 3. Login dengan kredensial yang valid
+    // 3. Login dengan kredensial yang valid serta mencentang opsi "Ingat saya"
     await emailInput.fill('ambangawi@telkomuniversity.ac.id');
     await passwordInput.fill('password123');
+
+    // Verifikasi checkbox Ingat Saya terlihat dan dicentang
+    const rememberMeCheckbox = page.locator('#rememberMe');
+    await expect(rememberMeCheckbox).toBeVisible();
+    await rememberMeCheckbox.check();
+    await expect(rememberMeCheckbox).toBeChecked();
+
     await loginButton.click();
 
     // 4. Verifikasi berhasil masuk ke Dashboard
@@ -65,6 +72,12 @@ test.describe('E2E Testing Role Pelapor (Civitas Akademika / Mahasiswa)', () => 
     await expect(page).toHaveURL(/.*dashboard/);
     await expect(page.locator('text=Halo,')).toBeVisible();
     await expect(page.locator('text=Total Laporan Anda')).toBeVisible();
+
+    // 5. Verifikasi persistensi fitur "Ingat Saya": navigasi kembali ke /login
+    await page.goto('/login');
+    await page.waitForURL(/.*login/, { timeout: 10000 });
+    await expect(page.locator('input[type="email"]')).toHaveValue('ambangawi@telkomuniversity.ac.id');
+    await expect(page.locator('#rememberMe')).toBeChecked();
   });
 
   test('Step 3: Eksplorasi Dashboard Pelapor & Modal Detail Laporan', async ({ page }) => {

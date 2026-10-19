@@ -7,9 +7,9 @@ import { authService } from '../../services/auth.service';
 
 const RegisterPage = ({ onRegisterSuccess }) => {
   const navigate = useNavigate();
-  const [name, setName] = useState('Amba Ngawi');
-  const [nim, setNim] = useState('103012400229');
-  const [email, setEmail] = useState('ambangawi@telkomuniversity.ac.id');
+  const [name, setName] = useState('');
+  const [nim, setNim] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [registerError, setRegisterError] = useState('');

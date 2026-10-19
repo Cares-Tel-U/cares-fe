@@ -27,9 +27,9 @@ const ReportTable = ({ reports = [], onSelectReport, showPagination = true, limi
               displayReports.map((report, index) => (
                 <tr key={report.id || index} style={{ borderBottom: '1px solid #ededed', color: '#63636a', fontSize: '9px' }}>
                   <td style={{ padding: '11px 8px', textAlign: 'center', verticalAlign: 'middle' }}>{index + 1}</td>
-                  <td style={{ padding: '11px 8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>{report.lokasi || 'Gedung A - KU3.02.12'}</td>
-                  <td style={{ padding: '11px 8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>{report.deskripsi || 'AC dikelas KU3.03.12 tidak dingin...'}</td>
-                  <td style={{ padding: '11px 8px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>{report.tanggal || '12/02/2026'}</td>
+                  <td style={{ padding: '11px 8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>{report.lokasi || '-'}</td>
+                  <td style={{ padding: '11px 8px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>{report.deskripsi || '-'}</td>
+                  <td style={{ padding: '11px 8px', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>{report.tanggal || '-'}</td>
                   <td style={{ padding: '11px 8px', textAlign: 'center', verticalAlign: 'middle' }}>
                     <StatusBadge status={report.status} />
                   </td>
@@ -48,16 +48,9 @@ const ReportTable = ({ reports = [], onSelectReport, showPagination = true, limi
         </table>
       </div>
 
-      {showPagination && (
+      {showPagination && reports.length > 0 && (
         <div className="p-4 border-t border-gray-100 flex justify-between items-center text-xs text-gray-500">
-          <span>Menampilkan 1 sampai 10 dari 38 data</span>
-          <div className="flex items-center space-x-2">
-            <button className="bg-[#800000] text-white px-3 py-1.5 rounded-lg hover:opacity-90">Sebelumnya</button>
-            <span className="font-bold text-gray-800 px-1">1</span>
-            <span className="px-1 text-gray-400">2</span>
-            <span className="px-1 text-gray-400">3</span>
-            <button className="bg-[#800000] text-white px-3 py-1.5 rounded-lg hover:opacity-90">Selanjutnya</button>
-          </div>
+          <span>Menampilkan 1 sampai {displayReports.length} dari {reports.length} data</span>
         </div>
       )}
     </div>

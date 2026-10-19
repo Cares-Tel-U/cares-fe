@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Button from '../common/Button';
 
-// All available buildings with their display labels
-const gedungList = [
+// All available default buildings with their display labels
+const defaultGedungList = [
   { value: 'Kultubai Utara', label: 'Kultubai Utara' },
   { value: 'Gedung A', label: 'Gedung A (Gedung Kuliah Umum)' },
   { value: 'Gedung B', label: 'Gedung B (Tokong Nanas)' },
@@ -12,7 +12,7 @@ const gedungList = [
   { value: 'Kantin Telkom', label: 'Area Kantin' },
 ];
 
-const ruanganOptionsMap = {
+const defaultRuanganOptionsMap = {
   'Kultubai Utara': ['RU01.01.02', 'RU01.01.03', 'RU01.02.01', 'Toilet Lt. 1', 'KU3.03.12'],
   'Gedung A': ['KU3.02.12', 'KU3.02.13', 'KU3.01.01', 'KU3.03.05', 'Toilet Lt. 2'],
   'Gedung B': ['TN2.01.05', 'TN1.02.04', 'Lab Rekayasa Perangkat Lunak', 'Toilet Lt. 1'],
@@ -139,8 +139,41 @@ const AutocompleteField = ({ label, required, placeholder, value, onChange, sugg
   );
 };
 
-const ReportFormSection = ({ onSubmit, isSubmitting = false }) => {
+const ReportFormSection = ({ onSubmit, isSubmitting = false, facilities = [] }) => {
   const [jenisLokasi, setJenisLokasi] = useState('Dalam Gedung');
+
+  // Gedung & Ruangan dinamis dari data fasilitas backend
+  const { gedungList, ruanganOptionsMap } = React.useMemo(() => {
+    if (!facilities || facilities.length === 0) {
+      return { gedungList: defaultGedungList, ruanganOptionsMap: defaultRuanganOptionsMap };
+    }
+
+    const gedungMap = new Map();
+    const ruanganMap = {};
+
+    defaultGedungList.forEach((g) => {
+      gedungMap.set(g.value, g);
+      ruanganMap[g.value] = [...(defaultRuanganOptionsMap[g.value] || [])];
+    });
+
+    facilities.forEach((f) => {
+      const gName = f.lokasi?.trim() || 'Lainnya';
+      if (!gedungMap.has(gName)) {
+        gedungMap.set(gName, { value: gName, label: gName });
+      }
+      if (!ruanganMap[gName]) {
+        ruanganMap[gName] = [];
+      }
+      if (f.nama && !ruanganMap[gName].includes(f.nama)) {
+        ruanganMap[gName].push(f.nama);
+      }
+    });
+
+    return {
+      gedungList: Array.from(gedungMap.values()),
+      ruanganOptionsMap: ruanganMap
+    };
+  }, [facilities]);
 
   // Gedung autocomplete state
   const [gedungQuery, setGedungQuery] = useState('');

@@ -40,7 +40,7 @@ const AdminReportResponsePage = ({
 
   const [activeReports, setActiveReports] = useState(initialReports);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('Laporan berhasil diverifikasi');
+  const [successMessage, setSuccessMessage] = useState('');
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isDragOver, setIsDragOver] = useState(false);
 

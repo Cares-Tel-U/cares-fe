@@ -237,7 +237,7 @@ test.describe('E2E Testing Role Admin (Petugas Sarana & Prasarana)', () => {
     await page.waitForURL(/.*admin\/data-statistik/, { timeout: 10000 });
 
     // 3. Verifikasi elemen halaman Data Statistik
-    await expect(page.locator('header h2:has-text("Data Statistik")').or(page.locator('text=Data Statistik').first())).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Data Statistik' })).toBeVisible();
     await expect(page.locator('svg').first()).toBeVisible();
   });
 

@@ -2,10 +2,10 @@ import { apiRequest, setAuthToken, setStoredUser, clearAuth } from './api';
 
 export const authService = {
   // Login Civitas Akademika (Mahasiswa / Dosen / Tendik / Sarpras)
-  async login(email, password) {
+  async login(email, password, rememberMe = false) {
     const res = await apiRequest('/auth/login', {
       method: 'POST',
-      body: { email, password },
+      body: { email, password, rememberMe },
     });
 
     if (res.data?.token) {

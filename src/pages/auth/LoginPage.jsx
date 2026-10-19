@@ -7,8 +7,10 @@ import { authService } from '../../services/auth.service';
 
 const LoginPage = ({ onLoginSuccess }) => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('ambangawi@telkomuniversity.ac.id');
-  const [password, setPassword] = useState('password123');
+  const savedEmail = typeof window !== 'undefined' ? localStorage.getItem('cares_remembered_email') || '' : '';
+  const [email, setEmail] = useState(savedEmail);
+  const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(Boolean(savedEmail));
   const [loginError, setLoginError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,9 +22,15 @@ const LoginPage = ({ onLoginSuccess }) => {
     setLoading(true);
 
     try {
-      const data = await authService.login(email.trim(), password);
+      const data = await authService.login(email.trim(), password, rememberMe);
       const user = data.user;
       const isAdmin = user.role === 'SARPRAS' || user.role === 'ADMIN';
+
+      if (rememberMe) {
+        localStorage.setItem('cares_remembered_email', email.trim());
+      } else {
+        localStorage.removeItem('cares_remembered_email');
+      }
 
       const userPayload = {
         id: user.id,
@@ -103,11 +111,40 @@ const LoginPage = ({ onLoginSuccess }) => {
 
           <div
             style={{
-              textAlign: 'right',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
               marginTop: '-10px',
               marginBottom: '18px'
             }}
           >
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                fontSize: '12.5px',
+                color: '#4b5563',
+                userSelect: 'none'
+              }}
+            >
+              <input
+                type="checkbox"
+                name="rememberMe"
+                id="rememberMe"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                style={{
+                  width: '15px',
+                  height: '15px',
+                  accentColor: '#ba181b',
+                  cursor: 'pointer'
+                }}
+              />
+              <span>Ingat saya</span>
+            </label>
+
             <span
               style={{
                 fontSize: '12px',
