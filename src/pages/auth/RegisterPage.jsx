@@ -203,9 +203,13 @@ const RegisterPage = ({ onRegisterSuccess }) => {
           disabled={isPasswordShort || loading}
           style={{
             width: '100%',
+            height: '46px',
             marginTop: '8px',
             backgroundColor: isPasswordShort || loading ? '#f2989b' : '#dc2626',
             color: '#ffffff',
+            fontWeight: '700',
+            fontSize: '14px',
+            borderRadius: '8px',
             cursor: isPasswordShort || loading ? 'not-allowed' : 'pointer',
             opacity: 1
           }}

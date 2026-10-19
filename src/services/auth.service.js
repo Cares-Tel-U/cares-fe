@@ -73,6 +73,15 @@ export const authService = {
     return res.data;
   },
 
+  // Pengecekan Ketersediaan Email di Database
+  async checkEmail(email) {
+    const res = await apiRequest('/auth/check-email', {
+      method: 'POST',
+      body: { email },
+    });
+    return res;
+  },
+
   // Permintaan Pemulihan Kata Sandi (Forgot Password)
   async forgotPassword(email) {
     const res = await apiRequest('/auth/forgot-password', {

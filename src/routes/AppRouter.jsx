@@ -2,6 +2,8 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
+import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
+import ResetPasswordPage from '../pages/auth/ResetPasswordPage';
 import DashboardPage from '../pages/pelapor/DashboardPage';
 import CreateReportPage from '../pages/pelapor/CreateReportPage';
 import ReportHistoryPage from '../pages/pelapor/ReportHistoryPage';
@@ -49,6 +51,14 @@ const AppRouter = ({
       <Route
         path="/register"
         element={<RegisterPage onRegisterSuccess={onRegisterSuccess} />}
+      />
+      <Route
+        path="/forgot-password"
+        element={<ForgotPasswordPage />}
+      />
+      <Route
+        path="/reset-password"
+        element={<ResetPasswordPage />}
       />
 
       {/* Pelapor Routes */}

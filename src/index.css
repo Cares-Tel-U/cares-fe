@@ -359,3 +359,191 @@ button, a, input, select, textarea {
 .success-icon-wrapper svg { width: 31px; height: 31px; }.success-modal-card p { color: #111827; font-size: 16px; font-weight: 700; line-height: 1.4; }
 @keyframes successBackdropIn { from { opacity: 0; } to { opacity: 1; } }
 @media (max-width: 480px) { .success-modal-card { padding: 28px 24px; }.success-modal-card p { font-size: 15px; } }
+
+/* ==========================================================================
+   Auth Layout & Responsive Styling
+   ========================================================================== */
+.auth-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #ffffff;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  overflow-x: hidden;
+}
+
+.auth-desktop-banner {
+  flex: 1.25;
+  background: radial-gradient(circle at 60% 50%, #d83035 0%, #ba181b 55%, #8f1214 100%);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 60px 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-desktop-banner-content {
+  z-index: 1;
+  max-width: 460px;
+}
+
+.auth-desktop-greeting {
+  font-size: 21px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #ffffff;
+  letter-spacing: -0.2px;
+}
+
+.auth-desktop-logo-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.auth-form-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 60px;
+  background-color: #ffffff;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.auth-form-wrapper {
+  max-width: 440px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.auth-mobile-header {
+  display: none;
+}
+
+.auth-mobile-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.auth-mobile-logo {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+
+.auth-mobile-brand {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.auth-mobile-brand-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #ba181b;
+  letter-spacing: -0.5px;
+}
+
+.auth-mobile-brand-tagline {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  letter-spacing: 0.2px;
+}
+
+.auth-form-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.auth-form-subtitle {
+  font-size: 13.5px;
+  color: #6b7280;
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+/* Responsif Mobile & Tablet untuk Auth */
+@media (max-width: 900px) {
+  .auth-container {
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .auth-desktop-banner {
+    display: none !important;
+  }
+
+  .auth-mobile-header {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .auth-form-section {
+    flex: 1;
+    justify-content: center;
+    padding: 36px 24px 44px;
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  .auth-form-wrapper {
+    max-width: 440px;
+    width: 100%;
+  }
+
+  .auth-form-title {
+    font-size: 24px;
+    margin-bottom: 6px;
+  }
+
+  .auth-form-subtitle {
+    font-size: 13px;
+    margin-bottom: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-form-section {
+    padding: 24px 18px 36px;
+  }
+
+  .auth-mobile-header {
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+  }
+
+  .auth-mobile-logo {
+    width: 38px;
+    height: 38px;
+  }
+
+  .auth-mobile-brand-title {
+    font-size: 19px;
+  }
+
+  .auth-mobile-brand-tagline {
+    font-size: 10.5px;
+  }
+
+  .auth-form-title {
+    font-size: 22px;
+  }
+
+  .auth-form-subtitle {
+    font-size: 12.5px;
+    margin-bottom: 18px;
+  }
+}

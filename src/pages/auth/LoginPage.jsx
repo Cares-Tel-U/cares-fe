@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import AuthLayout from '../../layouts/AuthLayout';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import ReportLoadingModal from '../../components/modals/ReportLoadingModal';
-import ForgotPasswordModal from '../../components/modals/ForgotPasswordModal';
 import { authService } from '../../services/auth.service';
 
 const LoginPage = ({ onLoginSuccess }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const notificationMsg = location.state?.notificationMessage || '';
   const savedEmail = typeof window !== 'undefined' ? localStorage.getItem('cares_remembered_email') || '' : '';
   const [email, setEmail] = useState(savedEmail);
   const [password, setPassword] = useState('');
@@ -17,7 +18,6 @@ const LoginPage = ({ onLoginSuccess }) => {
   const [errorMessage, setErrorMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [showForgotModal, setShowForgotModal] = useState(false);
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -96,6 +96,25 @@ const LoginPage = ({ onLoginSuccess }) => {
       title="Login"
       subtitle="Masuk ke akun CARES untuk membuat laporan dan melihat riwayat laporan fasilitas kampus Anda"
     >
+      {/* Banner Pesan Sukses Pemulihan Password / Redirect */}
+      {notificationMsg && !loginError && (
+        <div
+          style={{
+            backgroundColor: '#ecfdf5',
+            color: '#065f46',
+            border: '1px solid #a7f3d0',
+            padding: '12px 16px',
+            borderRadius: '8px',
+            fontSize: '13px',
+            lineHeight: '1.45',
+            fontWeight: '500',
+            marginBottom: '20px'
+          }}
+        >
+          {notificationMsg}
+        </div>
+      )}
+
       {/* Banner Pesan Error Login Gagal */}
       {loginError && (
         <div
@@ -147,8 +166,10 @@ const LoginPage = ({ onLoginSuccess }) => {
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              marginTop: '-10px',
-              marginBottom: '18px'
+              flexWrap: 'wrap',
+              gap: '8px',
+              marginTop: '-6px',
+              marginBottom: '20px'
             }}
           >
             <label
@@ -178,17 +199,18 @@ const LoginPage = ({ onLoginSuccess }) => {
               <span>Ingat saya</span>
             </label>
 
-            <span
+            <Link
+              to="/forgot-password"
               style={{
                 fontSize: '12px',
                 color: '#ba181b',
-                cursor: 'pointer',
-                fontWeight: '600'
+                textDecoration: 'none',
+                fontWeight: '600',
+                padding: '2px 0'
               }}
-              onClick={() => setShowForgotModal(true)}
             >
               Lupa Password?
-            </span>
+            </Link>
           </div>
         </div>
 
@@ -199,9 +221,13 @@ const LoginPage = ({ onLoginSuccess }) => {
           disabled={loading}
           style={{
             width: '100%',
+            height: '46px',
             backgroundColor: '#dc2626',
             color: '#ffffff',
             marginTop: '4px',
+            fontWeight: '700',
+            fontSize: '14px',
+            borderRadius: '8px',
             opacity: loading ? 0.7 : 1,
           }}
         >
@@ -229,11 +255,6 @@ const LoginPage = ({ onLoginSuccess }) => {
           Sign Up
         </Link>
       </div>
-
-      <ForgotPasswordModal
-        isOpen={showForgotModal}
-        onClose={() => setShowForgotModal(false)}
-      />
 
       <ReportLoadingModal isOpen={loading} text="Memproses login..." />
     </AuthLayout>
