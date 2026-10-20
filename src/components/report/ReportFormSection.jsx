@@ -27,14 +27,20 @@ const ReportFormSection = ({ onSubmit, isSubmitting = false, facilities = [] }) 
     if (Array.isArray(facilities)) {
       facilities.forEach((f) => {
         const gName = f.lokasi?.trim() || 'Lainnya';
-        if (!gedungMap.has(gName)) {
-          gedungMap.set(gName, { value: gName, label: gName });
-        }
-        if (!ruanganMap[gName]) {
-          ruanganMap[gName] = [];
-        }
-        if (f.nama && !ruanganMap[gName].includes(f.nama)) {
-          ruanganMap[gName].push(f.nama);
+        // Jangan masukkan ke daftar gedung jika lokasi tersebut merupakan kategori area luar
+        const isAreaLuarLoc = defaultAreaLuarList.some(
+          (a) => a.value.toLowerCase() === gName.toLowerCase() || a.label.toLowerCase() === gName.toLowerCase()
+        );
+        if (!isAreaLuarLoc) {
+          if (!gedungMap.has(gName)) {
+            gedungMap.set(gName, { value: gName, label: gName });
+          }
+          if (!ruanganMap[gName]) {
+            ruanganMap[gName] = [];
+          }
+          if (f.nama && !ruanganMap[gName].includes(f.nama)) {
+            ruanganMap[gName].push(f.nama);
+          }
         }
       });
     }
@@ -45,7 +51,7 @@ const ReportFormSection = ({ onSubmit, isSubmitting = false, facilities = [] }) 
     };
   }, [facilities]);
 
-  // Area Luar & Lokasi Spesifik dinamis
+  // Area Luar & Lokasi Spesifik dinamis dari data fasilitas backend digabung dengan default lengkap
   const { areaList, lokasiSpesifikMap } = useMemo(() => {
     const areaMap = new Map();
     const spesifikMap = {};
@@ -55,11 +61,32 @@ const ReportFormSection = ({ onSubmit, isSubmitting = false, facilities = [] }) 
       spesifikMap[a.value] = [...(defaultLokasiSpesifikMap[a.value] || [])];
     });
 
+    if (Array.isArray(facilities)) {
+      facilities.forEach((f) => {
+        const aName = f.lokasi?.trim();
+        if (!aName) return;
+
+        const matchedArea = defaultAreaLuarList.find(
+          (a) => a.value.toLowerCase() === aName.toLowerCase() || a.label.toLowerCase() === aName.toLowerCase()
+        );
+
+        if (matchedArea) {
+          const key = matchedArea.value;
+          if (!spesifikMap[key]) {
+            spesifikMap[key] = [];
+          }
+          if (f.nama && !spesifikMap[key].includes(f.nama)) {
+            spesifikMap[key].push(f.nama);
+          }
+        }
+      });
+    }
+
     return {
       areaList: Array.from(areaMap.values()),
       lokasiSpesifikMap: spesifikMap,
     };
-  }, []);
+  }, [facilities]);
 
   // Field 1 (Nama Gedung / Area) autocomplete state
   const [gedungQuery, setGedungQuery] = useState('');
