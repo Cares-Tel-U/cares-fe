@@ -170,12 +170,13 @@ test.describe('E2E Testing Role Pelapor (Civitas Akademika / Mahasiswa)', () => 
     const laporkanButton = page.getByRole('button', { name: 'Laporkan' });
     await laporkanButton.click();
 
-    // 10. Verifikasi Modal Notifikasi Keberhasilan atau Batas Harian
+    // 10. Verifikasi Modal Notifikasi Keberhasilan, Batas Harian, atau Peringatan Fasilitas Sedang Aktif
     const successModal = page.locator('text=Laporan berhasil dibuat');
     const quotaModal = page.locator('text=melebihi batas laporan harian');
+    const facilityBusyAlert = page.locator('text=sedang dalam penanganan');
 
-    // Menunggu salah satu modal status muncul
-    await expect(successModal.or(quotaModal)).toBeVisible({ timeout: 10000 });
+    // Menunggu salah satu feedback status muncul
+    await expect(successModal.or(quotaModal).or(facilityBusyAlert)).toBeVisible({ timeout: 10000 });
 
     // Jika berhasil, tunggu pengalihan ke /riwayat-laporan
     if (await successModal.isVisible()) {

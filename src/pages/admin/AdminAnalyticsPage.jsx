@@ -1,318 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import AdminLayout from '../../layouts/AdminLayout';
 import { adminService } from '../../services';
+import AnalyticsAreaChart from '../../components/analytics/AnalyticsAreaChart';
+import AnalyticsDonutChart from '../../components/analytics/AnalyticsDonutChart';
+import AnalyticsHourlyChart from '../../components/analytics/AnalyticsHourlyChart';
 
-// Area Chart Dinamis berbasis Data Riil API
-const AreaChart = ({ data = [] }) => {
-  const chartData = data && data.length > 0 ? data : [];
-  if (chartData.length === 0) {
-    return (
-      <div style={{ height: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: '11.5px' }}>
-        Belum ada data tren laporan pada periode ini
-      </div>
-    );
-  }
-  const maxVal = Math.max(...chartData.map((d) => d.value), 4);
-  const yTicks = [maxVal, Math.round((maxVal * 2) / 3), Math.round(maxVal / 3), 0];
-
-  const W = 500;
-  const H = 140;
-  const padX = 14;
-  const padT = 14;
-  const padB = 10;
-  const chartW = W - padX * 2;
-  const chartH = H - padT - padB;
-  const baselineY = padT + chartH;
-
-  const pts = chartData.map((d, i) => ({
-    x: chartData.length > 1 ? padX + (i / (chartData.length - 1)) * chartW : W / 2,
-    y: padT + chartH - (d.value / maxVal) * chartH,
-    value: d.value,
-    label: d.label
-  }));
-
-  const linePath = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
-  const areaPath = pts.length > 1
-    ? `${linePath} L${pts[pts.length - 1].x},${baselineY} L${pts[0].x},${baselineY} Z`
-    : '';
-
-  // Filter label sumbu X agar rapi dan tidak tumpang tindih untuk rentang data panjang (misal 30 hari)
-  const visibleXLabels = useMemo(() => {
-    if (pts.length <= 8) return pts;
-    const step = Math.ceil(pts.length / 6);
-    return pts.filter((_, idx) => idx === 0 || idx === pts.length - 1 || idx % step === 0);
-  }, [pts]);
-
-  return (
-    <div style={{ width: '100%', userSelect: 'none' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '24px 1fr', gap: '10px', alignItems: 'stretch' }}>
-        {/* Y Axis Ticks (HTML: proporsional, rapi, tajam, ukuran 11px) */}
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '2px 0', fontSize: '11px', color: '#9ca3af', textAlign: 'right', fontWeight: 500, height: '140px' }}>
-          {yTicks.map((t, idx) => (
-            <span key={idx} style={{ lineHeight: 1 }}>{t}</span>
-          ))}
-        </div>
-
-        {/* Chart Container & Titik Bulat Presisi */}
-        <div style={{ position: 'relative', width: '100%', height: '140px', overflow: 'visible' }}>
-          <svg width="100%" height="100%" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ overflow: 'visible', display: 'block' }}>
-            <defs>
-              <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#dc2626" stopOpacity="0.22" />
-                <stop offset="100%" stopColor="#dc2626" stopOpacity="0.01" />
-              </linearGradient>
-            </defs>
-
-            {/* Horizontal Grid lines */}
-            {yTicks.map((t, idx) => {
-              const y = padT + chartH - (t / maxVal) * chartH;
-              return (
-                <line
-                  key={idx}
-                  x1="0"
-                  y1={y}
-                  x2={W}
-                  y2={y}
-                  stroke="#f3f4f6"
-                  strokeWidth="1"
-                  vectorEffect="non-scaling-stroke"
-                />
-              );
-            })}
-
-            {/* Area fill */}
-            {areaPath && <path d={areaPath} fill="url(#areaGrad)" />}
-
-            {/* Line: garis ramping 1.5px presisi */}
-            <path
-              d={linePath}
-              fill="none"
-              stroke="#dc2626"
-              strokeWidth="1.5"
-              vectorEffect="non-scaling-stroke"
-              strokeLinejoin="round"
-              strokeLinecap="round"
-            />
-          </svg>
-
-          {/* Titik Lingkaran Data (HTML Overlay: Bulat Sempurna 1:1, Tidak Gepeng, Animasi Denyut Halus) */}
-          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'visible' }}>
-            {pts.map((p, i) => {
-              const hasData = p.value > 0;
-              return (
-                <div
-                  key={i}
-                  title={`${p.label}: ${p.value} Laporan`}
-                  style={{
-                    position: 'absolute',
-                    left: `${(p.x / W) * 100}%`,
-                    top: `${(p.y / H) * 100}%`,
-                    transform: 'translate(-50%, -50%)',
-                    width: hasData ? '11px' : '6px',
-                    height: hasData ? '11px' : '6px',
-                    borderRadius: '50%',
-                    backgroundColor: hasData ? '#dc2626' : '#d1d5db',
-                    border: hasData ? '2.5px solid #ffffff' : '1px solid #9ca3af',
-                    boxShadow: hasData ? '0 1px 3px rgba(220, 38, 38, 0.4)' : 'none',
-                    pointerEvents: 'auto',
-                    cursor: 'pointer',
-                    boxSizing: 'border-box',
-                    animation: hasData ? 'chartPulse 2s infinite ease-in-out' : 'none',
-                    zIndex: hasData ? 2 : 1
-                  }}
-                />
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* X Axis Labels (HTML: proporsional, ukuran 11px, terpusat persis di bawah titik data) */}
-      <div style={{ display: 'grid', gridTemplateColumns: '24px 1fr', gap: '10px', marginTop: '10px' }}>
-        <div />
-        <div style={{ position: 'relative', width: '100%', height: '18px' }}>
-          {visibleXLabels.map((p, i) => {
-            const leftPercent = (p.x / W) * 100;
-            return (
-              <span
-                key={i}
-                style={{
-                  position: 'absolute',
-                  left: `${leftPercent}%`,
-                  transform: leftPercent === 0 ? 'none' : leftPercent === 100 ? 'translateX(-100%)' : 'translateX(-50%)',
-                  fontSize: '11px',
-                  color: '#9ca3af',
-                  fontWeight: 500,
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                {p.label}
-              </span>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// SVG Donut Chart Dinamis
-const DonutChart = ({ data = DONUT_DATA }) => {
-  const chartData = data && data.length > 0 ? data : DONUT_DATA;
-  const cx = 80, cy = 80, R = 65, r = 44;
-  const total = chartData.reduce((s, d) => s + (d.count || 0), 0);
-  let startAngle = -Math.PI / 2;
-
-  const slices = chartData.map((d) => {
-    const angle = total > 0 ? ((d.count || 0) / total) * 2 * Math.PI : 0;
-    const x1 = cx + R * Math.cos(startAngle);
-    const y1 = cy + R * Math.sin(startAngle);
-    const x2 = cx + R * Math.cos(startAngle + angle);
-    const y2 = cy + R * Math.sin(startAngle + angle);
-    const x3 = cx + r * Math.cos(startAngle + angle);
-    const y3 = cy + r * Math.sin(startAngle + angle);
-    const x4 = cx + r * Math.cos(startAngle);
-    const y4 = cy + r * Math.sin(startAngle);
-    const large = angle > Math.PI ? 1 : 0;
-    const path = angle > 0
-      ? `M${x1},${y1} A${R},${R} 0 ${large},1 ${x2},${y2} L${x3},${y3} A${r},${r} 0 ${large},0 ${x4},${y4} Z`
-      : '';
-    startAngle += angle;
-    return { ...d, path };
-  });
-
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-      <div style={{ flexShrink: 0 }}>
-        <svg width="160" height="160" viewBox="0 0 160 160">
-          {slices.map((s, i) => (
-            s.path ? <path key={i} d={s.path} fill={s.color} /> : null
-          ))}
-          <circle cx={cx} cy={cy} r={r - 1} fill="white" />
-          <text x={cx} y={cy - 6} textAnchor="middle" fontSize="20" fontWeight="800" fill="#111827">{total}</text>
-          <text x={cx} y={cy + 12} textAnchor="middle" fontSize="11" fill="#9ca3af">Laporan</text>
-        </svg>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', flex: 1, minWidth: '160px' }}>
-        {chartData.map((d, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: d.color, flexShrink: 0 }} />
-              <span style={{ fontSize: '12px', color: '#374151' }}>{d.label}</span>
-            </div>
-            <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600', whiteSpace: 'nowrap' }}>
-              {d.percent}% ({d.count})
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-// Hourly Bar Chart Dinamis
-const default24Hours = Array.from({ length: 24 }, (_, h) => ({ hour: h, val: 0 }));
-const HourlyBarChart = ({ data = default24Hours }) => {
-  const chartData = data && data.length > 0 ? data : default24Hours;
-  const maxVal = Math.max(...chartData.map((d) => d.val), 1);
-  const effMax = Math.max(maxVal, 4);
-  const showLabels = ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'];
-  const yTicks = [effMax, Math.round((effMax * 2) / 3), Math.round(effMax / 3), 0];
-
-  const W = 480;
-  const H = 120;
-  const padT = 6;
-  const chartH = H - padT;
-  const slotW = W / 24;
-
-  return (
-    <div style={{ width: '100%', userSelect: 'none' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '24px 1fr', gap: '10px', alignItems: 'stretch' }}>
-        {/* Y Axis Ticks (HTML: proporsional, ukuran 11px) */}
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '2px 0', fontSize: '11px', color: '#9ca3af', textAlign: 'right', fontWeight: 500, height: '120px' }}>
-          {yTicks.map((t, idx) => (
-            <span key={idx} style={{ lineHeight: 1 }}>{t}</span>
-          ))}
-        </div>
-
-        {/* Bars SVG */}
-        <div style={{ position: 'relative', width: '100%', height: '120px' }}>
-          <svg
-            width="100%"
-            height="100%"
-            viewBox={`0 0 ${W} ${H}`}
-            preserveAspectRatio="none"
-            style={{ overflow: 'visible', display: 'block' }}
-          >
-            {/* Horizontal Grid lines */}
-            {yTicks.map((t, idx) => {
-              const y = padT + chartH - (t / effMax) * chartH;
-              return (
-                <line
-                  key={idx}
-                  x1="0"
-                  y1={y}
-                  x2={W}
-                  y2={y}
-                  stroke="#f3f4f6"
-                  strokeWidth="1"
-                  vectorEffect="non-scaling-stroke"
-                />
-              );
-            })}
-
-            {/* Bars: proporsional dan rapi */}
-            {chartData.map((d, i) => {
-              const bh = (d.val / effMax) * chartH;
-              const barWidth = Math.min(slotW * 0.55, 12);
-              const barX = i * slotW + (slotW - barWidth) / 2;
-              return (
-                <rect
-                  key={i}
-                  x={barX}
-                  y={padT + chartH - bh}
-                  width={barWidth}
-                  height={Math.max(bh, 0)}
-                  fill="#dc2626"
-                  rx="2"
-                />
-              );
-            })}
-          </svg>
-        </div>
-      </div>
-
-      {/* X Axis Labels (HTML: proporsional, ukuran 11px) */}
-      <div style={{ display: 'grid', gridTemplateColumns: '24px 1fr', gap: '10px', marginTop: '10px' }}>
-        <div />
-        <div style={{ position: 'relative', width: '100%', height: '16px' }}>
-          {showLabels.map((lbl, idx) => {
-            const hour = idx * 4; // 0, 4, 8, 12, 16, 20
-            const pct = ((hour + 0.5) / 24) * 100;
-            return (
-              <span
-                key={idx}
-                style={{
-                  position: 'absolute',
-                  left: `${pct}%`,
-                  transform: 'translateX(-50%)',
-                  fontSize: '11px',
-                  color: '#9ca3af',
-                  fontWeight: 500,
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                {lbl}
-              </span>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ─── Main Page ─────────────────────────────────────────────────────────────────
 const AdminAnalyticsPage = ({
   user,
   reports = [],
@@ -589,7 +281,7 @@ const AdminAnalyticsPage = ({
           <div style={{ fontSize: '14px', fontWeight: '700', color: '#111827', marginBottom: '16px' }}>
             Grafik Laporan
           </div>
-          <AreaChart data={areaChartData} />
+          <AnalyticsAreaChart data={areaChartData} />
         </div>
 
         {/* Distribusi Status Laporan */}
@@ -603,7 +295,7 @@ const AdminAnalyticsPage = ({
             </div>
           </div>
           <div style={{ marginTop: '12px' }}>
-            <DonutChart data={donutData} />
+            <AnalyticsDonutChart data={donutData} />
           </div>
         </div>
       </div>
@@ -657,7 +349,7 @@ const AdminAnalyticsPage = ({
           <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '16px', marginTop: '2px' }}>
             Menunjukkan waktu dengan jumlah laporan yang paling banyak masuk
           </div>
-          <HourlyBarChart data={hourlyData} />
+          <AnalyticsHourlyChart data={hourlyData} />
         </div>
       </div>
     </AdminLayout>

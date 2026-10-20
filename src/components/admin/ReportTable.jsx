@@ -1,5 +1,6 @@
 import React from 'react';
 import StatusBadge from './StatusBadge';
+import EmptyTableState from '../common/EmptyTableState';
 
 const ReportTable = ({ reports = [], onSelectReport, showPagination = true, limit }) => {
   const displayReports = limit ? reports.slice(0, limit) : reports;
@@ -20,9 +21,7 @@ const ReportTable = ({ reports = [], onSelectReport, showPagination = true, limi
           </thead>
           <tbody className="divide-y divide-gray-100 text-xs text-gray-700">
             {displayReports.length === 0 ? (
-              <tr>
-                <td colSpan="6" className="text-center py-6 text-gray-400" style={{ fontSize: '12.5px' }}>Tidak ada data laporan</td>
-              </tr>
+              <EmptyTableState colSpan={6} />
             ) : (
               displayReports.map((report, index) => (
                 <tr key={report.id || index} style={{ borderBottom: '1px solid #ededed', color: '#4b5563', fontSize: '12.5px' }}>

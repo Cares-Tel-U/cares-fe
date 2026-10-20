@@ -29,15 +29,19 @@ const ReportDetailModal = ({ isOpen, onClose, report }) => {
               </div>
             </div>
             <div>
-              <div style={{ fontSize: '11.5px', color: '#9ca3af', marginBottom: '2px' }}>Nama Gedung</div>
+              <div style={{ fontSize: '11.5px', color: '#9ca3af', marginBottom: '2px' }}>
+                {(report.jenisLokasi === 'Area Luar' || report.jenisLokasi === 'Luar Gedung') ? 'Area' : 'Nama Gedung'}
+              </div>
               <div style={{ fontSize: '13px', color: '#1f2937', fontWeight: '500' }}>
-                {report.namaGedung || report.lokasi.split(' - ')[0] || '-'}
+                {report.namaGedung || (report.lokasi ? report.lokasi.split(' - ')[0] : '-')}
               </div>
             </div>
             <div>
-              <div style={{ fontSize: '11.5px', color: '#9ca3af', marginBottom: '2px' }}>Nama Ruangan</div>
+              <div style={{ fontSize: '11.5px', color: '#9ca3af', marginBottom: '2px' }}>
+                {(report.jenisLokasi === 'Area Luar' || report.jenisLokasi === 'Luar Gedung') ? 'Lokasi Spesifik' : 'Nama Ruangan'}
+              </div>
               <div style={{ fontSize: '13px', color: '#1f2937', fontWeight: '500' }}>
-                {report.namaRuangan || report.lokasi.split(' - ')[1] || '-'}
+                {report.namaRuangan || (report.lokasi ? report.lokasi.split(' - ')[1] : '-')}
               </div>
             </div>
           </div>

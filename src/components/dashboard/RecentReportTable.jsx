@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import BadgeStatus from '../common/BadgeStatus';
+import EmptyTableState from '../common/EmptyTableState';
 
 const headerCell = (width, align = 'left', extra = {}) => ({ width, padding: '10px 8px', background: '#f3f3f3', color: '#7b7c82', fontSize: '12px', fontWeight: 600, textAlign: align, ...extra });
 const cell = (align = 'left', extra = {}) => ({ padding: '12px 8px', color: '#4b5563', fontSize: '12.5px', verticalAlign: 'middle', textAlign: align, ...extra });
@@ -31,11 +32,7 @@ const RecentReportTable = ({ reports = [], onSelectDetail }) => {
             <td style={cell('center', { paddingRight: '16px' })}><button type="button" onClick={() => onSelectDetail(report)} style={{ border: '1px solid #ff5964', color: '#df1e2d', background: '#fff', borderRadius: '4px', padding: '5px 10px', fontSize: '11.5px', fontWeight: 500, lineHeight: 1.2, whiteSpace: 'nowrap', cursor: 'pointer' }}>Lihat detail</button></td>
           </tr>)
         ) : (
-          <tr>
-            <td colSpan="6" style={{ padding: '26px', textAlign: 'center', color: '#9ca3af', fontSize: '12.5px' }}>
-              Belum ada riwayat laporan yang dibuat.
-            </td>
-          </tr>
+          <EmptyTableState colSpan={6} />
         )}</tbody>
       </table>
     </div>

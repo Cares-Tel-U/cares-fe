@@ -1,9 +1,11 @@
-import React, { useState, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import AdminLayout from '../../layouts/AdminLayout';
 import BadgeStatus from '../../components/common/BadgeStatus';
 import SuccessModal from '../../components/modals/SuccessModal';
 import ReportLoadingModal from '../../components/modals/ReportLoadingModal';
+import RepairProofDropzone from '../../components/admin/RepairProofDropzone';
+import AdminReportPreviewList from '../../components/admin/AdminReportPreviewList';
 
 const AdminReportResponsePage = ({
   user,
@@ -19,7 +21,6 @@ const AdminReportResponsePage = ({
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const fileInputRef = useRef(null);
 
   // Initial reports from location state (batch mode) or from param id
   const initialReports = useMemo(() => {
@@ -44,7 +45,6 @@ const AdminReportResponsePage = ({
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [uploadedFiles, setUploadedFiles] = useState([]);
-  const [isDragOver, setIsDragOver] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [loadingText, setLoadingText] = useState('Memproses pembaruan laporan...');
 
@@ -61,13 +61,6 @@ const AdminReportResponsePage = ({
     }));
     setUploadedFiles((prev) => [...prev, ...newEntries]);
   }, []);
-
-  const handleFileInputChange = (e) => {
-    if (e.target.files && e.target.files.length > 0) {
-      handleFilesSelected(e.target.files);
-      e.target.value = '';
-    }
-  };
 
   const handleRemoveUploadedFile = (index) => {
     setUploadedFiles((prev) => {
@@ -210,7 +203,7 @@ const AdminReportResponsePage = ({
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
               <div>
                 <div style={{ fontSize: '11.5px', color: '#9ca3af', marginBottom: '2px' }}>
-                  Nama Gedung
+                  {(primaryReport.jenisLokasi === 'Area Luar' || primaryReport.jenisLokasi === 'Luar Gedung') ? 'Area' : 'Nama Gedung'}
                 </div>
                 <div style={{ fontSize: '13px', color: '#1f2937', fontWeight: '600' }}>
                   {primaryReport.namaGedung || primaryReport.gedung || (primaryReport.lokasi ? primaryReport.lokasi.split(' - ')[0] : '-')}
@@ -218,7 +211,7 @@ const AdminReportResponsePage = ({
               </div>
               <div>
                 <div style={{ fontSize: '11.5px', color: '#9ca3af', marginBottom: '2px' }}>
-                  Nama Ruangan
+                  {(primaryReport.jenisLokasi === 'Area Luar' || primaryReport.jenisLokasi === 'Luar Gedung') ? 'Lokasi Spesifik' : 'Nama Ruangan'}
                 </div>
                 <div style={{ fontSize: '13px', color: '#1f2937', fontWeight: '600' }}>
                   {primaryReport.namaRuangan || primaryReport.ruangan || (primaryReport.lokasi ? primaryReport.lokasi.split(' - ')[1] : '-')}
@@ -229,115 +222,11 @@ const AdminReportResponsePage = ({
 
           {/* Single Report Mode: Diproses -> Upload Bukti Perbaikan */}
           {isProcessMode && (
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#111827', marginBottom: '10px' }}>
-                Bukti Perbaikan Fasilitas
-              </label>
-
-              {/* Hidden file input */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                multiple
-                style={{ display: 'none' }}
-                onChange={handleFileInputChange}
-              />
-
-              {/* Drop Zone */}
-              <div
-                onClick={() => fileInputRef.current && fileInputRef.current.click()}
-                onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
-                onDragLeave={() => setIsDragOver(false)}
-                onDrop={(e) => { e.preventDefault(); setIsDragOver(false); if (e.dataTransfer.files?.length) handleFilesSelected(e.dataTransfer.files); }}
-                style={{
-                  border: `2px dashed ${isDragOver ? '#dc2626' : '#d1d5db'}`,
-                  borderRadius: '16px',
-                  padding: '28px 16px',
-                  textAlign: 'center',
-                  backgroundColor: isDragOver ? '#fff5f5' : '#f9fafb',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                <div
-                  style={{
-                    width: '42px',
-                    height: '42px',
-                    backgroundColor: isDragOver ? '#fee2e2' : '#e5e7eb',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: isDragOver ? '#dc2626' : '#6b7280',
-                    marginBottom: '10px',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="17 8 12 3 7 8" />
-                    <line x1="12" y1="3" x2="12" y2="15" />
-                  </svg>
-                </div>
-                <div style={{ fontSize: '13px', fontWeight: '600', color: '#374151' }}>
-                  Seret ke sini <span style={{ fontWeight: '400', color: '#6b7280' }}>atau klik untuk dipilih</span>
-                </div>
-                <div style={{ fontSize: '11px', color: '#9ca3af', marginTop: '4px', marginBottom: '14px' }}>
-                  Format JPG, PNG · Maks. 5 MB per foto
-                </div>
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); fileInputRef.current && fileInputRef.current.click(); }}
-                  style={{
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #f87171',
-                    color: '#dc2626',
-                    borderRadius: '8px',
-                    padding: '7px 16px',
-                    fontSize: '12.5px',
-                    fontWeight: '600',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Pilih dari perangkat
-                </button>
-              </div>
-
-              {/* Uploaded file thumbnails */}
-              {uploadedFiles.length > 0 && (
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
-                  {uploadedFiles.map((file, idx) => (
-                    <div key={idx} style={{ position: 'relative', display: 'inline-block' }}>
-                      <img
-                        src={file.url}
-                        alt={file.name}
-                        style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e5e7eb' }}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveUploadedFile(idx)}
-                        title="Hapus foto"
-                        style={{
-                          position: 'absolute', top: '-6px', right: '-6px',
-                          width: '18px', height: '18px',
-                          backgroundColor: '#dc2626', color: '#ffffff',
-                          border: 'none', borderRadius: '50%',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          cursor: 'pointer', fontSize: '9px', lineHeight: 1, padding: 0
-                        }}
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <RepairProofDropzone
+              uploadedFiles={uploadedFiles}
+              onFilesSelected={handleFilesSelected}
+              onRemoveFile={handleRemoveUploadedFile}
+            />
           )}
 
           {/* Attention Box */}
@@ -380,7 +269,7 @@ const AdminReportResponsePage = ({
             </div>
           </div>
 
-          {/* Action Button on bottom right */}
+          {/* Action Button */}
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '24px' }}>
             {isProcessMode ? (
               <button
@@ -429,123 +318,15 @@ const AdminReportResponsePage = ({
         </div>
 
         {/* Right Column: Preview Laporan */}
-        <div
-          style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '16px',
-            border: '1px solid #e5e7eb',
-            padding: '24px',
-            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)'
-          }}
-        >
-          <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#111827', margin: '0 0 16px 0' }}>
-            Preview Laporan ({activeReports.length})
-          </h3>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            {activeReports.map((report, index) => {
-              const photoList = report.foto && report.foto.length > 0 ? report.foto : [];
-
-              return (
-                <div
-                  key={report.id || index}
-                  style={{
-                    backgroundColor: '#fafafa',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '12px',
-                    padding: '16px',
-                    position: 'relative'
-                  }}
-                >
-                  {/* Card Header: Laporan X & Trash Icon */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-                    <span style={{ fontSize: '13px', fontWeight: '700', color: '#ba181b' }}>
-                      Laporan {index + 1}
-                    </span>
-                    <button
-                      type="button"
-                      title="Hapus dari daftar"
-                      onClick={() => handleRemoveReport(report.id)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: '#9ca3af',
-                        cursor: 'pointer',
-                        padding: '4px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: '4px',
-                        transition: 'color 0.15s ease'
-                      }}
-                      onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
-                      onMouseLeave={(e) => (e.currentTarget.style.color = '#9ca3af')}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="3 6 5 6 21 6" />
-                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                      </svg>
-                    </button>
-                  </div>
-
-                  {/* Deskripsi Masalah */}
-                  <div style={{ marginBottom: '12px' }}>
-                    <div style={{ fontSize: '11.5px', fontWeight: '700', color: '#374151', marginBottom: '4px' }}>
-                      Deskripsi Masalah
-                    </div>
-                    <div style={{ fontSize: '12.5px', color: '#4b5563', lineHeight: '1.45' }}>
-                      {report.deskripsi || '-'}
-                    </div>
-                  </div>
-
-                  {/* Bukti Foto */}
-                  <div style={{ marginBottom: '12px' }}>
-                    <div style={{ fontSize: '11.5px', fontWeight: '700', color: '#374151', marginBottom: '6px' }}>
-                      Bukti Foto
-                    </div>
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      {photoList.length > 0 ? (
-                        photoList.map((imgSrc, imgIdx) => (
-                          <img
-                            key={imgIdx}
-                            src={imgSrc}
-                            alt={`Bukti Foto ${imgIdx + 1}`}
-                            style={{
-                              width: '56px',
-                              height: '56px',
-                              borderRadius: '8px',
-                              objectFit: 'cover',
-                              border: '1px solid #e5e7eb'
-                            }}
-                          />
-                        ))
-                      ) : (
-                        <span style={{ fontSize: '11.5px', color: '#9ca3af', fontStyle: 'italic' }}>
-                          Tidak ada lampiran foto
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Pelapor */}
-                  <div>
-                    <div style={{ fontSize: '11.5px', fontWeight: '700', color: '#374151', marginBottom: '2px' }}>
-                      Pelapor
-                    </div>
-                    <div style={{ fontSize: '12.5px', color: '#374151' }}>
-                      {report.isAnonim ? 'Anonim' : (report.pelapor || 'Anonim')}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <AdminReportPreviewList
+          activeReports={activeReports}
+          onRemoveReport={handleRemoveReport}
+        />
       </div>
 
       <ReportLoadingModal isOpen={isProcessing} text={loadingText} />
 
-      {/* Success Modal (Screenshot 5) */}
+      {/* Success Modal */}
       {showSuccess && (
         <SuccessModal
           message={successMessage}

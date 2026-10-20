@@ -1,11 +1,13 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import AdminLayout from '../../layouts/AdminLayout';
-import BadgeStatus from '../../components/common/BadgeStatus';
 import DetailReportModal from '../../components/modals/DetailReportModal';
 import RejectReportModal from '../../components/modals/RejectReportModal';
 import SuccessModal from '../../components/modals/SuccessModal';
+import AdminReportTableToolbar from '../../components/admin/AdminReportTableToolbar';
+import AdminReportTable from '../../components/admin/AdminReportTable';
+import TablePagination from '../../components/common/TablePagination';
+import AdminBulkStatusModal from '../../components/admin/AdminBulkStatusModal';
 import { reportService } from '../../services';
 
 const ITEMS_PER_PAGE = 10;
@@ -87,7 +89,7 @@ const AdminReportListPage = ({
     );
   };
 
-  // Select / Deselect all visible on the page
+  // Select / Deselect all visible on the current page
   const handleSelectAllVisible = () => {
     const visibleIds = currentReports.map((r) => r.id);
     const allSelected = visibleIds.every((id) => selectedIds.includes(id));
@@ -165,590 +167,61 @@ const AdminReportListPage = ({
       onLogout={onLogout}
       onUpdateAvatar={onUpdateAvatar}
     >
-      {/* Main Card Container */}
       <div className="admin-card-container">
-        {/* Top Bar / Filters */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '20px',
-            flexWrap: 'wrap',
-            gap: '12px'
+        {/* Toolbar Filter & Bulk Action */}
+        <AdminReportTableToolbar
+          filterSort={filterSort}
+          onSortChange={(val) => {
+            setFilterSort(val);
+            setCurrentPage(1);
           }}
-        >
-          {!isSelectionMode ? (
-            /* Mode Normal: Sort, Status, and "Pilih beberapa" button */
-            <>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '13px', color: '#4b5563', fontWeight: '500' }}>
-                    Sort by:
-                  </span>
-                  <div style={{ position: 'relative' }}>
-                    <select
-                      value={filterSort}
-                      onChange={(e) => {
-                        setFilterSort(e.target.value);
-                        setCurrentPage(1);
-                      }}
-                      style={{
-                        backgroundColor: '#ffffff',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '8px',
-                        padding: '7px 32px 7px 14px',
-                        fontSize: '13px',
-                        fontWeight: '500',
-                        color: '#374151',
-                        cursor: 'pointer',
-                        outline: 'none',
-                        appearance: 'none',
-                        fontFamily: 'inherit',
-                        minWidth: '110px'
-                      }}
-                    >
-                      <option value="Terbaru">Terbaru</option>
-                      <option value="Terlama">Terlama</option>
-                    </select>
-                    <div
-                      style={{
-                        position: 'absolute',
-                        right: '10px',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        pointerEvents: 'none',
-                        color: '#6b7280'
-                      }}
-                    >
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                        <polyline points="6 9 12 15 18 9" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ position: 'relative' }}>
-                  <select
-                    value={filterStatus}
-                    onChange={(e) => {
-                      setFilterStatus(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    style={{
-                      backgroundColor: '#ffffff',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      padding: '7px 32px 7px 14px',
-                      fontSize: '13px',
-                      fontWeight: '500',
-                      color: '#374151',
-                      cursor: 'pointer',
-                      outline: 'none',
-                      appearance: 'none',
-                      fontFamily: 'inherit',
-                      minWidth: '150px'
-                    }}
-                  >
-                    <option value="Semua Status">Semua Status</option>
-                    <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
-                    <option value="Diproses">Diproses</option>
-                    <option value="Selesai">Selesai</option>
-                    <option value="Ditolak">Ditolak</option>
-                  </select>
-                  <div
-                    style={{
-                      position: 'absolute',
-                      right: '10px',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      pointerEvents: 'none',
-                      color: '#6b7280'
-                    }}
-                  >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <button
-                  type="button"
-                  onClick={() => setIsSelectionMode(true)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #ef4444',
-                    color: '#dc2626',
-                    borderRadius: '8px',
-                    padding: '7px 16px',
-                    fontSize: '13px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
-                    transition: 'all 0.15s ease'
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#fef2f2')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#ffffff')}
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="9 11 12 14 22 4" />
-                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-                  </svg>
-                  <span>Pilih beberapa</span>
-                </button>
-              </div>
-            </>
-          ) : (
-            /* Mode Selection: Count + Action buttons */
-            <>
-              <div style={{ fontSize: '14.5px', fontWeight: '700', color: '#111827' }}>
-                {selectedIds.length} Laporan dipilih
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <button
-                  type="button"
-                  disabled={selectedIds.length === 0}
-                  onClick={() => setShowUpdateModal(true)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '7px',
-                    backgroundColor: '#ba181b',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '8px 18px',
-                    fontSize: '13px',
-                    fontWeight: '600',
-                    cursor: selectedIds.length === 0 ? 'not-allowed' : 'pointer',
-                    opacity: selectedIds.length === 0 ? 0.6 : 1,
-                    transition: 'all 0.15s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (selectedIds.length > 0) e.currentTarget.style.backgroundColor = '#9e181c';
-                  }}
-                  onMouseLeave={(e) => {
-                    if (selectedIds.length > 0) e.currentTarget.style.backgroundColor = '#ba181b';
-                  }}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  <span>Update status</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsSelectionMode(false);
-                    setSelectedIds([]);
-                  }}
-                  style={{
-                    backgroundColor: '#f3f4f6',
-                    color: '#4b5563',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '8px 18px',
-                    fontSize: '13px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.15s ease'
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e5e7eb')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f3f4f6')}
-                >
-                  Batal
-                </button>
-              </div>
-            </>
-          )}
-        </div>
+          filterStatus={filterStatus}
+          onStatusChange={(val) => {
+            setFilterStatus(val);
+            setCurrentPage(1);
+          }}
+          isSelectionMode={isSelectionMode}
+          onEnableSelectionMode={() => setIsSelectionMode(true)}
+          onCancelSelectionMode={() => {
+            setIsSelectionMode(false);
+            setSelectedIds([]);
+          }}
+          selectedCount={selectedIds.length}
+          onOpenUpdateModal={() => setShowUpdateModal(true)}
+        />
 
         {/* Data Table */}
-        <div className="table-responsive-wrapper">
-          <table
-            style={{
-              width: '100%',
-              minWidth: isSelectionMode ? '820px' : '785px',
-              tableLayout: 'fixed',
-              borderCollapse: 'collapse',
-              textAlign: 'left'
-            }}
-          >
-            <thead>
-              <tr style={{ borderBottom: '1px solid #d9d9d9', background: '#f3f3f3' }}>
-                {isSelectionMode && (
-                  <th style={{ padding: '9px 4px 9px 16px', width: '45px', textAlign: 'center' }}>
-                    <div
-                      onClick={handleSelectAllVisible}
-                      style={{
-                        width: '18px',
-                        height: '18px',
-                        borderRadius: '4px',
-                        backgroundColor: isAllVisibleSelected ? '#ba181b' : '#ffffff',
-                        border: isAllVisibleSelected ? 'none' : '1.5px solid #d1d5db',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        color: '#ffffff',
-                        fontSize: '12px',
-                        fontWeight: '700',
-                        margin: '0 auto',
-                        userSelect: 'none'
-                      }}
-                    >
-                      {isAllVisibleSelected && '✓'}
-                    </div>
-                  </th>
-                )}
-                <th style={{ padding: isSelectionMode ? '10px 8px' : '10px 8px 10px 16px', fontSize: '12px', fontWeight: '600', color: '#7b7c82', width: isSelectionMode ? '45px' : '55px', textAlign: 'center' }}>
-                  No
-                </th>
-                <th style={{ padding: '10px 8px', fontSize: '12px', fontWeight: '600', color: '#7b7c82', width: '165px' }}>
-                  Lokasi
-                </th>
-                <th style={{ padding: '10px 8px', fontSize: '12px', fontWeight: '600', color: '#7b7c82', width: '210px' }}>
-                  Deskripsi
-                </th>
-                <th style={{ padding: '10px 8px', fontSize: '12px', fontWeight: '600', color: '#7b7c82', width: '105px' }}>
-                  Tanggal
-                </th>
-                <th style={{ padding: '10px 8px', fontSize: '12px', fontWeight: '600', color: '#7b7c82', width: '140px', textAlign: 'center' }}>
-                  Status
-                </th>
-                <th style={{ padding: '10px 16px 10px 8px', fontSize: '12px', fontWeight: '600', color: '#7b7c82', textAlign: 'center', width: '110px' }}>
-                  Aksi
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentReports.length === 0 ? (
-                <tr>
-                  <td colSpan={isSelectionMode ? 7 : 6} style={{ padding: '36px', textAlign: 'center', color: '#9ca3af', fontSize: '14px' }}>
-                    Tidak ada data laporan yang sesuai.
-                  </td>
-                </tr>
-              ) : (
-                currentReports.map((item, index) => {
-                  const isSelected = selectedIds.includes(item.id);
-                  const rowBg = isSelected ? '#fff5f5' : '#ffffff';
-
-                  return (
-                    <tr
-                      key={item.id}
-                      onClick={() => {
-                        if (isSelectionMode) toggleSelectReport(item.id);
-                      }}
-                      style={{
-                        backgroundColor: rowBg,
-                        borderBottom: '1px solid #ededed',
-                        transition: 'background-color 0.1s ease',
-                        cursor: isSelectionMode ? 'pointer' : 'default'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = isSelected ? '#ffecec' : '#fafafa';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = rowBg;
-                      }}
-                    >
-                      {isSelectionMode && (
-                        <td style={{ padding: '11px 4px 11px 16px', textAlign: 'center', verticalAlign: 'middle' }}>
-                          <div
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleSelectReport(item.id);
-                            }}
-                            style={{
-                              width: '18px',
-                              height: '18px',
-                              borderRadius: '4px',
-                              backgroundColor: isSelected ? '#ba181b' : '#ffffff',
-                              border: isSelected ? 'none' : '1.5px solid #d1d5db',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              cursor: 'pointer',
-                              color: '#ffffff',
-                              fontSize: '12px',
-                              fontWeight: '700',
-                              margin: '0 auto',
-                              userSelect: 'none'
-                            }}
-                          >
-                            {isSelected && '✓'}
-                          </div>
-                        </td>
-                      )}
-                      <td style={{ padding: isSelectionMode ? '12px 8px' : '12px 8px 12px 16px', fontSize: '12.5px', color: '#63636a', textAlign: 'center', verticalAlign: 'middle' }}>
-                        {startIndex + index + 1}
-                      </td>
-                      <td style={{ padding: '12px 8px', fontSize: '12.5px', color: '#63636a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', verticalAlign: 'middle' }} title={item.lokasi}>
-                        {item.lokasi}
-                      </td>
-                      <td
-                        style={{
-                          padding: '12px 8px',
-                          fontSize: '12.5px',
-                          color: '#4b5563',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                          verticalAlign: 'middle'
-                        }}
-                        title={item.deskripsi}
-                      >
-                        {item.deskripsi}
-                      </td>
-                      <td style={{ padding: '12px 8px', fontSize: '12.5px', color: '#63636a', whiteSpace: 'nowrap', verticalAlign: 'middle' }}>
-                        {item.tanggal}
-                      </td>
-                      <td style={{ padding: '12px 8px', textAlign: 'center', verticalAlign: 'middle' }}>
-                        <BadgeStatus status={item.status} />
-                      </td>
-                      <td style={{ padding: '12px 16px 12px 8px', textAlign: 'center', verticalAlign: 'middle' }}>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOpenDetail(item);
-                          }}
-                          style={{
-                            border: '1px solid #ff5964',
-                            color: '#df1e2d',
-                            backgroundColor: '#ffffff',
-                            borderRadius: '4px',
-                            padding: '5px 10px',
-                            fontSize: '11.5px',
-                            fontWeight: '500',
-                            cursor: 'pointer',
-                            whiteSpace: 'nowrap',
-                            transition: 'all 0.15s ease'
-                          }}
-                          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#fff5f5')}
-                          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#ffffff')}
-                        >
-                          Lihat detail
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+        <AdminReportTable
+          reports={currentReports}
+          startIndex={startIndex}
+          isSelectionMode={isSelectionMode}
+          selectedIds={selectedIds}
+          onToggleSelectReport={toggleSelectReport}
+          onSelectAllVisible={handleSelectAllVisible}
+          isAllVisibleSelected={isAllVisibleSelected}
+          onOpenDetail={handleOpenDetail}
+        />
 
         {/* Pagination Footer */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginTop: '24px',
-            paddingTop: '16px',
-            borderTop: '1px solid #f3f4f6',
-            flexWrap: 'wrap',
-            gap: '12px'
-          }}
-        >
-          <div style={{ fontSize: '12.5px', color: '#4b5563' }}>
-            Menampilkan {totalItems === 0 ? 0 : startIndex + 1} sampai {endIndex} dari {totalItems} data
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <button
-              type="button"
-              disabled={currentPage === 1}
-              onClick={() => handlePageChange(currentPage - 1)}
-              style={{
-                backgroundColor: '#ba181b',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '9999px',
-                padding: '6px 18px',
-                fontSize: '12px',
-                fontWeight: '600',
-                cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                opacity: currentPage === 1 ? 0.5 : 1,
-                transition: 'opacity 0.15s ease'
-              }}
-            >
-              Sebelumnya
-            </button>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', margin: '0 6px' }}>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                const isActive = page === currentPage;
-                return (
-                  <button
-                    key={page}
-                    type="button"
-                    onClick={() => handlePageChange(page)}
-                    style={{
-                      backgroundColor: 'transparent',
-                      border: 'none',
-                      borderBottom: isActive ? '2px solid #ba181b' : '2px solid transparent',
-                      color: isActive ? '#ba181b' : '#6b7280',
-                      fontSize: '13px',
-                      fontWeight: isActive ? '700' : '500',
-                      cursor: 'pointer',
-                      padding: '4px 8px',
-                      minWidth: '24px'
-                    }}
-                  >
-                    {page}
-                  </button>
-                );
-              })}
-            </div>
-
-            <button
-              type="button"
-              disabled={currentPage === totalPages}
-              onClick={() => handlePageChange(currentPage + 1)}
-              style={{
-                backgroundColor: '#ba181b',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '9999px',
-                padding: '6px 18px',
-                fontSize: '12px',
-                fontWeight: '600',
-                cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                opacity: currentPage === totalPages ? 0.5 : 1,
-                transition: 'opacity 0.15s ease'
-              }}
-            >
-              Selanjutnya
-            </button>
-          </div>
-        </div>
+        <TablePagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalItems}
+          startIndex={startIndex}
+          endIndex={endIndex}
+          onPageChange={handlePageChange}
+        />
       </div>
 
-      {/* Confirmation Modal: Update Status Laporan? (Screenshot 3) */}
-      {showUpdateModal && typeof document !== 'undefined' && createPortal(
-        <div
-          onClick={() => setShowUpdateModal(false)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.45)',
-            backdropFilter: 'blur(2px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 99999,
-            padding: '20px'
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '20px',
-              padding: '32px 28px',
-              width: '100%',
-              maxWidth: '380px',
-              textAlign: 'center',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.15)',
-              animation: 'modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
-            }}
-          >
-            {/* Red Circle Icon with reload arrows */}
-            <div
-              style={{
-                width: '56px',
-                height: '56px',
-                borderRadius: '50%',
-                backgroundColor: '#fee2e2',
-                border: '1.5px solid #fca5a5',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 16px auto',
-                color: '#dc2626'
-              }}
-            >
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-            </div>
+      {/* Confirmation Modal: Update Status Laporan Massal */}
+      <AdminBulkStatusModal
+        isOpen={showUpdateModal}
+        selectedCount={selectedIds.length}
+        onClose={() => setShowUpdateModal(false)}
+        onConfirm={handleConfirmUpdate}
+      />
 
-            <h3
-              style={{
-                fontSize: '18px',
-                fontWeight: '700',
-                color: '#111827',
-                marginBottom: '6px'
-              }}
-            >
-              Update Status Laporan?
-            </h3>
-            <p
-              style={{
-                fontSize: '13px',
-                color: '#6b7280',
-                marginBottom: '24px',
-                lineHeight: '1.4'
-              }}
-            >
-              Status {selectedIds.length} laporan terpilih akan diupdate
-            </p>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <button
-                type="button"
-                onClick={() => setShowUpdateModal(false)}
-                style={{
-                  backgroundColor: '#f3f4f6',
-                  color: '#4b5563',
-                  border: 'none',
-                  borderRadius: '10px',
-                  padding: '11px 0',
-                  fontSize: '13.5px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.15s ease'
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e5e7eb')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f3f4f6')}
-              >
-                Batal
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmUpdate}
-                style={{
-                  backgroundColor: '#ba181b',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '10px',
-                  padding: '11px 0',
-                  fontSize: '13.5px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.15s ease'
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#9e181c')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#ba181b')}
-              >
-                Update
-              </button>
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
-
-      {/* Admin Detail Report Modal */}
+      {/* Detail Report Modal */}
       {selectedReport && (
         <DetailReportModal
           report={selectedReport}

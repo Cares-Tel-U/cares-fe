@@ -1,256 +1,8 @@
 import React, { useState } from 'react';
-import { createPortal } from 'react-dom';
 import Modal from '../common/Modal';
 import BadgeStatus from '../common/BadgeStatus';
-
-/* ─────────────────────────────────────────────
-   Sub-modal: Bukti (photo + timestamp + note)
-───────────────────────────────────────────── */
-const BuktiModal = ({ proof, onClose }) => {
-  if (!proof) return null;
-
-  const content = (
-    <div
-      onClick={onClose}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 100001,
-        backgroundColor: 'rgba(0,0,0,0.55)',
-        backdropFilter: 'blur(3px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px',
-        animation: 'modalFadeIn 0.18s ease-out'
-      }}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          backgroundColor: '#ffffff',
-          borderRadius: '16px',
-          width: '100%',
-          maxWidth: '420px',
-          overflow: 'hidden',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
-          animation: 'modalFadeIn 0.2s ease-out'
-        }}
-      >
-        {/* Header */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '16px 20px',
-            borderBottom: '1px solid #f3f4f6'
-          }}
-        >
-          <span style={{ fontSize: '15px', fontWeight: '700', color: '#111827' }}>Bukti</span>
-          <button
-            onClick={onClose}
-            style={{
-              width: '28px',
-              height: '28px',
-              borderRadius: '50%',
-              border: 'none',
-              backgroundColor: '#f3f4f6',
-              color: '#6b7280',
-              fontSize: '18px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              lineHeight: 1
-            }}
-          >
-            ×
-          </button>
-        </div>
-
-        {/* Photo with overlay */}
-        <div style={{ position: 'relative' }}>
-          <img
-            src={proof.foto}
-            alt="Bukti perbaikan"
-            style={{
-              width: '100%',
-              maxHeight: '320px',
-              objectFit: 'cover',
-              display: 'block'
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              background: 'linear-gradient(to top, rgba(0,0,0,0.78) 0%, transparent 100%)',
-              padding: '40px 16px 14px',
-              color: '#ffffff'
-            }}
-          >
-            <div style={{ fontSize: '13px', fontWeight: '700', marginBottom: '4px' }}>
-              {proof.waktu}
-            </div>
-            {proof.keterangan && (
-              <>
-                <div style={{ fontSize: '11.5px', fontWeight: '600', marginBottom: '2px', opacity: 0.9 }}>
-                  Keterangan:
-                </div>
-                <div style={{ fontSize: '12px', lineHeight: '1.45', opacity: 0.88 }}>
-                  {proof.keterangan}
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  return typeof document !== 'undefined' ? createPortal(content, document.body) : content;
-};
-
-/* ─────────────────────────────────────────────
-   Timeline sub-component
-───────────────────────────────────────────── */
-const TimelineSection = ({ report, onLihatBukti }) => {
-  // Helper: get date from report.timeline array by step index
-  const tl = report.timeline || [];
-  const tlDate = (idx) => (tl[idx] && tl[idx].date && tl[idx].date !== '-') ? tl[idx].date : null;
-
-  const steps = [
-    { key: 'terkirim',   label: 'Laporan terkirim',              date: report.tanggalTerkirim   || tlDate(0) || report.tanggal || null },
-    { key: 'verifikasi', label: 'Laporan berhasil diverifikasi', date: report.tanggalVerifikasi || tlDate(1) || null },
-    { key: 'proses',     label: 'Laporan dalam proses',          date: report.tanggalDiproses   || tlDate(2) || null },
-    { key: 'selesai',    label: 'Laporan selesai',               date: report.tanggalSelesai    || tlDate(3) || null }
-  ];
-
-  // For Selesai all 4 steps are active
-  const activeCount = 4;
-
-
-  return (
-    <div>
-      <div style={{ fontSize: '13px', fontWeight: '700', color: '#111827', marginBottom: '12px' }}>
-        Timeline Laporan
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        {steps.map((step, idx) => {
-          const isActive = idx < activeCount;
-          const isLast = idx === steps.length - 1;
-          const showBuktiBtn =
-            step.key === 'selesai' &&
-            report.completionProofs &&
-            report.completionProofs.length > 0;
-
-          return (
-            <div key={step.key} style={{ display: 'flex', gap: '12px' }}>
-              {/* Dot + connector line */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
-                <div
-                  style={{
-                    width: '22px',
-                    height: '22px',
-                    borderRadius: '50%',
-                    border: `2px solid ${isActive ? '#ba181b' : '#d1d5db'}`,
-                    backgroundColor: isActive ? '#ba181b' : '#ffffff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0
-                  }}
-                >
-                  <div
-                    style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                      backgroundColor: isActive ? '#ffffff' : '#d1d5db'
-                    }}
-                  />
-                </div>
-                {!isLast && (
-                  <div
-                    style={{
-                      width: '2px',
-                      flex: 1,
-                      minHeight: '20px',
-                      backgroundColor: idx < activeCount - 1 ? '#ba181b' : '#e5e7eb',
-                      margin: '3px 0'
-                    }}
-                  />
-                )}
-              </div>
-
-              {/* Text + button */}
-              <div
-                style={{
-                  paddingBottom: isLast ? 0 : '14px',
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: showBuktiBtn ? 'center' : 'flex-start',
-                  justifyContent: 'space-between',
-                  gap: '8px'
-                }}
-              >
-                <div>
-                  <div
-                    style={{
-                      fontSize: '13px',
-                      fontWeight: '600',
-                      color: isActive ? '#111827' : '#9ca3af'
-                    }}
-                  >
-                    {step.label}
-                  </div>
-                  <div style={{ fontSize: '11.5px', color: '#6b7280', marginTop: '2px' }}>
-                    {step.date || (isActive ? '-' : '')}
-                  </div>
-                </div>
-
-                {showBuktiBtn && (
-                  <button
-                    type="button"
-                    onClick={onLihatBukti}
-                    style={{
-                      flexShrink: 0,
-                      border: '1px solid #e5e7eb',
-                      backgroundColor: '#ffffff',
-                      color: '#374151',
-                      borderRadius: '7px',
-                      padding: '5px 12px',
-                      fontSize: '11.5px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease',
-                      whiteSpace: 'nowrap'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#f9fafb';
-                      e.currentTarget.style.borderColor = '#ba181b';
-                      e.currentTarget.style.color = '#ba181b';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = '#ffffff';
-                      e.currentTarget.style.borderColor = '#e5e7eb';
-                      e.currentTarget.style.color = '#374151';
-                    }}
-                  >
-                    Lihat bukti
-                  </button>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
+import ReportProofModal from './ReportProofModal';
+import ReportTimeline from '../report/ReportTimeline';
 
 const DetailReportModal = ({
   report,
@@ -301,13 +53,17 @@ const DetailReportModal = ({
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: '11.5px', color: '#9ca3af', marginBottom: '2px' }}>Nama Gedung</div>
+                <div style={{ fontSize: '11.5px', color: '#9ca3af', marginBottom: '2px' }}>
+                  {(report.jenisLokasi === 'Area Luar' || report.jenisLokasi === 'Luar Gedung') ? 'Area' : 'Nama Gedung'}
+                </div>
                 <div style={{ fontSize: '13px', color: '#1f2937', fontWeight: '500' }}>
                   {report.namaGedung || report.gedung || (report.lokasi ? report.lokasi.split(' - ')[0] : 'Gedung A')}
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: '11.5px', color: '#9ca3af', marginBottom: '2px' }}>Nama Ruangan</div>
+                <div style={{ fontSize: '11.5px', color: '#9ca3af', marginBottom: '2px' }}>
+                  {(report.jenisLokasi === 'Area Luar' || report.jenisLokasi === 'Luar Gedung') ? 'Lokasi Spesifik' : 'Nama Ruangan'}
+                </div>
                 <div style={{ fontSize: '13px', color: '#1f2937', fontWeight: '500' }}>
                   {report.namaRuangan || report.ruangan || (report.lokasi ? report.lokasi.split(' - ')[1] : 'KU3.02.12')}
                 </div>
@@ -356,7 +112,7 @@ const DetailReportModal = ({
 
           {/* Timeline Laporan — hanya untuk status Selesai */}
           {isSelesai && (
-            <TimelineSection
+            <ReportTimeline
               report={report}
               onLihatBukti={() => setShowBuktiModal(true)}
             />
@@ -513,8 +269,6 @@ const DetailReportModal = ({
             </div>
           )}
 
-          {/* Selesai: no extra block needed — Timeline handles it above */}
-
           {/* Detail Khusus Status: Ditolak */}
           {report.status === 'Ditolak' && (
             <div>
@@ -540,9 +294,9 @@ const DetailReportModal = ({
         </div>
       </Modal>
 
-      {/* Bukti sub-modal — rendered outside main Modal for correct z-index */}
+      {/* Bukti sub-modal */}
       {showBuktiModal && proofData && (
-        <BuktiModal proof={proofData} onClose={() => setShowBuktiModal(false)} />
+        <ReportProofModal proof={proofData} onClose={() => setShowBuktiModal(false)} />
       )}
     </>
   );

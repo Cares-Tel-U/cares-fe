@@ -121,8 +121,8 @@ test.describe('E2E Testing Role Admin (Petugas Sarana & Prasarana)', () => {
     await expect(page.locator('button:has-text("Update status")')).toBeVisible();
     await expect(page.locator('button:has-text("Batal")')).toBeVisible();
 
-    // 3. Pilih baris pertama di tabel
-    const firstCheckbox = page.locator('tbody tr td div').first();
+    // 3. Pilih baris pertama di tabel jika ada laporan
+    const firstCheckbox = page.locator('[data-testid="report-checkbox"]').first();
     if (await firstCheckbox.isVisible()) {
       await firstCheckbox.click();
       await expect(page.locator('text=1 Laporan dipilih')).toBeVisible();

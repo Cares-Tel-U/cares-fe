@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import BadgeStatus from '../common/BadgeStatus';
+import EmptyTableState from '../common/EmptyTableState';
 
 const ITEMS_PER_PAGE = 10;
 const headerCell = (width, align = 'left', extra = {}) => ({ width, padding: '10px 8px', background: '#f3f3f3', color: '#7b7c82', fontSize: '12px', fontWeight: 600, textAlign: align, ...extra });
@@ -31,7 +32,7 @@ const HistoryTable = ({ reports = [], onSelectDetail }) => {
           <td style={{ ...cell(), whiteSpace: 'nowrap' }}>{report.tanggal}</td>
           <td style={cell('center')}><BadgeStatus status={report.status} /></td>
           <td style={cell('center', { paddingRight: '16px' })}><button type="button" onClick={() => onSelectDetail(report)} style={{ border: '1px solid #ff5964', color: '#df1e2d', background: '#fff', borderRadius: '4px', padding: '5px 10px', fontSize: '11.5px', fontWeight: 500, lineHeight: 1.2, whiteSpace: 'nowrap', cursor: 'pointer' }}>Lihat detail</button></td>
-        </tr>) : <tr><td colSpan="6" style={{ padding: '28px', textAlign: 'center', color: '#9ca3af', fontSize: '12.5px' }}>Tidak ada laporan yang sesuai dengan filter.</td></tr>}</tbody>
+        </tr>) : <EmptyTableState colSpan={6} />}</tbody>
       </table>
     </div>
     <footer style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', color: '#4b5563', fontSize: '12.5px', flexWrap: 'wrap', gap: '10px' }}>
