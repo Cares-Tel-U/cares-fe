@@ -196,8 +196,15 @@ docker build -t cares-frontend:latest .
 docker run -d -p 5173:80 --name cares-frontend cares-frontend:latest
 ```
 
-### 4. Checklist Sebelum Deploy ke Cloud
+### 4. Pipeline CI/CD GitHub Actions
+Frontend telah dilengkapi pipeline CI otomatis pada `.github/workflows/ci.yml`:
+- **Pemicu Alur Kerja**: Dijalankan otomatis pada setiap `push` dan `pull_request` menuju cabang `main`.
+- **Tahap 1 (Production Build Verification)**: Memverifikasi proses kompilasi bundel aset produksi React 19 via Vite (`npm run build`).
+- **Tahap 2 (Docker Nginx Build Verification)**: Memverifikasi pembuatan image Docker Nginx agar artefak siap didistribusikan ke server cloud.
+
+### 5. Checklist Sebelum Deploy ke Cloud
 - [ ] Pastikan variabel `VITE_API_BASE_URL` telah diarahkan ke domain publik backend API produksi (misalnya `https://api.cares.telkomuniversity.ac.id`).
 - [ ] Konfigurasi aturan *Single Page Application (SPA) Rewrite* pada web server (Nginx/Vercel/Netlify) agar rute diarahkan ke `index.html`.
 - [ ] Lakukan verifikasi bahwa seluruh aset gambar dan font dimuat melalui protokol HTTPS.
+
 
