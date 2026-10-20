@@ -1,0 +1,17 @@
+node_modules
+dist
+dist-ssr
+.env
+.env.*
+!.env.example
+.git
+.gitignore
+.DS_Store
+*.log
+npm-debug.log*
+test-results
+playwright-report
+blob-report
+playwright/.cache
+scratch
+e2e

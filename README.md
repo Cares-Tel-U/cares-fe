@@ -186,7 +186,18 @@ Hasil kompilasi bundel aset optimal akan tersimpan di direktori `dist/`.
 npm run preview
 ```
 
-### 3. Checklist Sebelum Deploy ke Cloud
+### 3. Kontainerisasi Docker (Nginx Web Server)
+Proyek telah dilengkapi dengan `Dockerfile` multi-stage dan `nginx.conf` teroptimasi dengan kompresi gzip serta aturan SPA rewrite:
+```bash
+# Membangun image Docker frontend secara mandiri
+docker build -t cares-frontend:latest .
+
+# Menjalankan kontainer Nginx pada port 80 (atau 5173)
+docker run -d -p 5173:80 --name cares-frontend cares-frontend:latest
+```
+
+### 4. Checklist Sebelum Deploy ke Cloud
 - [ ] Pastikan variabel `VITE_API_BASE_URL` telah diarahkan ke domain publik backend API produksi (misalnya `https://api.cares.telkomuniversity.ac.id`).
 - [ ] Konfigurasi aturan *Single Page Application (SPA) Rewrite* pada web server (Nginx/Vercel/Netlify) agar rute diarahkan ke `index.html`.
 - [ ] Lakukan verifikasi bahwa seluruh aset gambar dan font dimuat melalui protokol HTTPS.
+
