@@ -25,7 +25,9 @@ const AutocompleteField = ({
   onSelect,
   error,
   helperText,
-  disabled
+  disabled,
+  maxLength,
+  minLength,
 }) => {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
@@ -61,6 +63,8 @@ const AutocompleteField = ({
           placeholder={placeholder}
           value={value}
           disabled={disabled}
+          maxLength={maxLength}
+          minLength={minLength}
           onChange={(e) => {
             onChange(e.target.value);
             setOpen(true);

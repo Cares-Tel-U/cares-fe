@@ -26,28 +26,95 @@ const LocationStatsCard = ({ reports = [] }) => {
   const topLocation = locations[0]?.name || 'Fasilitas Kampus';
 
   return (
-    <div style={{ height: '100%', minHeight: '342px', boxSizing: 'border-box', background: '#fff', padding: '16px', borderRadius: '8px', border: '1px solid #d7d7d7', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+    <div
+      style={{
+        height: '100%',
+        minHeight: '342px',
+        boxSizing: 'border-box',
+        background: '#fff',
+        padding: '16px',
+        borderRadius: '8px',
+        border: '1px solid #d7d7d7',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        overflow: 'hidden'
+      }}
+    >
       <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-          <h3 style={{ margin: 0, fontWeight: 700, color: '#303038', fontSize: '14px' }}>Laporan berdasarkan lokasi</h3>
-          <span style={{ background: '#dd2c37', color: '#fff', fontSize: '11px', fontWeight: 700, padding: '4px 10px', borderRadius: '20px' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '4px',
+            gap: '8px',
+            flexWrap: 'wrap'
+          }}
+        >
+          <h3 style={{ margin: 0, fontWeight: 700, color: '#303038', fontSize: '14px' }}>
+            Laporan berdasarkan lokasi
+          </h3>
+          <span
+            style={{
+              background: '#dd2c37',
+              color: '#fff',
+              fontSize: '11px',
+              fontWeight: 700,
+              padding: '3px 9px',
+              borderRadius: '20px',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
+            }}
+          >
             Minggu ini
           </span>
         </div>
-        <p style={{ fontSize: '12px', color: '#a3a3a7', margin: '0 0 13px', lineHeight: 1.35 }}>Lokasi yang paling banyak dilaporkan pada minggu ini</p>
+        <p style={{ fontSize: '12px', color: '#a3a3a7', margin: '0 0 14px', lineHeight: 1.35 }}>
+          Lokasi yang paling banyak dilaporkan pada minggu ini
+        </p>
 
-        <div style={{ display: 'grid', gap: '9px' }}>
+        <div style={{ display: 'grid', gap: '10px' }}>
           {locations.length > 0 ? (
             locations.map((loc, idx) => (
               <div key={idx}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', color: '#343438', marginBottom: '4px', fontSize: '12px', fontWeight: 600 }}>
-                  <span>{loc.name}</span>
-                  <span>{loc.percent} ({loc.count})</span>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    color: '#343438',
+                    marginBottom: '4px',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    gap: '8px'
+                  }}
+                >
+                  <span
+                    title={loc.name}
+                    style={{
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      flex: 1,
+                      minWidth: 0
+                    }}
+                  >
+                    {loc.name}
+                  </span>
+                  <span style={{ whiteSpace: 'nowrap', flexShrink: 0, fontSize: '11.5px', color: '#55555c' }}>
+                    {loc.percent} ({loc.count})
+                  </span>
                 </div>
-                <div style={{ width: '100%', height: '6px', background: '#c9c9cc', borderRadius: '99px', overflow: 'hidden' }}>
+                <div style={{ width: '100%', height: '6px', background: '#e5e7eb', borderRadius: '99px', overflow: 'hidden' }}>
                   <div
-                    style={{ width: loc.percent.replace(',', '.'), height: '100%', borderRadius: '99px', background: '#ed2735' }}
-                  ></div>
+                    style={{
+                      width: loc.percent.replace(',', '.'),
+                      height: '100%',
+                      borderRadius: '99px',
+                      background: '#ed2735'
+                    }}
+                  />
                 </div>
               </div>
             ))
@@ -59,14 +126,46 @@ const LocationStatsCard = ({ reports = [] }) => {
         </div>
       </div>
 
-      <div style={{ marginTop: '15px', border: '1px solid #ed4550', borderRadius: '8px', padding: '10px 12px', display: 'flex', alignItems: 'flex-start', gap: '8px', color: '#df2632' }}>
-        <svg className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      <div
+        style={{
+          marginTop: '15px',
+          border: '1px solid #fed7aa',
+          background: '#fffaf5',
+          borderRadius: '8px',
+          padding: '10px 12px',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '8px'
+        }}
+      >
+        <svg
+          style={{ width: '16px', height: '16px', color: '#ea580c', marginTop: '2px', flexShrink: 0 }}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+          />
         </svg>
-        <div>
-          <h4 style={{ margin: '0 0 4px', fontSize: '12px', fontWeight: 700 }}>Perhatian</h4>
-          <p style={{ margin: 0, fontSize: '12px', lineHeight: 1.4, color: '#77777b' }}>
-            {topLocation} menjadi lokasi dengan laporan terbanyak saat ini
+        <div style={{ minWidth: 0 }}>
+          <h4 style={{ margin: '0 0 2px', fontSize: '12px', fontWeight: 700, color: '#c2410c' }}>
+            Perhatian
+          </h4>
+          <p
+            style={{
+              margin: 0,
+              fontSize: '11.5px',
+              lineHeight: 1.4,
+              color: '#7c2d12',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}
+          >
+            <strong>{topLocation}</strong> menjadi lokasi dengan laporan terbanyak saat ini
           </p>
         </div>
       </div>

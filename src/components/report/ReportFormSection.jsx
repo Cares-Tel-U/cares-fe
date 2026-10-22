@@ -284,12 +284,26 @@ const ReportFormSection = ({ onSubmit, isSubmitting = false, facilities = [] }) 
     const errors = {};
     if (!currentGedung) {
       errors.gedung = isAreaLuar ? 'Area wajib diisi' : 'Nama gedung wajib diisi';
+    } else if (currentGedung.length < 3) {
+      errors.gedung = isAreaLuar ? 'Nama area minimal 3 karakter' : 'Nama gedung minimal 3 karakter';
+    } else if (currentGedung.length > 100) {
+      errors.gedung = isAreaLuar ? 'Nama area maksimal 100 karakter' : 'Nama gedung maksimal 100 karakter';
     }
+
     if (!currentRuangan) {
       errors.ruangan = isAreaLuar ? 'Lokasi spesifik wajib diisi' : 'Nama ruangan wajib diisi';
+    } else if (currentRuangan.length < 3) {
+      errors.ruangan = isAreaLuar ? 'Lokasi spesifik minimal 3 karakter' : 'Nama ruangan minimal 3 karakter';
+    } else if (currentRuangan.length > 100) {
+      errors.ruangan = isAreaLuar ? 'Lokasi spesifik maksimal 100 karakter' : 'Nama ruangan maksimal 100 karakter';
     }
+
     if (!currentDeskripsi) {
       errors.deskripsi = 'Deskripsi masalah wajib diisi';
+    } else if (currentDeskripsi.length < 10) {
+      errors.deskripsi = 'Deskripsi masalah minimal 10 karakter';
+    } else if (currentDeskripsi.length > 1000) {
+      errors.deskripsi = 'Deskripsi masalah maksimal 1000 karakter';
     }
 
     if (uploadedPhotos.length === 0) {
@@ -370,10 +384,11 @@ const ReportFormSection = ({ onSubmit, isSubmitting = false, facilities = [] }) 
             required
             placeholder={isAreaLuar ? 'Ketik nama area...' : 'Ketik nama gedung...'}
             value={gedungQuery}
+            maxLength={100}
             onChange={(val) => {
               setGedungQuery(val);
               setSelectedGedung(val);
-              if (formErrors.gedung) {
+              if (formErrors.gedung && val.trim().length >= 3) {
                 setFormErrors((prev) => ({ ...prev, gedung: '' }));
               }
             }}
@@ -382,7 +397,7 @@ const ReportFormSection = ({ onSubmit, isSubmitting = false, facilities = [] }) 
             error={formErrors.gedung}
             helperText={
               isAreaLuar
-                ? 'Ketik area kampus atau pilih dari rekomendasi (contoh: Area Parkir, Taman)'
+                ? 'Ketik area kampus atau pilih dari rekomendasi'
                 : 'Ketik nama gedung kampus atau pilih dari rekomendasi'
             }
           />
@@ -392,10 +407,11 @@ const ReportFormSection = ({ onSubmit, isSubmitting = false, facilities = [] }) 
             required
             placeholder={isAreaLuar ? 'Ketik lokasi spesifik...' : 'Ketik nama ruangan...'}
             value={ruanganQuery}
+            maxLength={100}
             onChange={(val) => {
               setRuanganQuery(val);
               setSelectedRuangan(val);
-              if (formErrors.ruangan) {
+              if (formErrors.ruangan && val.trim().length >= 3) {
                 setFormErrors((prev) => ({ ...prev, ruangan: '' }));
               }
             }}
@@ -418,11 +434,12 @@ const ReportFormSection = ({ onSubmit, isSubmitting = false, facilities = [] }) 
           <textarea
             required
             rows={4}
+            maxLength={1000}
             placeholder="Tuliskan deskripsi masalah dengan detail"
             value={deskripsi}
             onChange={(e) => {
               setDeskripsi(e.target.value);
-              if (formErrors.deskripsi) {
+              if (formErrors.deskripsi && e.target.value.trim().length >= 10) {
                 setFormErrors((prev) => ({ ...prev, deskripsi: '' }));
               }
             }}
@@ -444,11 +461,11 @@ const ReportFormSection = ({ onSubmit, isSubmitting = false, facilities = [] }) 
             <div style={{ fontSize: '11px', color: '#dc2626', marginTop: '4px', fontWeight: '500' }}>
               {formErrors.deskripsi}
             </div>
-          ) : (
-            <div style={{ fontSize: '11.5px', color: '#9ca3af', marginTop: '4px' }}>
-              Tuliskan deskripsi masalah dengan detail
+          ) : deskripsi.length >= 1000 ? (
+            <div style={{ fontSize: '11px', color: '#dc2626', marginTop: '4px', fontWeight: '500' }}>
+              Batas maksimal 1000 karakter telah tercapai
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Foto Upload Area */}

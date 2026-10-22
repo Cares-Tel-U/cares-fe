@@ -58,7 +58,7 @@ const AdminDashboardPage = ({
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <MetricCards reports={reports} />
 
-        <div className="admin-dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '2.12fr 1fr', gap: '12px', alignItems: 'stretch' }}>
+        <div className="admin-dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '1.85fr 1fr', gap: '14px', alignItems: 'stretch' }}>
           <div style={{ minWidth: 0, height: '100%' }}>
             <ReportChart />
           </div>
