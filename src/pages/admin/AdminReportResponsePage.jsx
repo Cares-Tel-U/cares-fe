@@ -56,6 +56,7 @@ const AdminReportResponsePage = ({
     const fileArray = Array.from(files);
     const imageFiles = fileArray.filter((f) => f.type.startsWith('image/'));
     const newEntries = imageFiles.map((f) => ({
+      file: f,
       url: URL.createObjectURL(f),
       name: f.name
     }));
@@ -89,21 +90,21 @@ const AdminReportResponsePage = ({
     await new Promise((r) => setTimeout(r, 600));
     const ids = activeReports.map((r) => r.id);
     if (onVerifyReports) {
-      onVerifyReports(ids);
+      await onVerifyReports(ids);
     }
     setIsProcessing(false);
     setSuccessMessage('Laporan berhasil diverifikasi');
     setShowSuccess(true);
   };
 
-  // Handle Complete single report - pass uploaded proof image URLs
+  // Handle Complete single report - pass uploaded proof image files or URLs
   const handleCompleteSingle = async () => {
     setLoadingText('Memproses penyelesaian laporan...');
     setIsProcessing(true);
     await new Promise((r) => setTimeout(r, 600));
     if (onCompleteReport && primaryReport.id) {
-      const proofUrls = uploadedFiles.map((f) => f.url);
-      onCompleteReport(primaryReport.id, proofUrls);
+      const proofPayload = uploadedFiles.map((f) => f.file || f.url);
+      await onCompleteReport(primaryReport.id, proofPayload);
     }
     setIsProcessing(false);
     setSuccessMessage('Laporan selesai ditangani');

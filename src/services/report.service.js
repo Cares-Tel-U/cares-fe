@@ -25,6 +25,25 @@ export function transformReport(r) {
   const createdAt = new Date(r.createdAt || Date.now());
   const formattedDate = `${String(createdAt.getDate()).padStart(2, '0')}/${String(createdAt.getMonth() + 1).padStart(2, '0')}/${createdAt.getFullYear()}`;
   const photos = r.photos ? r.photos.map((p) => (typeof p === 'string' ? p : p.url)) : (r.foto || []);
+  const completionProofs = r.completionPhotos
+    ? r.completionPhotos.map((p) => (typeof p === 'string' ? p : p.url))
+    : (r.completionProofs || []);
+
+  const formatTimeStr = (d) => {
+    if (!d) return null;
+    try {
+      const dateObj = new Date(d);
+      if (isNaN(dateObj.getTime())) return null;
+      return `${dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}, ${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')} WIB`;
+    } catch {
+      return null;
+    }
+  };
+
+  const waktuTerkirim = formatTimeStr(r.createdAt) || `${formattedDate}, 14:30 WIB`;
+  const waktuDiproses = formatTimeStr(r.diprosesAt);
+  const waktuSelesai = formatTimeStr(r.selesaiAt);
+  const waktuDitolak = formatTimeStr(r.ditolakAt);
 
   const frontendStatus = mapBackendStatusToFrontend(r.status);
 
@@ -41,34 +60,47 @@ export function transformReport(r) {
     rawStatus: r.status,
     tanggal: formattedDate,
     createdAt: r.createdAt,
+    diprosesAt: r.diprosesAt,
+    selesaiAt: r.selesaiAt,
+    ditolakAt: r.ditolakAt,
+    tanggalTerkirim: waktuTerkirim,
+    tanggalVerifikasi: waktuDiproses,
+    tanggalDiproses: waktuDiproses,
+    tanggalSelesai: waktuSelesai,
+    tanggalDitolak: waktuDitolak,
     isAnonim: Boolean(r.isAnonymous ?? r.isAnonim),
     foto: photos,
+    completionProofs,
+    keteranganBukti: r.catatan || r.completionNote || '',
+    completionNote: r.catatan || r.completionNote || '',
     reporterId: r.userId || r.reporterId,
     pelapor: r.user ? r.user.nama : (r.pelapor || (r.isAnonymous ? 'Anonim' : 'Civitas Akademika')),
     rejectReason: r.rejectionReason || r.rejectReason || '',
     timeline: [
       {
         step: 'Laporan terkirim',
-        date: `${createdAt.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}, ${String(createdAt.getHours()).padStart(2, '0')}:${String(createdAt.getMinutes()).padStart(2, '0')} WIB`,
+        date: waktuTerkirim,
         completed: true,
         current: r.status === 'PENDING',
       },
       {
         step: 'Laporan berhasil diverifikasi',
-        date: r.status !== 'PENDING' && r.status !== 'DITOLAK' ? 'Diverifikasi Sarpras' : '-',
+        date: waktuDiproses || (r.status !== 'PENDING' && r.status !== 'DITOLAK' ? 'Diverifikasi Sarpras' : '-'),
         completed: r.status === 'DIPROSES' || r.status === 'SELESAI',
         current: r.status === 'DIPROSES',
       },
       {
         step: 'Laporan dalam proses',
-        date: r.status === 'DIPROSES' || r.status === 'SELESAI' ? 'Dalam Pengerjaan' : '-',
+        date: waktuDiproses || (r.status === 'DIPROSES' || r.status === 'SELESAI' ? 'Dalam Pengerjaan' : '-'),
         completed: r.status === 'DIPROSES' || r.status === 'SELESAI',
         current: r.status === 'DIPROSES',
       },
       {
-        step: 'Laporan selesai',
-        date: r.status === 'SELESAI' ? 'Pekerjaan Selesai' : (r.status === 'DITOLAK' ? 'Laporan Ditolak' : '-'),
-        completed: r.status === 'SELESAI',
+        step: r.status === 'DITOLAK' ? 'Laporan ditolak' : 'Laporan selesai',
+        date: r.status === 'SELESAI'
+          ? (waktuSelesai || 'Pekerjaan Selesai')
+          : (r.status === 'DITOLAK' ? (waktuDitolak || 'Laporan Ditolak') : '-'),
+        completed: r.status === 'SELESAI' || r.status === 'DITOLAK',
         current: r.status === 'SELESAI' || r.status === 'DITOLAK',
       },
     ],

@@ -87,8 +87,7 @@ test.describe('Verifikasi Dinamis Form Laporan Area Luar vs Dalam Gedung', () =>
 
     // Verifikasi feedback modal muncul (sukses atau kuota)
     const successModal = page.locator('text=Laporan berhasil dibuat');
-    const quotaModal = page.locator('text=melebihi batas laporan harian');
-    const facilityBusyAlert = page.locator('text=sedang dalam penanganan');
-    await expect(successModal.or(quotaModal).or(facilityBusyAlert)).toBeVisible({ timeout: 10000 });
+    const quotaModal = page.locator('text=Batas Maksimal 3 Laporan Harian').or(page.locator('text=melebihi batas'));
+    await expect(successModal.or(quotaModal)).toBeVisible({ timeout: 10000 });
   });
 });

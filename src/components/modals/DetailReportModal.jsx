@@ -3,6 +3,7 @@ import Modal from '../common/Modal';
 import BadgeStatus from '../common/BadgeStatus';
 import ReportProofModal from './ReportProofModal';
 import ReportTimeline from '../report/ReportTimeline';
+import ImagePreviewModal from '../common/ImagePreviewModal';
 
 const DetailReportModal = ({
   report,
@@ -13,6 +14,13 @@ const DetailReportModal = ({
   onNavigateToResponse
 }) => {
   const [showBuktiModal, setShowBuktiModal] = useState(false);
+  const [previewState, setPreviewState] = useState({ isOpen: false, images: [], index: 0 });
+
+  const handleOpenPreview = (imgs, idx) => {
+    if (Array.isArray(imgs) && imgs.length > 0) {
+      setPreviewState({ isOpen: true, images: imgs, index: idx });
+    }
+  };
 
   if (!report) return null;
 
@@ -83,8 +91,15 @@ const DetailReportModal = ({
 
           {/* Bukti Foto */}
           <div>
-            <div style={{ fontSize: '13px', fontWeight: '700', color: '#111827', marginBottom: '8px' }}>
-              Bukti Foto
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <div style={{ fontSize: '13px', fontWeight: '700', color: '#111827' }}>
+                Bukti Foto Masalah
+              </div>
+              {photoList.length > 0 && (
+                <span style={{ fontSize: '11px', color: '#6b7280' }}>
+                  Klik foto untuk memperbesar
+                </span>
+              )}
             </div>
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               {photoList.length > 0 ? (
@@ -93,12 +108,24 @@ const DetailReportModal = ({
                     key={idx}
                     src={imgSrc}
                     alt={`Bukti foto ${idx + 1}`}
+                    onClick={() => handleOpenPreview(photoList, idx)}
+                    title="Klik untuk memperbesar foto"
                     style={{
                       width: '80px',
                       height: '80px',
                       borderRadius: '8px',
                       objectFit: 'cover',
-                      border: '1px solid #e5e7eb'
+                      border: '1px solid #e5e7eb',
+                      cursor: 'pointer',
+                      transition: 'transform 0.15s ease, box-shadow 0.15s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.05)';
+                      e.currentTarget.style.boxShadow = '0 4px 10px rgba(0, 0, 0, 0.12)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.boxShadow = 'none';
                     }}
                   />
                 ))
@@ -109,6 +136,48 @@ const DetailReportModal = ({
               )}
             </div>
           </div>
+
+          {/* Bukti Foto Penyelesaian (jika ada) */}
+          {report.completionProofs && report.completionProofs.length > 0 && (
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <div style={{ fontSize: '13px', fontWeight: '700', color: '#15803d' }}>
+                  Bukti Foto Penyelesaian
+                </div>
+                <span style={{ fontSize: '11px', color: '#6b7280' }}>
+                  Klik foto untuk memperbesar
+                </span>
+              </div>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                {report.completionProofs.map((imgSrc, idx) => (
+                  <img
+                    key={idx}
+                    src={imgSrc}
+                    alt={`Bukti selesai ${idx + 1}`}
+                    onClick={() => handleOpenPreview(report.completionProofs, idx)}
+                    title="Klik untuk memperbesar foto penyelesaian"
+                    style={{
+                      width: '80px',
+                      height: '80px',
+                      borderRadius: '8px',
+                      objectFit: 'cover',
+                      border: '2px solid #86efac',
+                      cursor: 'pointer',
+                      transition: 'transform 0.15s ease, box-shadow 0.15s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'scale(1.05)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(22, 163, 74, 0.2)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'scale(1)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Timeline Laporan — hanya untuk status Selesai */}
           {isSelesai && (
@@ -298,6 +367,15 @@ const DetailReportModal = ({
       {showBuktiModal && proofData && (
         <ReportProofModal proof={proofData} onClose={() => setShowBuktiModal(false)} />
       )}
+
+      {/* Lightbox Zoom Modal */}
+      <ImagePreviewModal
+        isOpen={previewState.isOpen}
+        onClose={() => setPreviewState((prev) => ({ ...prev, isOpen: false }))}
+        images={previewState.images}
+        currentIndex={previewState.index}
+        onNavigate={(newIdx) => setPreviewState((prev) => ({ ...prev, index: newIdx }))}
+      />
     </>
   );
 };

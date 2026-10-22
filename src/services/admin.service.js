@@ -18,13 +18,40 @@ export const adminService = {
   },
 
   // Memperbarui Status Laporan Tunggal (DIPROSES, SELESAI, DITOLAK)
-  async updateReportStatus(id, { status, rejectionReason, catatan }) {
+  async updateReportStatus(id, { status, rejectionReason, catatan, completionPhotos, proofImages }) {
+    const rawProofs = completionPhotos || proofImages;
+    const hasPhysicalFiles =
+      Array.isArray(rawProofs) &&
+      rawProofs.some((p) => typeof File !== 'undefined' && p instanceof File);
+
+    if (hasPhysicalFiles) {
+      const formData = new FormData();
+      formData.append('status', status);
+      if (rejectionReason) formData.append('rejectionReason', rejectionReason);
+      if (catatan) formData.append('catatan', catatan);
+
+      rawProofs.forEach((photo) => {
+        if (typeof File !== 'undefined' && photo instanceof File) {
+          formData.append('completionPhotos', photo);
+        } else if (typeof photo === 'string') {
+          formData.append('completionPhotos', photo);
+        }
+      });
+
+      const res = await apiRequest(`/admin/reports/${id}/status`, {
+        method: 'PATCH',
+        body: formData,
+      });
+      return res.data;
+    }
+
     const res = await apiRequest(`/admin/reports/${id}/status`, {
       method: 'PATCH',
       body: {
         status,
         ...(rejectionReason && { rejectionReason }),
         ...(catatan && { catatan }),
+        ...(rawProofs && { completionPhotos: rawProofs }),
       },
     });
     return res.data;

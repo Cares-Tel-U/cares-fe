@@ -34,6 +34,8 @@ const Modal = ({ isOpen, onClose, title, children, maxWidth = '540px' }) => {
       }}
     >
       <div
+        role="dialog"
+        aria-modal="true"
         onClick={(e) => e.stopPropagation()}
         style={{
           backgroundColor: '#ffffff',

@@ -185,7 +185,7 @@ function App() {
 
   const handleCompleteReport = async (reportId, proofImages) => {
     try {
-      await adminService.updateReportStatus(reportId, { status: 'SELESAI' });
+      await adminService.updateReportStatus(reportId, { status: 'SELESAI', completionPhotos: proofImages });
     } catch (err) {
       console.warn('Gagal menyelesaikan laporan via API, memperbarui state lokal:', err.message);
     }

@@ -44,11 +44,7 @@ const CreateReportPage = ({
     return () => window.clearTimeout(redirectTimer);
   }, [navigate, showSuccessModal]);
 
-  useEffect(() => {
-    if (!showDailyLimitModal) return undefined;
-    const closeTimer = window.setTimeout(() => setShowDailyLimitModal(false), 2400);
-    return () => window.clearTimeout(closeTimer);
-  }, [showDailyLimitModal]);
+
 
   const handleSubmit = async (formData) => {
     setErrorMessage('');
@@ -110,7 +106,14 @@ const CreateReportPage = ({
     } catch (err) {
       setShowLoadingModal(false);
       const msg = err.message || '';
-      if (msg.includes('3 laporan harian') || msg.includes('melebihi batas')) {
+      const isLimit =
+        err.status === 429 ||
+        msg.toLowerCase().includes('3 laporan') ||
+        msg.toLowerCase().includes('melebihi batas') ||
+        msg.toLowerCase().includes('batas maksimal') ||
+        msg.toLowerCase().includes('laporan harian');
+
+      if (isLimit) {
         setShowDailyLimitModal(true);
       } else {
         setErrorMessage(msg || 'Gagal mengirimkan laporan. Silakan periksa kembali formulir Anda.');
@@ -194,30 +197,91 @@ const CreateReportPage = ({
             alignItems: 'center',
             justifyContent: 'center',
             padding: '20px',
-            background: 'rgba(0, 0, 0, 0.32)',
-            backdropFilter: 'blur(1px)'
+            background: 'rgba(0, 0, 0, 0.45)',
+            backdropFilter: 'blur(3px)',
+            animation: 'fadeIn 0.2s ease-out'
           }}
         >
           <section
-            role="alert"
-            aria-live="assertive"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="limit-title"
+            aria-describedby="limit-desc"
             onClick={(event) => event.stopPropagation()}
             style={{
-              width: '182px',
-              padding: '22px 18px 18px',
-              borderRadius: '9px',
+              width: '100%',
+              maxWidth: '380px',
+              padding: '28px 24px 22px',
+              borderRadius: '16px',
               background: '#ffffff',
               textAlign: 'center',
-              boxShadow: '0 16px 36px rgba(0, 0, 0, .18)',
-              animation: 'modalFadeIn .2s ease-out'
+              boxShadow: '0 20px 50px rgba(0, 0, 0, 0.2)',
+              animation: 'modalFadeIn 0.2s ease-out'
             }}
           >
-            <div style={{ display: 'grid', placeItems: 'center', width: '36px', height: '36px', margin: '0 auto 16px', borderRadius: '50%', background: '#ff654f', color: '#ffffff' }}>
-              <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="m7 7 10 10M17 7 7 17" /></svg>
+            <div
+              style={{
+                display: 'grid',
+                placeItems: 'center',
+                width: '52px',
+                height: '52px',
+                margin: '0 auto 16px',
+                borderRadius: '50%',
+                background: '#fee2e2',
+                color: '#dc2626'
+              }}
+            >
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
             </div>
-            <p style={{ margin: 0, color: '#171717', fontSize: '13.5px', fontWeight: 600, lineHeight: 1.45 }}>
-              Laporan gagal dibuat karena melebihi batas laporan harian
+
+            <h3
+              id="limit-title"
+              style={{
+                margin: '0 0 8px 0',
+                fontSize: '16px',
+                fontWeight: '700',
+                color: '#111827'
+              }}
+            >
+              Batas Maksimal 3 Laporan Harian
+            </h3>
+
+            <p
+              id="limit-desc"
+              style={{
+                margin: '0 0 22px 0',
+                color: '#4b5563',
+                fontSize: '13px',
+                lineHeight: '1.55'
+              }}
+            >
+              Laporan gagal dibuat karena Anda telah mencapai batas maksimal 3 laporan dalam satu hari. Sistem membatasi kuota harian untuk menjaga kualitas penanganan fasilitas. Silakan coba kembali besok.
             </p>
+
+            <button
+              type="button"
+              onClick={() => setShowDailyLimitModal(false)}
+              style={{
+                width: '100%',
+                padding: '11px',
+                borderRadius: '10px',
+                backgroundColor: '#ba181b',
+                color: '#ffffff',
+                border: 'none',
+                fontSize: '13.5px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'background-color 0.15s ease'
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#9e181c')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#ba181b')}
+            >
+              Saya Mengerti
+            </button>
           </section>
         </div>,
         document.body
