@@ -41,8 +41,8 @@ test.describe('Fitur Lupa Kata Sandi & Atur Ulang Kata Sandi', () => {
     // 6. Klik tombol "Kirim Instruksi Pemulihan"
     await submitBtn.click();
 
-    // Pastikan diarahkan kembali ke halaman /login dengan notifikasi sukses
-    await page.waitForURL('**/login', { timeout: 10000 });
+    // Pastikan diarahkan kembali ke halaman /login dengan notifikasi sukses (berikan toleransi transmisi SMTP riil)
+    await page.waitForURL('**/login', { timeout: 25000 });
     await expect(page.getByRole('heading', { name: 'Login' })).toBeVisible();
     await expect(page.locator('text=Tautan pemulihan kata sandi telah dikirim ke email terdaftar Anda')).toBeVisible();
 

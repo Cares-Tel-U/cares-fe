@@ -23,8 +23,21 @@ const AdminGuideStepList = ({
     <div className="admin-guide-right-panel">
       {/* Top Red Header dengan Tab pilihan panduan */}
       <div className="admin-guide-red-header">
-        <button className="admin-guide-close-btn" onClick={onClose} aria-label="Tutup">
-          &times;
+        <button type="button" className="admin-guide-close-btn" onClick={onClose} aria-label="Tutup">
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ display: 'block' }}
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
         </button>
         <h3 className="admin-guide-tab-header-title">Pilih Panduan Tindakan</h3>
         <p className="admin-guide-tab-header-sub">Pilih salah satu tab untuk melihat panduan operasional</p>
