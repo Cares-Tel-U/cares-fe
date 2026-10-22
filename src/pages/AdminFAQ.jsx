@@ -36,7 +36,7 @@ const adminFaqItems = [
   ]
 ];
 
-const AdminFAQ = ({ user, notifications, onLogout, onUpdateAvatar }) => {
+const AdminFAQ = ({ user, notifications, onLogout, onUpdateAvatar, onToggleNotificationPreference }) => {
   const [query, setQuery] = useState('');
   const [openIndex, setOpenIndex] = useState(null);
 
@@ -56,6 +56,7 @@ const AdminFAQ = ({ user, notifications, onLogout, onUpdateAvatar }) => {
       notifications={notifications}
       onLogout={onLogout}
       onUpdateAvatar={onUpdateAvatar}
+      onToggleNotificationPreference={onToggleNotificationPreference}
     >
       <div className="faq-page">
         <aside className="faq-info-card">

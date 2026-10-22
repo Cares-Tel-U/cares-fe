@@ -16,7 +16,8 @@ const CreateReportPage = ({
   onMarkAllNotificationsAsRead,
   onMarkNotificationAsRead,
   onLogout,
-  onUpdateAvatar
+  onUpdateAvatar,
+  onToggleNotificationPreference
 }) => {
   const navigate = useNavigate();
   const [isAnonim, setIsAnonim] = useState(true);
@@ -133,6 +134,7 @@ const CreateReportPage = ({
       onMarkNotificationAsRead={onMarkNotificationAsRead}
       onLogout={onLogout}
       onUpdateAvatar={onUpdateAvatar}
+      onToggleNotificationPreference={onToggleNotificationPreference}
     >
       <div className="create-report-grid">
         {/* Left: Identity and Report Form */}

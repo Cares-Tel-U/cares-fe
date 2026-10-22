@@ -9,6 +9,7 @@ import {
   getAuthToken,
   getStoredUser,
   setStoredUser,
+  connectRealtimeEvents,
 } from './services';
 
 function App() {
@@ -35,14 +36,16 @@ function App() {
   const [adminNotifications, setAdminNotifications] = useState([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
 
-  // Fungsi memuat data riil dari backend API
-  const refreshBackendData = useCallback(async () => {
+  // Fungsi memuat data riil dari backend API (mendukung silent refresh untuk update realtime tanpa kedip)
+  const refreshBackendData = useCallback(async (isSilent = false) => {
     const token = getAuthToken();
     if (!token) return;
 
-    try {
+    if (!isSilent) {
       setIsLoadingData(true);
+    }
 
+    try {
       // 1. Sinkronisasi Profil Pengguna
       const profile = await authService.getProfile().catch(() => null);
       if (profile) {
@@ -59,10 +62,10 @@ function App() {
         };
 
         if (isAdmin) {
-          setAdminUser(formattedUser);
+          setAdminUser((prev) => (prev ? { ...prev, ...formattedUser } : formattedUser));
           setUser(null);
         } else {
-          setUser(formattedUser);
+          setUser((prev) => (prev ? { ...prev, ...formattedUser } : formattedUser));
           setAdminUser(null);
         }
 
@@ -89,13 +92,75 @@ function App() {
     } catch (err) {
       console.warn('Gagal memuat data dari backend API:', err.message);
     } finally {
-      setIsLoadingData(false);
+      if (!isSilent) {
+        setIsLoadingData(false);
+      }
     }
   }, []);
 
-  // Muat data saat aplikasi pertama kali dimuat
+  // Real-time synchronization & revalidasi latar belakang tanpa perlu reload web manual
   useEffect(() => {
-    refreshBackendData();
+    // 1. Muat data awal
+    refreshBackendData(false);
+
+    // 2. Berlangganan Server-Sent Events (SSE) untuk sinkronisasi seketika saat ada perubahan data
+    const unsubscribeSSE = connectRealtimeEvents((event) => {
+      if (event?.type === 'USER_AVATAR_CHANGED') {
+        const changedUserId = event?.data?.userId;
+        const newAvatar = event?.data?.avatar;
+        const updatedUserData = event?.data?.user;
+
+        if (newAvatar) {
+          setUser((prev) => {
+            if (prev && String(prev.id) === String(changedUserId)) {
+              return { ...prev, avatar: newAvatar, ...(updatedUserData || {}) };
+            }
+            return prev;
+          });
+          setAdminUser((prev) => {
+            if (prev && String(prev.id) === String(changedUserId)) {
+              return { ...prev, avatar: newAvatar, ...(updatedUserData || {}) };
+            }
+            return prev;
+          });
+          const stored = getStoredUser();
+          if (stored && String(stored.id) === String(changedUserId)) {
+            setStoredUser({ ...stored, avatar: newAvatar, ...(updatedUserData || {}) });
+          }
+        }
+      }
+      refreshBackendData(true);
+    });
+
+    // 3. Sinkronisasi latar belakang setiap 4 detik saat pengguna login dan tab aktif
+    const pollInterval = setInterval(() => {
+      if (getAuthToken() && document.visibilityState === 'visible') {
+        refreshBackendData(true);
+      }
+    }, 4000);
+
+    // 4. Sinkronisasi seketika saat jendela/tab browser kembali aktif (fokus)
+    const handleFocus = () => {
+      if (getAuthToken()) {
+        refreshBackendData(true);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && getAuthToken()) {
+        refreshBackendData(true);
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      unsubscribeSSE();
+      clearInterval(pollInterval);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [refreshBackendData]);
 
   const handleLoginSuccess = async (userData) => {
@@ -229,7 +294,8 @@ function App() {
       const res = await authService.updateAvatar(newAvatarPayload);
       finalAvatarUrl = res?.avatar || '';
     } catch (err) {
-      console.warn('Gagal update avatar via API, memperbarui state lokal:', err.message);
+      console.warn('Gagal update avatar via API:', err.message);
+      throw err;
     }
 
     if (!finalAvatarUrl && typeof newAvatarPayload === 'string') {
@@ -243,17 +309,39 @@ function App() {
       if (stored) {
         setStoredUser({ ...stored, avatar: finalAvatarUrl });
       }
+
+      const newNotif = {
+        id: `NOTIF-AVATAR-${Date.now()}`,
+        category: 'Hari ini',
+        title: 'Foto Profil Diperbarui',
+        time: 'Baru saja',
+        desc: 'Foto profil akun Anda telah berhasil diperbarui dengan gambar baru.',
+        isUnread: true,
+      };
+      setNotifications((prev) => [newNotif, ...prev]);
+    }
+  };
+
+  const handleToggleNotificationPreference = async (newPreference) => {
+    const nextVal = Boolean(newPreference);
+    setUser((prev) => (prev ? { ...prev, notificationPreference: nextVal } : prev));
+    setAdminUser((prev) => (prev ? { ...prev, notificationPreference: nextVal } : prev));
+    localStorage.setItem('user_notif_enabled', String(nextVal));
+
+    const stored = getStoredUser();
+    if (stored) {
+      setStoredUser({ ...stored, notificationPreference: nextVal });
     }
 
-    const newNotif = {
-      id: `NOTIF-AVATAR-${Date.now()}`,
-      category: 'Hari ini',
-      title: 'Foto Profil Diperbarui',
-      time: 'Baru saja',
-      desc: 'Foto profil akun Anda telah berhasil diperbarui dengan gambar baru.',
-      isUnread: true,
-    };
-    setNotifications((prev) => [newNotif, ...prev]);
+    try {
+      const updated = await authService.updateNotificationPreference(nextVal);
+      if (updated && updated.notificationPreference !== undefined) {
+        setUser((prev) => (prev ? { ...prev, notificationPreference: updated.notificationPreference } : prev));
+        setAdminUser((prev) => (prev ? { ...prev, notificationPreference: updated.notificationPreference } : prev));
+      }
+    } catch (err) {
+      console.warn('Gagal sinkron preferensi notifikasi:', err.message);
+    }
   };
 
   return (
@@ -276,6 +364,7 @@ function App() {
         adminNotifications={adminNotifications}
         onMarkAllAdminNotificationsAsRead={handleMarkAllAdminNotificationsAsRead}
         onUpdateAvatar={handleUpdateAvatar}
+        onToggleNotificationPreference={handleToggleNotificationPreference}
         isLoadingData={isLoadingData}
         onRefreshData={refreshBackendData}
       />

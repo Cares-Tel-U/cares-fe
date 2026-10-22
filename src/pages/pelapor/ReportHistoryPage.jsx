@@ -13,6 +13,7 @@ const ReportHistoryPage = ({
   onMarkNotificationAsRead,
   onLogout,
   onUpdateAvatar,
+  onToggleNotificationPreference,
   onRefreshData
 }) => {
   const [sortBy, setSortBy] = useState('Terbaru');
@@ -68,6 +69,7 @@ const ReportHistoryPage = ({
       onMarkNotificationAsRead={onMarkNotificationAsRead}
       onLogout={onLogout}
       onUpdateAvatar={onUpdateAvatar}
+      onToggleNotificationPreference={onToggleNotificationPreference}
     >
       <div
         style={{

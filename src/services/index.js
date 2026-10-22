@@ -4,3 +4,4 @@ export * from './facility.service';
 export * from './report.service';
 export * from './notification.service';
 export * from './admin.service';
+export * from './realtime.service';

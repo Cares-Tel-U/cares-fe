@@ -17,6 +17,7 @@ const DashboardPage = ({
   onMarkNotificationAsRead,
   onLogout,
   onUpdateAvatar,
+  onToggleNotificationPreference,
   onRefreshData
 }) => {
   const navigate = useNavigate();
@@ -52,6 +53,7 @@ const DashboardPage = ({
       onMarkNotificationAsRead={onMarkNotificationAsRead}
       onLogout={onLogout}
       onUpdateAvatar={onUpdateAvatar}
+      onToggleNotificationPreference={onToggleNotificationPreference}
     >
       {/* Action Button: + Buat Laporan */}
       <div style={{ marginBottom: '22px' }}>

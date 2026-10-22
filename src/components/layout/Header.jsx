@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService, notificationService } from '../../services';
 import NotificationDropdown from './NotificationDropdown';
@@ -16,6 +16,7 @@ const Header = ({
   onMarkNotificationAsRead,
   onLogout,
   onUpdateAvatar,
+  onToggleNotificationPreference,
 }) => {
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -29,15 +30,29 @@ const Header = ({
     return saved !== null ? saved === 'true' : true;
   });
 
+  // Sinkronkan state lokal saat user prop berubah dari revalidasi background
+  useEffect(() => {
+    if (user?.notificationPreference !== undefined) {
+      setIsNotifActive(Boolean(user.notificationPreference));
+    }
+  }, [user?.notificationPreference]);
+
   const handleToggleNotif = async (e) => {
-    e.stopPropagation();
+    if (e && e.stopPropagation) {
+      e.stopPropagation();
+    }
     const next = !isNotifActive;
     setIsNotifActive(next);
     localStorage.setItem('user_notif_enabled', String(next));
-    try {
-      await authService.updateNotificationPreference(next);
-    } catch (err) {
-      console.warn('Gagal sinkron preferensi notifikasi ke backend:', err.message);
+
+    if (onToggleNotificationPreference) {
+      onToggleNotificationPreference(next);
+    } else {
+      try {
+        await authService.updateNotificationPreference(next);
+      } catch (err) {
+        console.warn('Gagal sinkron preferensi notifikasi ke backend:', err.message);
+      }
     }
   };
 

@@ -12,7 +12,8 @@ const AdminAnalyticsPage = ({
   onMarkAllNotificationsAsRead,
   onMarkNotificationAsRead,
   onLogout,
-  onUpdateAvatar
+  onUpdateAvatar,
+  onToggleNotificationPreference
 }) => {
   const [activeFilter, setActiveFilter] = useState('Semua');
   const [stats, setStats] = useState(null);
@@ -178,6 +179,7 @@ const AdminAnalyticsPage = ({
       onMarkNotificationAsRead={onMarkNotificationAsRead}
       onLogout={onLogout}
       onUpdateAvatar={onUpdateAvatar}
+      onToggleNotificationPreference={onToggleNotificationPreference}
     >
       {/* Pill Filter */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>

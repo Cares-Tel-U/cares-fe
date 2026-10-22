@@ -17,6 +17,7 @@ const ProfileDropdown = ({
   const profileRef = useRef(null);
   const avatarInputRef = useRef(null);
   const [avatarSuccessMsg, setAvatarSuccessMsg] = useState('');
+  const [avatarErrorMsg, setAvatarErrorMsg] = useState('');
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   useEffect(() => {
@@ -33,38 +34,80 @@ const ProfileDropdown = ({
     };
   }, [isOpen, onClose]);
 
+  const validateImageDimensions = (file) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        const { naturalWidth, naturalHeight } = img;
+        const MIN_DIMENSION = 150;
+        const MAX_DIMENSION = 4096;
+        if (naturalWidth < MIN_DIMENSION || naturalHeight < MIN_DIMENSION) {
+          reject(new Error(`Resolusi foto terlalu kecil. Minimal ${MIN_DIMENSION} x ${MIN_DIMENSION} piksel.`));
+          return;
+        }
+        if (naturalWidth > MAX_DIMENSION || naturalHeight > MAX_DIMENSION) {
+          reject(new Error(`Dimensi foto terlalu besar. Maksimal ${MAX_DIMENSION} x ${MAX_DIMENSION} piksel.`));
+          return;
+        }
+        resolve({ width: naturalWidth, height: naturalHeight });
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('Berkas gambar rusak atau tidak dapat dibaca.'));
+      };
+      img.src = objectUrl;
+    });
+  };
+
   const handleAvatarUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      alert('Harap pilih file gambar (JPG, PNG, dll).');
+    setAvatarErrorMsg('');
+    setAvatarSuccessMsg('');
+
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+    if (!allowedMimeTypes.includes(file.type.toLowerCase())) {
+      setAvatarErrorMsg('Format file tidak didukung. Gunakan format JPG, PNG, atau WEBP.');
+      if (e.target) e.target.value = '';
+      return;
+    }
+
+    const MIN_SIZE = 5 * 1024; // 5 KB
+    const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
+
+    if (file.size < MIN_SIZE) {
+      setAvatarErrorMsg('Ukuran foto terlalu kecil. Minimal 5 KB.');
+      if (e.target) e.target.value = '';
+      return;
+    }
+
+    if (file.size > MAX_SIZE) {
+      setAvatarErrorMsg('Ukuran foto terlalu besar. Maksimal 5 MB.');
+      if (e.target) e.target.value = '';
       return;
     }
 
     try {
       setIsUploadingAvatar(true);
+      await validateImageDimensions(file);
+
       if (onUpdateAvatar) {
         await onUpdateAvatar(file);
       } else {
         await authService.updateAvatar(file);
       }
       setAvatarSuccessMsg('Foto profil berhasil diperbarui.');
-      setTimeout(() => setAvatarSuccessMsg(''), 3500);
+      setTimeout(() => setAvatarSuccessMsg(''), 4000);
     } catch (err) {
-      console.warn('Gagal unggah avatar via API, mencoba fallback lokal:', err.message);
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const newAvatarUrl = event.target?.result;
-        if (newAvatarUrl && onUpdateAvatar) {
-          onUpdateAvatar(newAvatarUrl);
-        }
-        setAvatarSuccessMsg('Foto profil berhasil diperbarui.');
-        setTimeout(() => setAvatarSuccessMsg(''), 3500);
-      };
-      reader.readAsDataURL(file);
+      const errMsg = err?.message || 'Gagal memperbarui foto profil. Silakan coba lagi.';
+      setAvatarErrorMsg(errMsg);
+      setTimeout(() => setAvatarErrorMsg(''), 5000);
     } finally {
       setIsUploadingAvatar(false);
+      if (e.target) e.target.value = '';
     }
   };
 
@@ -74,6 +117,10 @@ const ProfileDropdown = ({
     <div ref={profileRef} style={{ position: 'relative' }}>
       <div
         onClick={onToggle}
+        role="button"
+        tabIndex={0}
+        aria-label="Menu Profil"
+        data-testid="profile-dropdown-trigger"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -135,7 +182,8 @@ const ProfileDropdown = ({
           <input
             type="file"
             ref={avatarInputRef}
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp"
+            data-testid="avatar-file-input"
             onChange={handleAvatarUpload}
             style={{ display: 'none' }}
           />
@@ -153,6 +201,7 @@ const ProfileDropdown = ({
             <div
               onClick={() => avatarInputRef.current && avatarInputRef.current.click()}
               title="Klik untuk mengganti foto profil"
+              data-testid="avatar-image-trigger"
               style={{
                 position: 'relative',
                 cursor: 'pointer',
@@ -166,6 +215,7 @@ const ProfileDropdown = ({
               <img
                 src={avatarSrc}
                 alt={user?.name || "User"}
+                data-testid="profile-dropdown-avatar-img"
                 onError={(e) => {
                   e.currentTarget.onerror = null;
                   e.currentTarget.src = DEFAULT_AVATAR;
@@ -226,6 +276,7 @@ const ProfileDropdown = ({
               </div>
               <button
                 type="button"
+                data-testid="change-avatar-button"
                 onClick={() => avatarInputRef.current && avatarInputRef.current.click()}
                 style={{
                   background: 'none',
@@ -241,13 +292,44 @@ const ProfileDropdown = ({
               >
                 Ubah Foto Profil
               </button>
+              {avatarErrorMsg && (
+                <div
+                  data-testid="avatar-error-message"
+                  style={{
+                    color: '#dc2626',
+                    fontSize: '11px',
+                    marginTop: '4px',
+                    fontWeight: '600',
+                    lineHeight: '1.3'
+                  }}
+                >
+                  {avatarErrorMsg}
+                </div>
+              )}
               {avatarSuccessMsg && (
-                <div style={{ color: '#16a34a', fontSize: '10.5px', marginTop: '4px', fontWeight: '600' }}>
+                <div
+                  data-testid="avatar-success-message"
+                  style={{
+                    color: '#16a34a',
+                    fontSize: '11px',
+                    marginTop: '4px',
+                    fontWeight: '600',
+                    lineHeight: '1.3'
+                  }}
+                >
                   {avatarSuccessMsg}
                 </div>
               )}
               {isUploadingAvatar && (
-                <div style={{ color: '#6b7280', fontSize: '10.5px', marginTop: '4px' }}>
+                <div
+                  data-testid="avatar-uploading-message"
+                  style={{
+                    color: '#6b7280',
+                    fontSize: '11px',
+                    marginTop: '4px',
+                    fontStyle: 'italic'
+                  }}
+                >
                   Mengunggah foto...
                 </div>
               )}
@@ -256,7 +338,12 @@ const ProfileDropdown = ({
 
           {/* Notifikasi Toggle Row */}
           <div
-            onClick={onToggleNotif}
+            onClick={(e) => {
+              if (onToggleNotif) onToggleNotif(e);
+            }}
+            role="switch"
+            aria-checked={Boolean(isNotifActive)}
+            data-testid="notification-toggle-row"
             style={{
               padding: '12px 18px',
               display: 'flex',
@@ -274,18 +361,32 @@ const ProfileDropdown = ({
               e.currentTarget.style.backgroundColor = '#ffffff';
             }}
           >
-            <span
-              style={{
-                fontSize: '13.5px',
-                fontWeight: '600',
-                color: '#374151'
-              }}
-            >
-              Notifikasi
-            </span>
+            <div>
+              <span
+                style={{
+                  fontSize: '13.5px',
+                  fontWeight: '600',
+                  color: '#374151',
+                  display: 'block'
+                }}
+              >
+                Notifikasi
+              </span>
+              <span
+                data-testid="notification-toggle-status"
+                style={{
+                  fontSize: '11px',
+                  color: isNotifActive ? '#16a34a' : '#6b7280',
+                  fontWeight: '500'
+                }}
+              >
+                {isNotifActive ? 'Aktif' : 'Nonaktif'}
+              </span>
+            </div>
 
             {/* Switch Toggle */}
             <div
+              data-testid="notification-toggle-switch"
               style={{
                 width: '38px',
                 height: '20px',

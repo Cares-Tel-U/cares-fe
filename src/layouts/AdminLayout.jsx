@@ -13,6 +13,7 @@ const AdminLayout = ({
   onMarkNotificationAsRead,
   onLogout,
   onUpdateAvatar,
+  onToggleNotificationPreference,
   children
 }) => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -83,6 +84,7 @@ const AdminLayout = ({
           onMarkNotificationAsRead={handleMarkNotificationAsRead}
           onLogout={onLogout}
           onUpdateAvatar={onUpdateAvatar}
+          onToggleNotificationPreference={onToggleNotificationPreference}
         />
         <div style={{ flex: 1 }}>
           {children}

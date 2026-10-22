@@ -18,7 +18,8 @@ const AdminDashboardPage = ({
   onVerifyReport,
   onRejectReport,
   onLogout,
-  onUpdateAvatar
+  onUpdateAvatar,
+  onToggleNotificationPreference
 }) => {
   const navigate = useNavigate();
   const [selectedReport, setSelectedReport] = useState(null);
@@ -54,6 +55,7 @@ const AdminDashboardPage = ({
       onMarkNotificationAsRead={onMarkNotificationAsRead}
       onLogout={onLogout}
       onUpdateAvatar={onUpdateAvatar}
+      onToggleNotificationPreference={onToggleNotificationPreference}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
         <MetricCards reports={reports} />

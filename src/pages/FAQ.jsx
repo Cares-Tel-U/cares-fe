@@ -16,12 +16,12 @@ const faqItems = [
   ['Mengapa laporan saya berstatus Menunggu Verifikasi?', 'Artinya laporan telah berhasil dikirim dan sedang menunggu pemeriksaan atau verifikasi oleh admin.']
 ];
 
-const FAQ = ({ user, notifications, onLogout }) => {
+const FAQ = ({ user, notifications, onLogout, onUpdateAvatar, onToggleNotificationPreference }) => {
   const [query, setQuery] = useState('');
   const [openIndex, setOpenIndex] = useState(null);
   const filteredItems = useMemo(() => faqItems.filter(([question, answer]) => `${question} ${answer}`.toLowerCase().includes(query.toLowerCase().trim())), [query]);
 
-  return <MainLayout title="Frequently Asked Questions" subtitle="Temukan jawaban atas pertanyaan umum tentang CARES dan pelaporan fasilitas" user={user} notifications={notifications} onLogout={onLogout}>
+  return <MainLayout title="Frequently Asked Questions" subtitle="Temukan jawaban atas pertanyaan umum tentang CARES dan pelaporan fasilitas" user={user} notifications={notifications} onLogout={onLogout} onUpdateAvatar={onUpdateAvatar} onToggleNotificationPreference={onToggleNotificationPreference}>
     <div className="faq-page">
       <aside className="faq-info-card">
         <h2>Apa itu CARES?</h2>

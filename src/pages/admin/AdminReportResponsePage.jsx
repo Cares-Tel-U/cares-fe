@@ -16,7 +16,8 @@ const AdminReportResponsePage = ({
   onVerifyReports,
   onCompleteReport,
   onLogout,
-  onUpdateAvatar
+  onUpdateAvatar,
+  onToggleNotificationPreference
 }) => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -126,6 +127,7 @@ const AdminReportResponsePage = ({
       onMarkNotificationAsRead={onMarkNotificationAsRead}
       onLogout={onLogout}
       onUpdateAvatar={onUpdateAvatar}
+      onToggleNotificationPreference={onToggleNotificationPreference}
     >
       {/* Breadcrumb Navigation */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px' }}>

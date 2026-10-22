@@ -23,6 +23,7 @@ const AdminReportListPage = ({
   onRejectReport,
   onLogout,
   onUpdateAvatar,
+  onToggleNotificationPreference,
   onRefreshData
 }) => {
   const navigate = useNavigate();
@@ -166,6 +167,7 @@ const AdminReportListPage = ({
       onMarkNotificationAsRead={onMarkNotificationAsRead}
       onLogout={onLogout}
       onUpdateAvatar={onUpdateAvatar}
+      onToggleNotificationPreference={onToggleNotificationPreference}
     >
       <div className="admin-card-container">
         {/* Toolbar Filter & Bulk Action */}

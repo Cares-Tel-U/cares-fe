@@ -159,6 +159,24 @@ const NotificationDropdown = ({
             </button>
           </div>
 
+          {!isNotifActive && (
+            <div
+              data-testid="notification-inactive-banner"
+              style={{
+                backgroundColor: '#f3f4f6',
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px',
+                padding: '8px 12px',
+                marginBottom: '12px',
+                fontSize: '11.5px',
+                color: '#4b5563',
+                lineHeight: '1.4'
+              }}
+            >
+              Pemberitahuan sedang dinonaktifkan. Anda dapat mengaktifkannya kembali melalui menu profil.
+            </div>
+          )}
+
           {notifications.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '24px 0', color: '#9ca3af', fontSize: '13px' }}>
               Tidak ada notifikasi

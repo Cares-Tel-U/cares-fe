@@ -34,6 +34,7 @@ const AppRouter = ({
   adminNotifications,
   onMarkAllAdminNotificationsAsRead,
   onUpdateAvatar,
+  onToggleNotificationPreference,
   isLoadingData,
   onRefreshData
 }) => {
@@ -74,6 +75,7 @@ const AppRouter = ({
               onMarkNotificationAsRead={onMarkNotificationAsRead}
               onLogout={onLogout}
               onUpdateAvatar={onUpdateAvatar}
+              onToggleNotificationPreference={onToggleNotificationPreference}
               onRefreshData={onRefreshData}
             />
           ) : (
@@ -94,6 +96,7 @@ const AppRouter = ({
               onMarkNotificationAsRead={onMarkNotificationAsRead}
               onLogout={onLogout}
               onUpdateAvatar={onUpdateAvatar}
+              onToggleNotificationPreference={onToggleNotificationPreference}
             />
           ) : (
             <Navigate to="/login" replace />
@@ -112,6 +115,7 @@ const AppRouter = ({
               onMarkNotificationAsRead={onMarkNotificationAsRead}
               onLogout={onLogout}
               onUpdateAvatar={onUpdateAvatar}
+              onToggleNotificationPreference={onToggleNotificationPreference}
               onRefreshData={onRefreshData}
             />
           ) : (
@@ -138,6 +142,7 @@ const AppRouter = ({
               onRejectReport={onRejectReport}
               onLogout={onLogout}
               onUpdateAvatar={onUpdateAvatar}
+              onToggleNotificationPreference={onToggleNotificationPreference}
             />
           ) : (
             <Navigate to="/login" replace />
@@ -159,6 +164,7 @@ const AppRouter = ({
               onRejectReport={onRejectReport}
               onLogout={onLogout}
               onUpdateAvatar={onUpdateAvatar}
+              onToggleNotificationPreference={onToggleNotificationPreference}
             />
           ) : (
             <Navigate to="/login" replace />
@@ -179,6 +185,7 @@ const AppRouter = ({
               onCompleteReport={onCompleteReport}
               onLogout={onLogout}
               onUpdateAvatar={onUpdateAvatar}
+              onToggleNotificationPreference={onToggleNotificationPreference}
             />
           ) : (
             <Navigate to="/login" replace />
@@ -199,6 +206,7 @@ const AppRouter = ({
               onCompleteReport={onCompleteReport}
               onLogout={onLogout}
               onUpdateAvatar={onUpdateAvatar}
+              onToggleNotificationPreference={onToggleNotificationPreference}
             />
           ) : (
             <Navigate to="/login" replace />
@@ -217,6 +225,7 @@ const AppRouter = ({
               onMarkNotificationAsRead={onMarkNotificationAsRead}
               onLogout={onLogout}
               onUpdateAvatar={onUpdateAvatar}
+              onToggleNotificationPreference={onToggleNotificationPreference}
             />
           ) : (
             <Navigate to="/login" replace />
@@ -233,6 +242,7 @@ const AppRouter = ({
               notifications={currentAdminNotifs}
               onLogout={onLogout}
               onUpdateAvatar={onUpdateAvatar}
+              onToggleNotificationPreference={onToggleNotificationPreference}
             />
           ) : (
             <Navigate to="/login" replace />
@@ -242,7 +252,7 @@ const AppRouter = ({
 
       {/* Fallback routes */}
       <Route path="/" element={<Navigate to={user ? "/dashboard" : "/login"} replace />} />
-      <Route path="/faq" element={user ? <FAQ user={user} notifications={notifications} onLogout={onLogout} /> : <Navigate to="/login" replace />} />
+      <Route path="/faq" element={user ? <FAQ user={user} notifications={notifications} onLogout={onLogout} onUpdateAvatar={onUpdateAvatar} onToggleNotificationPreference={onToggleNotificationPreference} /> : <Navigate to="/login" replace />} />
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
