@@ -161,24 +161,42 @@ test.describe('E2E Testing Role Admin (Petugas Sarana & Prasarana)', () => {
     await expect(page.locator('h2:has-text("Form Respon")')).toBeVisible();
     await expect(page.locator('h3:has-text("Preview Laporan")')).toBeVisible();
 
-    // 4. Jika ada tombol pilih dari perangkat (mode pengerjaan selesai), uji upload bukti foto
-    const uploadBtn = page.locator('text=Pilih dari perangkat');
-    if (await uploadBtn.isVisible()) {
+    // 4. Jika dalam mode Laporan Selesai (laporan Diproses), uji validasi wajib minimal 1 foto
+    const completeBtn = page.locator('button:has-text("Laporan Selesai")');
+    if (await completeBtn.isVisible()) {
+      // 4a. Verifikasi label informasi aturan minimal 1 dan maksimal 3 foto
+      await expect(page.locator('text=Bukti Perbaikan Fasilitas')).toBeVisible();
+      await expect(page.locator('text=Wajib minimal 1 foto, maksimal 3 foto')).toBeVisible();
+      await expect(page.locator('text=0 / 3 Foto')).toBeVisible();
+
+      // 4b. Uji coba klik Selesai tanpa unggah foto -> harus dicegah dan muncul pesan validasi error
+      await completeBtn.click();
+      await expect(page.locator('text=Lampiran foto bukti perbaikan wajib disertakan (minimal 1 foto, maksimal 3 foto).')).toBeVisible();
+
+      // 4c. Unggah foto bukti perbaikan valid
+      const uploadBtn = page.locator('text=Pilih dari perangkat');
       const fileChooserPromise = page.waitForEvent('filechooser');
       await uploadBtn.click();
       const fileChooser = await fileChooserPromise;
       const samplePhotoPath = path.join(__dirname, 'fixtures', 'sample-photo.png');
       await fileChooser.setFiles(samplePhotoPath);
-    }
 
-    // 5. Lakukan verifikasi semua laporan atau laporan selesai
-    const verifyAllBtn = page.locator('button:has-text("Verifikasi semua laporan")').or(page.locator('button:has-text("Laporan Selesai")')).first();
-    if (await verifyAllBtn.isVisible()) {
-      await verifyAllBtn.click();
+      // 4d. Verifikasi counter bertambah menjadi 1 / 3 Foto dan pesan error hilang
+      await expect(page.locator('text=1 / 3 Foto')).toBeVisible();
+      await expect(page.locator('text=Lampiran foto bukti perbaikan wajib disertakan')).not.toBeVisible();
 
-      // Verifikasi kemunculan modal sukses
-      const successModal = page.locator('text=berhasil diverifikasi').or(page.locator('text=selesai ditangani')).or(page.locator('role=dialog'));
+      // 4e. Klik Laporan Selesai dengan foto terunggah
+      await completeBtn.click();
+      const successModal = page.locator('text=selesai ditangani').or(page.locator('role=dialog'));
       await expect(successModal.first()).toBeVisible({ timeout: 10000 });
+    } else {
+      // Mode verifikasi semua laporan (status Menunggu Verifikasi)
+      const verifyAllBtn = page.locator('button:has-text("Verifikasi semua laporan")');
+      if (await verifyAllBtn.isVisible()) {
+        await verifyAllBtn.click();
+        const successModal = page.locator('text=berhasil diverifikasi').or(page.locator('role=dialog'));
+        await expect(successModal.first()).toBeVisible({ timeout: 10000 });
+      }
     }
   });
 

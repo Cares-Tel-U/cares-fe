@@ -46,6 +46,7 @@ const AdminReportResponsePage = ({
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [photoError, setPhotoError] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [loadingText, setLoadingText] = useState('Memproses pembaruan laporan...');
 
@@ -56,12 +57,37 @@ const AdminReportResponsePage = ({
   const handleFilesSelected = useCallback((files) => {
     const fileArray = Array.from(files);
     const imageFiles = fileArray.filter((f) => f.type.startsWith('image/'));
-    const newEntries = imageFiles.map((f) => ({
-      file: f,
-      url: URL.createObjectURL(f),
-      name: f.name
-    }));
-    setUploadedFiles((prev) => [...prev, ...newEntries]);
+    if (imageFiles.length === 0) {
+      setPhotoError('Format berkas tidak didukung. Harap unggah berkas gambar (JPG, PNG, WEBP).');
+      return;
+    }
+
+    setUploadedFiles((prev) => {
+      if (prev.length >= 3) {
+        setPhotoError('Jumlah foto telah mencapai batas maksimal 3 foto bukti perbaikan.');
+        return prev;
+      }
+
+      if (prev.length + imageFiles.length > 3) {
+        const remainingSlots = 3 - prev.length;
+        setPhotoError(`Jumlah foto melebihi batas. Hanya ${remainingSlots} foto yang ditambahkan (maksimal 3 foto).`);
+        const allowedFiles = imageFiles.slice(0, remainingSlots);
+        const newEntries = allowedFiles.map((f) => ({
+          file: f,
+          url: URL.createObjectURL(f),
+          name: f.name
+        }));
+        return [...prev, ...newEntries];
+      }
+
+      setPhotoError('');
+      const newEntries = imageFiles.map((f) => ({
+        file: f,
+        url: URL.createObjectURL(f),
+        name: f.name
+      }));
+      return [...prev, ...newEntries];
+    });
   }, []);
 
   const handleRemoveUploadedFile = (index) => {
@@ -69,6 +95,9 @@ const AdminReportResponsePage = ({
       const copy = [...prev];
       URL.revokeObjectURL(copy[index].url);
       copy.splice(index, 1);
+      if (copy.length >= 1 && copy.length <= 3) {
+        setPhotoError('');
+      }
       return copy;
     });
   };
@@ -100,6 +129,15 @@ const AdminReportResponsePage = ({
 
   // Handle Complete single report - pass uploaded proof image files or URLs
   const handleCompleteSingle = async () => {
+    if (uploadedFiles.length === 0) {
+      setPhotoError('Lampiran foto bukti perbaikan wajib disertakan (minimal 1 foto, maksimal 3 foto).');
+      return;
+    }
+    if (uploadedFiles.length > 3) {
+      setPhotoError('Jumlah foto melebihi batas. Maksimal 3 file foto bukti perbaikan.');
+      return;
+    }
+    setPhotoError('');
     setLoadingText('Memproses penyelesaian laporan...');
     setIsProcessing(true);
     await new Promise((r) => setTimeout(r, 600));
@@ -229,6 +267,7 @@ const AdminReportResponsePage = ({
               uploadedFiles={uploadedFiles}
               onFilesSelected={handleFilesSelected}
               onRemoveFile={handleRemoveUploadedFile}
+              errorMessage={photoError}
             />
           )}
 
